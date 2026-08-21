@@ -10,7 +10,7 @@
     tailwind.config = {
       theme: { extend: {
         colors: {
-          background: '#212121', foreground: '#FAFAFA', card: '#303030', accent: '#F7C346',
+          background: '#212121', foreground: '#FAFAFA', card: '#303030', accent: '#F7C346' ,// Esse f7.. é o amarelo do hover //
           muted: '#303030', 'muted-text': '#A3A3A3', 'surface-light': '#D9D9D9',
           'surface-light-text': '#262626', secondary: '#2E2E2E',
         },
@@ -22,26 +22,30 @@
   <style>body { font-family: 'Inter', system-ui, sans-serif; }</style>
 </head>
 <body class="bg-background text-foreground antialiased">
-  <header class="border-b border-neutral-800 bg-[#1a1a1a]">
-    <div class="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
-      <div class="flex items-center gap-3">
-        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>
+  
+<header class="w-full flex items-center gap-4 px-6 py-4 bg-background">
+    <div class="flex items-center gap-3">
+        <span class="flex h-10 w-9 items-center justify-center rounded-full bg-secondary">
+            <svg class="h-4 w-9" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 4h4M14 4h4M8 4v16M16 4v16M5 20h14" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
         </span>
-        <span class="text-[11px] leading-tight text-muted-text">Logo/Logotipo da<br />Academia</span>
-      </div>
-      <nav class="ml-8 hidden items-center gap-7 text-sm sm:flex">
-        <a href="#blog" class="hover:text-accent">Blog</a>
-        <a href="#sobre" class="hover:text-accent">Sobre</a>
-        <a href="#treinos" class="hover:text-accent">Treinos</a>
-      </nav>
-      <button id="menuBtn" aria-label="Abrir menu" class="ml-auto flex flex-col gap-1.5 p-2">
-        <span class="block h-0.5 w-7 bg-foreground"></span>
-        <span class="block h-0.5 w-7 bg-foreground"></span>
-        <span class="block h-0.5 w-7 bg-foreground"></span>
-      </button>
+        <span class="text-xs leading-tight text-muted-text w-4">
+            Logo/Logotipo da<br />Academia
+        </span>
     </div>
-  </header>
+    <nav class="flex-1 flex justify-center items-center gap-7 text-sm">
+        <a href="#blog" class="transition-colors hover:text-accent">Blog</a>
+        <a href="#sobre" class="transition-colors hover:text-accent">Sobre</a>
+        <a href="#planos" class="transition-colors hover:text-accent">Planos</a>
+    </nav>
+    <button id="menuBtn" aria-label="Abrir menu" class="flex flex-col gap-1.5 p-2">
+        <span class="block h-0.5 w-7 bg-foreground"></span>
+        <span class="block h-0.5 w-7 bg-foreground"></span>
+        <span class="block h-0.5 w-7 bg-foreground"></span>
+    </button>
+</header>
+
 
   <main>
     <!-- Treino de hoje -->
@@ -92,28 +96,44 @@
           </p>
         </div>
         <div>
-          <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-4">
             <figure class="relative overflow-hidden rounded-lg">
-              <img src="/aluno-1.jpg" alt="Pedro Silva treinando na academia" width="640" height="800" loading="lazy" class="h-72 w-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=400&q=80" alt="Aluno Pedro Silva treinando" class="h-72 w-full object-cover" />
               <figcaption class="absolute left-3 top-3 rounded-full bg-surface-light px-3 py-1 text-xs font-semibold text-surface-light-text">Pedro Silva, 33 anos</figcaption>
             </figure>
-            <figure class="relative overflow-hidden rounded-lg">
-              <img src="/aluno-2.jpg" alt="Aline Carvalho treinando na academia" width="640" height="800" loading="lazy" class="h-72 w-full object-cover" />
+            <figure class="relative overflow-hidden rounded-lg opacity-70">
+              <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=400&q=80" alt="Aluna Aline Carvalho treinando" class="h-72 w-full object-cover" />
               <figcaption class="absolute left-3 top-3 rounded-full bg-surface-light px-3 py-1 text-xs font-semibold text-surface-light-text">Aline Carvalho, 31 anos</figcaption>
             </figure>
           </div>
           <div class="mt-5 flex justify-center gap-4">
-            <button aria-label="Anterior" class="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-600 hover:bg-secondary">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button type="button" aria-label="Anterior" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 transition-colors hover:bg-secondary">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <button aria-label="Próximo" class="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-600 hover:bg-secondary">
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button type="button" aria-label="Próximo" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 transition-colors hover:bg-secondary">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+          </div>
+          <div class="mt-5 flex justify-center gap-4">
+            
           </div>
         </div>
       </div>
     </section>
   </main>
+  <footer class="bg-surface-light py-14 text-surface-light-text">
+    <div class="mx-auto max-w-3xl px-6 text-center">
+      <nav class="flex flex-wrap justify-center gap-6 text-sm">
+        <a href="#endereco">Endereço</a>
+        <a href="#blog">Blog</a>
+        <a href="#redes">Redes Sociais</a>
+        <a href="#suporte">Suporte</a>
+        <a href="#contato">Contato</a>
+      </nav>
+      <hr class="mt-4 border-surface-light-text/30" />
+      <p class="mt-8 text-sm">Academia © 2026</p>
+    </div>
+  </footer>
 
   <!-- Menu lateral -->
   <div id="overlay" class="fixed inset-0 z-40 hidden bg-black/60"></div>
@@ -147,8 +167,10 @@
         Sobre nós
       </a>
     </nav>
-    <a href="/login.html" class="mt-auto self-end rounded-md bg-neutral-400 px-8 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-300">Sair</a>
+    <a href="/login" class="mt-auto self-end rounded-md bg-neutral-400 px-8 py-2 text-sm font-semibold text-neutral-900 hover:bg-neutral-300">Sair</a>
   </aside>
+
+
 
   <script>
     const drawer = document.getElementById('drawer');

@@ -36,7 +36,7 @@
         <p class="text-sm text-muted-text">Faça seu login</p>
         <h1 class="mt-1 text-2xl font-bold uppercase tracking-tight sm:text-3xl">Bem vindo(a) de volta</h1>
 
-        <form class="mt-8 space-y-6" onsubmit="event.preventDefault(); window.location.href='/adm.html';">
+        <form class="mt-8 space-y-6" onsubmit="event.preventDefault(); window.location.href='/menu';">
           <label class="relative block rounded-lg border border-neutral-600 px-4 pb-3 pt-4">
             <span class="absolute -top-2 left-3 bg-background px-1 text-xs text-muted-text">E-mail</span>
             <input type="email" required placeholder="exemplo@gmail.com"
@@ -70,7 +70,7 @@
           </button>
 
           <p class="text-center text-xs text-muted-text">
-            Não tem uma conta? <a href="/cadastro.html" class="text-foreground underline">Criar Conta</a>
+            Não tem uma conta? <a href="/cadastro" class="text-foreground underline">Criar Conta</a>
           </p>
         </form>
       </div>
