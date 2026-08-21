@@ -19,3 +19,7 @@ Route::get('/menu', [App\Http\Controllers\Principal::class, 'menu']);
 Route::get('/login', [App\Http\Controllers\Login::class, 'login'])->name('login');
 Route::post('/register', [App\Http\Controllers\RegisterController::class, 'register'])->name('register');
 
+Route::get('/noticias', [App\Http\Controllers\NoticiaController::class, 'index'])->name('noticias.index');
+Route::get('/noticias/{id}', [App\Http\Controllers\NoticiaController::class, 'show'])->name('noticias.show');
+
+
