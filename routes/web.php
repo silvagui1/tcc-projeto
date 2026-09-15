@@ -16,6 +16,8 @@ use App\Http\Middleware\LogAcessoMiddleware;
 Route::get('/', [App\Http\Controllers\Principal::class, 'principal']);
 
 
+
+
 Route::prefix('/aluno')->group(function(){
     Route::get('/index', [App\Http\Controllers\AlunoController::class, 'index'])->name('aluno.index');
     Route::post('/add', [App\Http\Controllers\AlunoController::class, 'add'])->name('aluno.add');
