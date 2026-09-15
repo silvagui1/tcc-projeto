@@ -95,14 +95,20 @@ img {
     position: relative;
 }
 
-/* No desktop: menu lateral fixo + conteúdo centralizado ao lado dele */
+/* No desktop o menu virou sobreposição (drawer), então ele não ocupa mais
+   espaço na página: o conteúdo fica centralizado e ganha um respiro à
+   esquerda só para não ficar embaixo do botão do menu. */
 @media (min-width: 992px) {
     .app-content {
         max-width: 720px;
         margin: 0 auto;
-        margin-left: calc(var(--sidebar-width) + 40px);
         padding: 40px 24px 60px;
     }
+}
+
+/* Trava a rolagem do fundo enquanto o menu está aberto */
+body.menu-aberto {
+    overflow: hidden;
 }
 
 /* ==========================================================================
@@ -1100,14 +1106,61 @@ img {
 }
 
 /* ==========================================================================
-   Menu lateral fixo (desktop)
+   Menu lateral em sobreposição / drawer (desktop)
+
+   Três peças, todas controladas pela classe .menu-aberto no <body>:
+     .menu-toggle   → o botão que abre
+     .menu-backdrop → a camada escura por cima do conteúdo
+     .sidebar       → o painel que desliza da esquerda
+
+   O painel anima com transform (não com left/width), porque transform não
+   obriga o navegador a recalcular o layout da página inteira a cada quadro.
    ========================================================================== */
+
+.menu-toggle,
+.menu-backdrop {
+    display: none;
+}
 
 .sidebar {
     display: none;
 }
 
 @media (min-width: 992px) {
+    .menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 24px;
+        left: 24px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: var(--navy-900);
+        color: var(--white);
+        font-size: 22px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        z-index: 45;
+    }
+
+    .menu-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 50;
+    }
+
+    /* opacity + pointer-events, e não display: none, porque display não anima */
+    body.menu-aberto .menu-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
     .sidebar {
         display: flex;
         flex-direction: column;
@@ -1119,7 +1172,32 @@ img {
         width: var(--sidebar-width);
         padding: 40px 0;
         background: linear-gradient(160deg, var(--navy-900) 0%, var(--purple-300) 140%);
-        z-index: 30;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 60;
+    }
+
+    body.menu-aberto .sidebar {
+        transform: translateX(0);
+    }
+
+    .sidebar__close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        color: var(--white);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .sidebar__close:hover {
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .sidebar__avatar {
@@ -1165,5 +1243,261 @@ img {
     .sidebar__nav a.is-current {
         background: rgba(255, 255, 255, 0.12);
         border-radius: 0 24px 24px 0;
+    }
+}
+
+/* Respeita quem pediu menos animação no sistema */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .menu-backdrop {
+        transition: none;
+    }
+}
+
+/* ==========================================================================
+   Campeonatos — Status (chips ativo / finalizado)
+   Usado em criar e editar campeonato. São radios de verdade por baixo:
+   o input fica escondido e quem aparece é o <label>, que muda de cor
+   quando o input irmão está :checked.
+   ========================================================================== */
+
+.status-field {
+    margin-bottom: 20px;
+}
+
+.status-field > span {
+    display: block;
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.status-chips {
+    display: flex;
+    gap: 12px;
+}
+
+.status-chips input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.status-chips label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.status-chips label .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--text-muted-2);
+}
+
+.status-chips input:checked + label {
+    background: var(--pink-200);
+    border-color: var(--pink-400);
+    font-weight: 600;
+}
+
+.status-chips input:focus-visible + label {
+    outline: 2px solid var(--pink-500);
+    outline-offset: 2px;
+}
+
+.status-chips input[value="ativo"]:checked + label .dot { background: #2ecc71; }
+.status-chips input[value="finalizado"]:checked + label .dot { background: #ff383c; }
+
+/* ==========================================================================
+   Campeonatos — Premiações (um bloco por colocação)
+   ========================================================================== */
+
+.prize-block {
+    background: var(--white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.prize-block__header {
+    background: var(--pink-300);
+    color: var(--white);
+    text-align: center;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.prize-block__body {
+    padding: 16px;
+}
+
+.prize-winner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.prize-winner .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: #d9d9d9;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.prize-winner__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.prize-winner__info strong {
+    font-size: 15px;
+}
+
+.prize-winner__info span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.prize-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.prize-amount input {
+    width: 123px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--surface-border);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.prize-amount .stepper {
+    width: 29px;
+    height: 29px;
+    border-radius: 8px;
+    background: var(--pink-200);
+    color: var(--pink-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.prize-block__body textarea {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--surface-border);
+    background: var(--surface);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+/* ==========================================================================
+   Campeonatos — Vencedores (tela de editar)
+   ========================================================================== */
+
+.winner-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.winner-row .avatar {
+    width: 33px;
+    height: 33px;
+    border-radius: 8px;
+    background: #d9d9d9;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.winner-row__info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.winner-row__info strong {
+    font-size: 15px;
+}
+
+.winner-row__info span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.winner-row__value {
+    background: var(--pink-200);
+    color: var(--pink-700);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.winner-row__action {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--pink-300);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Botão secundário (contorno) — usado no "Premiação" da tela do campeonato */
+.btn-outline-pink {
+    display: block;
+    width: 270px;
+    max-width: 100%;
+    margin: 12px auto 0;
+    padding: 12px;
+    border-radius: 999px;
+    border: 2px solid var(--pink-400);
+    color: var(--pink-700);
+    background: transparent;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+/* Hambúrgueres que ficam dentro das páginas (topo da tela de campeonatos).
+   Só aparecem no desktop, porque é lá que o menu lateral existe — no mobile
+   quem navega é o menu inferior em arco. */
+.menu-toggle-inline {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .menu-toggle-inline {
+        display: flex;
+        align-items: center;
     }
 }

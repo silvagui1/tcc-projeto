@@ -4,31 +4,53 @@
 
 @section('content')
 
-    <div class="podium-hero">
-        <div class="podium">
-            <div class="podium__place" style="height: 90px;">
-                <span class="avatar" style="background-image: url('{{ $podio[1]['avatar'] }}');"></span>
-                <strong>2°</strong>
-            </div>
-            <div class="podium__place podium__place--first" style="height: 121px;">
-                <span class="avatar" style="background-image: url('{{ $podio[0]['avatar'] }}');"></span>
-                <strong>1°</strong>
-            </div>
-            <div class="podium__place" style="height: 74px;">
-                <span class="avatar" style="background-image: url('{{ $podio[2]['avatar'] }}');"></span>
-                <strong>3°</strong>
-            </div>
-        </div>
+    <div class="page-topbar">
+        <a href="{{ route('campeonatos.show', $campeonatoId) }}" class="icon-btn"><i class="bi bi-x-lg"></i></a>
+        <p class="page-topbar__title">Premiações</p>
+        <span style="width: 30px;"></span>
     </div>
 
-    <div class="credit-transfer-list">
-        @foreach ($podio as $colocado)
-            <div class="credit-transfer-row">
-                <span class="avatar" style="background-image: url('{{ $colocado['avatar'] }}');"></span>
-                <strong>{{ $colocado['nome'] }}</strong>
-                <button type="button">transferir créditos</button>
+    {{-- Uma tela por colocação: quem ficou no lugar, quanto de crédito recebe
+         e uma observação. Somente frontend por enquanto. --}}
+    <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}">
+        @csrf
+
+        @foreach ($colocacoes as $indice => $colocacao)
+            <div class="prize-block">
+                <div class="prize-block__header">{{ $colocacao['posicao'] }}</div>
+
+                <div class="prize-block__body">
+                    <div class="prize-winner">
+                        <span class="avatar" style="background-image: url('{{ $colocacao['avatar'] }}');"></span>
+                        <span class="prize-winner__info">
+                            <strong>{{ $colocacao['nome'] }}</strong>
+                            <span>{{ $colocacao['nascimento'] }}</span>
+                        </span>
+                    </div>
+
+                    <div class="prize-amount">
+                        <input type="text"
+                               name="premiacoes[{{ $indice }}][valor]"
+                               value="R$ {{ number_format($colocacao['valor'], 2, ',', '.') }}"
+                               aria-label="Crédito do {{ $colocacao['posicao'] }}">
+                        <button type="button" class="stepper" aria-label="Diminuir crédito">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                        <button type="button" class="stepper" aria-label="Aumentar crédito">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+
+                    <textarea name="premiacoes[{{ $indice }}][descricao]"
+                              placeholder="descrição"
+                              aria-label="Descrição do prêmio do {{ $colocacao['posicao'] }}">{{ $colocacao['descricao'] }}</textarea>
+                </div>
             </div>
         @endforeach
-    </div>
+
+        <div class="form-submit-row">
+            <button type="submit" class="btn-pink">Finalizar campeonato</button>
+        </div>
+    </form>
 
 @endsection

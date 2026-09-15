@@ -4,7 +4,12 @@
 
 @section('content')
 
-    <div class="hero-band"></div>
+    <div class="hero-band" style="display:flex; align-items:center;">
+        <button type="button" class="icon-btn menu-toggle-inline" style="color: var(--white); font-size: 24px;"
+                data-menu-toggle aria-label="Abrir menu">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
 
     <a href="{{ route('campeonatos.criar') }}" class="btn-primary">
         Criar campeonato

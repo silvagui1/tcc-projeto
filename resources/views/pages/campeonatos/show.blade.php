@@ -5,7 +5,7 @@
 @section('content')
 
     <div class="hero-band" style="display:flex; align-items:center;">
-        <button type="button" class="icon-btn" style="color: var(--white); font-size: 24px;"><i class="bi bi-list"></i></button>
+        <button type="button" class="icon-btn menu-toggle-inline" style="color: var(--white); font-size: 24px;" data-menu-toggle><i class="bi bi-list"></i></button>
     </div>
 
     <div class="championship-detail">
@@ -23,8 +23,11 @@
 
             <p class="championship-detail__desc">{{ $campeonato['descricao'] }}</p>
         </div>
-        <a href="{{ route('campeonatos.premiacoes', $campeonato['id']) }}" class="championship-detail__cta">
+        <a href="{{ route('campeonatos.editar', $campeonato['id']) }}" class="championship-detail__cta">
             participantes cadastrados
+        </a>
+        <a href="{{ route('campeonatos.premiacoes', $campeonato['id']) }}" class="btn-outline-pink">
+            Premiação
         </a>
     </div>
 

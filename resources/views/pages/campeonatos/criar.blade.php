@@ -52,6 +52,17 @@
             <textarea id="descricao" name="descricao" placeholder="descrição do campeonato e premiação"></textarea>
         </div>
 
+        <div class="status-field">
+            <span>Status</span>
+            <div class="status-chips">
+                <input type="radio" id="status-ativo" name="status" value="ativo" checked>
+                <label for="status-ativo"><span class="dot"></span> Ativo</label>
+
+                <input type="radio" id="status-finalizado" name="status" value="finalizado">
+                <label for="status-finalizado"><span class="dot"></span> Finalizado</label>
+            </div>
+        </div>
+
         <h3>Participantes</h3>
 
         <div class="participants-search">

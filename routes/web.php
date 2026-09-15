@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\LogAcessoMiddleware;
+use App\Http\Controllers\AlunoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,6 +16,17 @@ use App\Http\Middleware\LogAcessoMiddleware;
 
 Route::get('/', function () {
     return redirect()->route('home');
+});
+
+
+// --- Alunos (CRUD) -------------------------------------------------------
+
+Route::prefix('aluno')->name('aluno.')->group(function () {
+    Route::get('/', [AlunoController::class, 'index'])->name('index');
+    Route::get('/list', [AlunoController::class, 'list'])->name('list');
+    Route::post('/add', [AlunoController::class, 'add'])->name('add');
+    Route::post('/edit', [AlunoController::class, 'edit'])->name('edit');
+    Route::post('/remove', [AlunoController::class, 'remove'])->name('remove');
 });
 
 
@@ -207,6 +219,12 @@ Route::get('/campeonatos/{id}/editar', function ($id) {
         'deck' => 'deck ultra max',
         'inscricao' => 15.00,
         'descricao' => "1° lugar ganha carta e 200 créditos\n2° lugar ganha 100 créditos\n3° lugar ganha 50 créditos",
+        'status' => 'ativo',
+        'vencedores' => [
+            ['posicao' => '1° Lugar', 'nome' => 'Guilherme Soares', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/ff7bf656-665a-48a3-ae39-c1ed512a5623.png'],
+            ['posicao' => '2° Lugar', 'nome' => 'Leonardo Pietro', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/a3742770-313c-426c-948b-f234001c46aa.png'],
+            ['posicao' => '3° Lugar', 'nome' => 'Maria Garcez', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/8668ad43-da37-42dc-9c7e-c7b20443e0f2.png'],
+        ],
         'participantesLista' => [
             ['nome' => 'Guilherme Soares', 'nascimento' => '20/06/2009', 'avatar' => 'https://www.figma.com/api/mcp/asset/ff7bf656-665a-48a3-ae39-c1ed512a5623.png'],
             ['nome' => 'Maria Garcez', 'nascimento' => '29/07/2008', 'avatar' => 'https://www.figma.com/api/mcp/asset/8668ad43-da37-42dc-9c7e-c7b20443e0f2.png'],
@@ -226,14 +244,23 @@ Route::put('/campeonatos/{id}/editar', function ($id) {
 Route::get('/campeonatos/{id}/premiacoes', function ($id) {
     $avatar = 'https://www.figma.com/api/mcp/asset/059f6265-ed5b-4526-98fa-bb92f0b11654.png';
 
-    $podio = [
-        ['nome' => 'Rogério Cartinhas', 'avatar' => $avatar],
-        ['nome' => 'Maria Garcez', 'avatar' => $avatar],
-        ['nome' => 'Leonardo Pietro', 'avatar' => $avatar],
+    // Um bloco por colocação: quem ficou no lugar, quanto de crédito recebe
+    // e a descrição do prêmio. Ainda é mock — sem banco de dados.
+    $colocacoes = [
+        ['posicao' => '1° Lugar', 'nome' => 'Guilherme Soares', 'nascimento' => '20/06/2009', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
+        ['posicao' => '2° Lugar', 'nome' => 'Leonardo Pietro', 'nascimento' => '24/06/2009', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
+        ['posicao' => '3° Lugar', 'nome' => 'Maria Garcez', 'nascimento' => '29/07/2008', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
     ];
 
-    return view('pages.campeonatos.premiacoes', compact('podio'));
+    $campeonatoId = $id;
+
+    return view('pages.campeonatos.premiacoes', compact('colocacoes', 'campeonatoId'));
 })->name('campeonatos.premiacoes');
+
+Route::post('/campeonatos/{id}/premiacoes', function ($id) {
+    // "Finalizar campeonato" — somente frontend por enquanto.
+    return redirect()->route('campeonatos.index');
+})->name('campeonatos.premiacoes.salvar');
 
 
 // --- Outras páginas do menu ----------------------------------------------
