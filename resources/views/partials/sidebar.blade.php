@@ -1,5 +1,11 @@
-{{-- Menu lateral fixo — aparece somente no desktop (ver .sidebar no app.css) --}}
-<aside class="sidebar">
+{{-- Menu lateral em sobreposição (desktop) — aberto/fechado pelo botão do
+     menu superior (.menu-toggle em app.blade.php). data-menu-panel é o que o
+     JS em app.js procura para ligar o toggle a este painel. --}}
+<aside class="sidebar" data-menu-panel>
+    <button type="button" class="sidebar__close" data-menu-close aria-label="Fechar menu">
+        <i class="bi bi-x-lg"></i>
+    </button>
+
     <div class="sidebar__avatar" style="background-image: url('https://www.figma.com/api/mcp/asset/d739a5e1-997e-473c-a82c-69ad0385d9c4.png');"></div>
     <p class="sidebar__name">Usuário X</p>
 
