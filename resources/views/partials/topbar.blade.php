@@ -9,10 +9,11 @@
         <a href="{{ route('campeonatos.index') }}" class="{{ request()->routeIs('campeonatos.*') ? 'is-current' : '' }}">Campeonatos</a>
     </nav>
 
-    {{-- Espaço reservado para a logo. Por enquanto é só o nome em texto —
-         trocar por <img src="..." class="topbar__logo"> quando tivermos o
-         arquivo exportado do Figma. Clicar na logo leva para a página inicial. --}}
-    <a href="{{ route('home') }}" class="topbar__logo" title="Página inicial">ArtPlay</a>
+    {{-- Logo (images/logo-navbar.svg, versão de logofinal.svg preparada para
+         o fundo escuro da navbar). Clicar na logo leva para a página inicial. --}}
+    <a href="{{ route('home') }}" class="topbar__logo" title="Página inicial">
+        <img src="{{ asset('images/logo-navbar.svg') }}" alt="ArtPlay">
+    </a>
 
     <nav class="topbar__nav topbar__nav--right">
         <a href="{{ route('clientes') }}" class="{{ request()->routeIs('clientes') ? 'is-current' : '' }}">Clientes</a>

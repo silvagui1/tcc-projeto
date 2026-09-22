@@ -91,6 +91,20 @@ Route::get('/estoque', function () {
             'categoria' => 'bebida',
             'imagem' => 'https://www.figma.com/api/mcp/asset/3d2dd4f5-16ba-4c5c-a32a-82ee622a2bd0.png',
         ],
+        [
+            'nome' => 'Produto #2',
+            'preco' => 0.00,
+            'descricao' => 'breve descrição....',
+            'categoria' => 'comida',
+            'imagem' => '',
+        ],
+        [
+            'nome' => 'Produto #3',
+            'preco' => 0.00,
+            'descricao' => 'breve descrição....',
+            'categoria' => 'Acessório',
+            'imagem' => '',
+        ],
     ];
 
     $cartaDestaque = [

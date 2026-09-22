@@ -207,6 +207,29 @@ img {
     margin: 20px 0;
 }
 
+/* resumo do dia (home): empilhado no mobile, lado a lado no desktop */
+.home-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+@media (min-width: 992px) {
+    .home-resumo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* no desktop as ações viram uma grade de 3 colunas */
+    .action-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
 .action-card {
     display: flex;
     align-items: center;
@@ -387,6 +410,7 @@ img {
 
 .product-card__image {
     height: 110px;
+    background-color: #d9d9d9; /* aparece quando o produto não tem imagem */
     background-size: cover;
     background-position: center;
     position: relative;
@@ -469,6 +493,100 @@ img {
     justify-content: center;
     font-size: 32px;
     color: var(--purple-light-800);
+}
+
+/* ==========================================================================
+   Página de estoque (pages/estoque/index.blade.php)
+
+   No mobile tudo continua empilhado. No desktop a página usa uma área mais
+   larga (.app-content--wide) para economizar espaço vertical: resumo numa
+   fileira só, abas + busca lado a lado, filtros numa coluna à esquerda e
+   4 produtos por fileira.
+   ========================================================================== */
+
+.estoque-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.estoque-resumo .stat-grid {
+    margin-bottom: 0;
+}
+
+@media (min-width: 992px) {
+    .app-content--wide {
+        max-width: 1200px;
+    }
+
+    .estoque-resumo {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* os dois cartões do .stat-grid entram direto na fileira do resumo */
+    .estoque-resumo .stat-grid {
+        display: contents;
+    }
+
+    .estoque-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .estoque-toolbar > * {
+        margin-bottom: 0;
+    }
+
+    .estoque-layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* filtros viram um painel fixo à esquerda enquanto a lista rola */
+    .estoque-layout .filters {
+        position: sticky;
+        top: calc(var(--topbar-height) + 24px);
+        margin: 0;
+        padding: 16px 18px;
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: var(--radius-md);
+    }
+
+    .estoque-layout__divider {
+        display: none;
+    }
+
+    .estoque-layout__produtos h2 {
+        margin-top: 0;
+    }
+
+    .estoque-layout .product-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .estoque-layout .product-card__image {
+        height: 140px;
+    }
+
+    /* no desktop o "adicionar" ocupa só uma célula, como um produto */
+    .estoque-layout .add-product-card {
+        grid-column: auto;
+        justify-content: center;
+        padding: 24px 0;
+    }
+
+    .estoque-cartas-preview {
+        max-width: 360px;
+    }
 }
 
 /* ==========================================================================
@@ -1045,60 +1163,87 @@ img {
     align-items: center;
     justify-content: center;
     box-shadow: 0 3px 10px rgba(139, 186, 237, 0.6);
-    margin-bottom: 24px;
+    margin-bottom: 16px;
     position: relative;
     z-index: 2;
 }
 
+/* círculo que "sai" de dentro do botão e cresce até ficar atrás de todos
+   os ícones do arco — fica abaixo deles (z-index 0), sem cobri-los */
+.bottom-nav::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 44px; /* mesmo centro do botão de alternância */
+    width: 310px;
+    height: 310px;
+    border-radius: 50%;
+    /* azul-marinho um pouco mais escuro que os botões (--blue-900),
+       clareando levemente da esquerda para a direita */
+    background: linear-gradient(90deg, #212333, var(--navy-900) 55%, #3b3e5a);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+    transform: translate(-50%, 50%) scale(0);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 0;
+}
+
+.bottom-nav.is-open::before {
+    transform: translate(-50%, 50%) scale(1);
+}
+
 .bottom-nav__arc {
     /* ponto único (0x0), alinhado exatamente ao centro do botão de
-       alternância (24px de margem + metade dos 56px do botão) — é em
+       alternância (16px de margem + metade dos 56px do botão) — é em
        torno desse ponto que os ícones giram para formar o arco */
     position: absolute;
     left: 50%;
-    bottom: 52px;
+    bottom: 44px;
     width: 0;
     height: 0;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s ease;
+    z-index: 1;
 }
 
 .bottom-nav.is-open .bottom-nav__arc {
     opacity: 1;
     pointer-events: auto;
+    /* os ícones aparecem logo depois do círculo começar a crescer */
+    transition-delay: 0.12s;
 }
 
 .bottom-nav__arc a {
     --angle: 0deg;
-    --radius: 92px;
+    --radius: 108px;
     position: absolute;
     top: 0;
     left: 0;
-    width: 46px;
-    height: 46px;
-    margin: -23px 0 0 -23px;
-    border-radius: 14px;
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+    border-radius: 15px;
     background: var(--blue-900);
     color: var(--bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     /* gira até o ângulo do item, anda o raio "para cima" e gira de volta
        — assim os 6 quadrados ficam à mesma distância do centro, formando
        um arco de circunferência de verdade em vez de posições "no olho" */
-    transform: translateY(8px) rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle)));
+    transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle)));
 }
 
-/* ângulos igualmente espaçados (30° entre cada item) em torno do centro */
-.bottom-nav__arc a:nth-child(1) { --angle: -75deg; }
-.bottom-nav__arc a:nth-child(2) { --angle: -45deg; }
-.bottom-nav__arc a:nth-child(3) { --angle: -15deg; }
-.bottom-nav__arc a:nth-child(4) { --angle: 15deg; }
-.bottom-nav__arc a:nth-child(5) { --angle: 45deg; }
-.bottom-nav__arc a:nth-child(6) { --angle: 75deg; }
+/* ângulos igualmente espaçados (36° entre cada item) em torno do centro;
+   os das pontas (±90°) ficam na altura do botão, deixando o arco mais baixo */
+.bottom-nav__arc a:nth-child(1) { --angle: -90deg; }
+.bottom-nav__arc a:nth-child(2) { --angle: -54deg; }
+.bottom-nav__arc a:nth-child(3) { --angle: -18deg; }
+.bottom-nav__arc a:nth-child(4) { --angle: 18deg; }
+.bottom-nav__arc a:nth-child(5) { --angle: 54deg; }
+.bottom-nav__arc a:nth-child(6) { --angle: 90deg; }
 
 .bottom-nav__arc a.is-current {
     background: var(--pink-400);
@@ -1194,10 +1339,13 @@ img {
 
     .topbar__logo {
         justify-self: center;
-        color: var(--white);
-        font-weight: 800;
-        font-size: 20px;
-        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .topbar__logo img {
+        height: 56px;
+        width: auto;
     }
 }
 

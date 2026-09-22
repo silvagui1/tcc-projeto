@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TCC Projeto') — ArtPlay</title>
 
+    {{-- logo sobre fundo azul-marinho, para aparecer tanto em abas claras quanto escuras --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
+
     {{-- Ícones (Bootstrap Icons): usados no lugar dos ícones do Figma, que não
          podem ser exportados a partir deste ambiente. Trocar depois pelos SVGs
          exportados do Figma se quiser fidelidade 100% ao design. --}}
@@ -18,7 +21,9 @@
              escondida, porque lá quem faz a navegação é o menu inferior em arco. --}}
         @include('partials.topbar')
 
-        <main class="app-content">
+        {{-- páginas podem pedir uma área mais larga no desktop com
+             @section('main_class', 'app-content--wide') --}}
+        <main class="app-content @yield('main_class')">
             @yield('content')
         </main>
 

@@ -2,6 +2,9 @@
 
 @section('title', 'Configurações')
 
+{{-- no desktop a página de configurações usa uma área mais larga (ver .app-content--wide) --}}
+@section('main_class', 'app-content--wide')
+
 @section('content')
 
     <div class="page-topbar">
