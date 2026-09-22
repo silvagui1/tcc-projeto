@@ -39,7 +39,7 @@
 
     /* layout */
     --sidebar-width: 280px;
-    --bottom-nav-height: 96px;
+    --bottom-nav-height: 16px;
     --radius-lg: 24px;
     --radius-md: 16px;
     --radius-sm: 10px;
@@ -1057,12 +1057,14 @@ body.menu-aberto {
 }
 
 .bottom-nav__arc {
+    /* ponto único (0x0), alinhado exatamente ao centro do botão de
+       alternância (24px de margem + metade dos 56px do botão) — é em
+       torno desse ponto que os ícones giram para formar o arco */
     position: absolute;
-    bottom: 24px;
     left: 50%;
-    width: 300px;
-    height: 160px;
-    transform: translateX(-50%);
+    bottom: 52px;
+    width: 0;
+    height: 0;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -1074,9 +1076,14 @@ body.menu-aberto {
 }
 
 .bottom-nav__arc a {
+    --angle: 0deg;
+    --radius: 92px;
     position: absolute;
+    top: 0;
+    left: 0;
     width: 46px;
     height: 46px;
+    margin: -23px 0 0 -23px;
     border-radius: 14px;
     background: var(--blue-900);
     color: var(--bg);
@@ -1085,18 +1092,23 @@ body.menu-aberto {
     justify-content: center;
     font-size: 18px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    /* gira até o ângulo do item, anda o raio "para cima" e gira de volta
+       — assim os 6 quadrados ficam à mesma distância do centro, formando
+       um arco de circunferência de verdade em vez de posições "no olho" */
+    transform: translateY(8px) rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle)));
 }
 
-/* posições em arco, calculadas a partir do centro inferior */
-.bottom-nav__arc a:nth-child(1) { left: 6px;   bottom: 34px; }
-.bottom-nav__arc a:nth-child(2) { left: 44px;  bottom: 78px; }
-.bottom-nav__arc a:nth-child(3) { left: 108px; bottom: 108px; }
-.bottom-nav__arc a:nth-child(4) { left: 180px; bottom: 108px; }
-.bottom-nav__arc a:nth-child(5) { left: 244px; bottom: 78px; }
-.bottom-nav__arc a:nth-child(6) { left: 282px; bottom: 34px; }
+/* ângulos igualmente espaçados (30° entre cada item) em torno do centro */
+.bottom-nav__arc a:nth-child(1) { --angle: -75deg; }
+.bottom-nav__arc a:nth-child(2) { --angle: -45deg; }
+.bottom-nav__arc a:nth-child(3) { --angle: -15deg; }
+.bottom-nav__arc a:nth-child(4) { --angle: 15deg; }
+.bottom-nav__arc a:nth-child(5) { --angle: 45deg; }
+.bottom-nav__arc a:nth-child(6) { --angle: 75deg; }
 
 .bottom-nav__arc a.is-current {
     background: var(--pink-400);
+    z-index: 1;
 }
 
 @media (min-width: 992px) {
