@@ -14,20 +14,9 @@
 </head>
 <body>
     <div class="app-shell">
-        {{-- Botão que abre o menu no desktop. No mobile ele fica escondido,
-             porque lá quem faz a navegação é o menu inferior em arco. --}}
-        <button type="button" class="menu-toggle" data-menu-toggle
-                aria-controls="menu-lateral" aria-expanded="false" aria-label="Abrir menu">
-            <i class="bi bi-list"></i>
-        </button>
-
-        {{-- Camada escura por trás do menu. Fica sempre no HTML: quem decide
-             se ela aparece é o CSS, reagindo à classe .menu-aberto no <body>. --}}
-        <div class="menu-backdrop" data-menu-backdrop hidden></div>
-
-        {{-- Menu lateral: agora abre por cima do conteúdo (drawer), não ocupa
-             mais espaço fixo na tela --}}
-        @include('partials.sidebar')
+        {{-- Navbar de largura total, só no desktop. No mobile ela fica
+             escondida, porque lá quem faz a navegação é o menu inferior em arco. --}}
+        @include('partials.topbar')
 
         <main class="app-content">
             @yield('content')

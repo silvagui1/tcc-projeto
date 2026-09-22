@@ -4,10 +4,6 @@
 
 @section('content')
 
-    <div class="hero-band" style="display:flex; align-items:center;">
-        <button type="button" class="icon-btn menu-toggle-inline" style="color: var(--white); font-size: 24px;" data-menu-toggle><i class="bi bi-list"></i></button>
-    </div>
-
     <div class="championship-detail">
         <div class="championship-detail__banner" style="background-image: url('{{ $campeonato['imagem'] }}');"></div>
         <div class="championship-detail__body">
