@@ -7,10 +7,24 @@ use Illuminate\Support\Facades\Validator;
 
 class CampController extends Controller
 {
-    function index(){ 
+    public function index()
+{
+    // Campeonato(s) em destaque no topo (carrossel se houver mais de um)
+    $ativos = CampModel::where('status', 'ativo')
+        ->orderBy('data')
+        ->orderBy('horario')
+        ->get();
 
-        return view('campeonato.index');
-    }
+    // Lista "Outras competições"
+    $finalizados = CampModel::where('status', 'finalizado')
+        ->orderBy('data', 'desc')
+        ->get();
+
+    return view('campeonato.index', [
+        'ativos' => $ativos,
+        'finalizados' => $finalizados,
+    ]);
+}
 
     function add(Request $dados) { 
         $validator = Validator::make(
@@ -32,15 +46,12 @@ class CampController extends Controller
                 ->withInput();
         }
         
+        $camp = new \App\Models\CampModel();
+        $camp::create($dados->all());
 
+        $camp = new \App\Models\CampModel();
 
-        $aluno = new \App\Models\AlunoModel();
-        $aluno::create($dados->all());
-
-        //RECUPERANDO TODOS ALUNOS DO BANCO E ENVIANDO PARA A VIEW
-        $alunos = new \App\Models\AlunoModel();
-
-        return view('aluno.index', ['success'=>'Cadastrado!', 'alunos'=>$alunos::all()]);
+        return view('campeonato.index', ['success'=>'Cadastrado!', 'campeonatos'=>$camp::all()]);
     }
 
     function remove(string $id) {
@@ -50,15 +61,35 @@ class CampController extends Controller
         return view('campeonato.index', ['success'=>'mostrou!', 'campeonatos'=>$camp::all()]);
 
     }
+        public function update(Request $request){
+    $camp = CampModel::find($request->id);
 
-    function atualizar(string $id) {
-        $camp= new \App\Models\CampModel();
-        $camp = $camp::find($id);
-
-        return view('campeonato.atualizar', ['campeonatos'=>$camp]);
+    if ($camp->status === 'finalizado') {
+        return redirect()
+            ->route('campeonato.index')
+            ->withErrors(['status' => 'Campeonatos finalizados não podem ser editados.']);
     }
 
-    function save(Request $dados) {
+    $validator = $this->validarDados($request);
+
+    if ($validator->fails()) {
+        return redirect()
+            ->route('campeonato.index')
+            ->withErrors($validator)
+            ->withInput();
+    }
+
+    $camp->update($validator->validated());
+
+    return view('campeonato.index', [
+        'success' => 'Salvo!',
+        'campeonatos' => CampModel::all(),
+    ]);
+}
+
+    
+
+function save(Request $dados) {
         $camp = new \App\Models\CampModel();
         $camp = $camp::find($dados->id);
         $camp->update($dados->all());

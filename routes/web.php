@@ -27,5 +27,5 @@ Route::prefix('/campeonato')->group(function(){
 }); 
 
 Route::prefix('/premiacao')->group(function(){
-    
-})
+    Route::get('/index', [App\Http\Controllers\PremioController::class, 'index'])->name('premiacao.index');    
+});
