@@ -1,0 +1,796 @@
+/* Fonte Inter (self-hosted via @fontsource, sem chamadas externas) */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/inter/800.css';
+
+/* ==========================================================================
+   Design tokens
+   - Espaçamento: grid de 4 pontos (--space-1 = 4px)
+   - Cores: escalas de 50 a 900 geradas a partir do azul-base #6ea9e9
+   ========================================================================== */
+:root {
+    /* Espaçamento (grid de 4pt) */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* Raios */
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px rgba(20, 24, 32, .06), 0 1px 3px rgba(20, 24, 32, .08);
+    --shadow-md: 0 4px 10px rgba(20, 24, 32, .12);
+    --shadow-lg: 0 12px 24px rgba(20, 24, 32, .16);
+
+    /* Azul (cor base do produto: #6ea9e9 = azul-500) */
+    --blue-50: #e9f2fc;
+    --blue-100: #d3e5f8;
+    --blue-200: #afd0f3;
+    --blue-300: #8cbbee;
+    --blue-400: #68a6e9;
+    --blue-500: #6ea9e9;
+    --blue-600: #2a84e5;
+    --blue-700: #146bc9;
+    --blue-800: #0c529d;
+    --blue-900: #063970;
+
+    /* Vermelho / rosa (ações destrutivas: apagar, descontar) */
+    --red-50: #faeaec;
+    --red-100: #f5d6da;
+    --red-200: #eeb4bc;
+    --red-300: #e6939f;
+    --red-400: #e07180;
+    --red-500: #e2828f;
+    --red-600: #da4357;
+    --red-700: #c72239;
+    --red-800: #9f182a;
+    --red-900: #750f1d;
+
+    /* Verde (créditos positivos) */
+    --green-50: #edf7f1;
+    --green-100: #dcefe2;
+    --green-200: #bfe3cc;
+    --green-300: #a3d6b5;
+    --green-400: #87ca9e;
+    --green-500: #79c493;
+    --green-600: #45b16a;
+    --green-700: #338f53;
+    --green-800: #236c3d;
+    --green-900: #154727;
+
+    /* Oliva (créditos zerados) */
+    --olive-50: #f8f6ec;
+    --olive-100: #f2edd9;
+    --olive-200: #e7dfbb;
+    --olive-300: #ddd19c;
+    --olive-400: #d3c37e;
+    --olive-500: #cbb968;
+    --olive-600: #b59e37;
+    --olive-700: #917e28;
+    --olive-800: #6b5d1a;
+    --olive-900: #443a0f;
+
+    /* Cinza neutro (texto, bordas, fundos) */
+    --gray-50: #f1f2f3;
+    --gray-100: #e4e5e7;
+    --gray-200: #ced0d4;
+    --gray-300: #b8bbc1;
+    --gray-400: #a3a7ae;
+    --gray-500: #8a8f98;
+    --gray-600: #676f7f;
+    --gray-700: #4d5666;
+    --gray-800: #353d4b;
+    --gray-900: #1e242e;
+}
+
+/* ==========================================================================
+   Reset / base
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ==========================================================================
+   Estrutura da aplicação (menu inferior no mobile -> barra lateral no desktop)
+   ========================================================================== */
+.app-shell {
+    min-height: 100vh;
+}
+
+.app-nav__perfil {
+    position: fixed;
+    top: var(--space-4);
+    left: var(--space-4);
+    z-index: 40;
+}
+
+.avatar--perfil {
+    width: 40px;
+    height: 40px;
+    background: var(--blue-200);
+    color: var(--blue-800);
+    box-shadow: var(--shadow-sm);
+}
+
+.avatar--perfil svg {
+    width: 24px;
+    height: 24px;
+}
+
+.app-nav__menu {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--space-4);
+    display: flex;
+    justify-content: center;
+    z-index: 40;
+}
+
+.app-nav__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--blue-600);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    text-decoration: none;
+}
+
+.app-nav__item svg {
+    width: 22px;
+    height: 22px;
+}
+
+.app-nav__item-label {
+    display: none;
+}
+
+.app-content {
+    padding-bottom: var(--space-12);
+}
+
+@media (min-width: 900px) {
+    .app-shell {
+        display: flex;
+    }
+
+    .app-nav {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 104px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-8);
+        padding: var(--space-6) 0;
+        background: #fff;
+        border-right: 1px solid var(--gray-200);
+    }
+
+    .app-nav__perfil {
+        position: static;
+    }
+
+    .app-nav__menu {
+        position: static;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+
+    .app-nav__item {
+        flex-direction: column;
+        width: auto;
+        height: auto;
+        min-width: 72px;
+        padding: var(--space-2) var(--space-1);
+        border-radius: var(--radius-lg);
+        gap: var(--space-1);
+        box-shadow: none;
+    }
+
+    .app-nav__item-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .app-content {
+        flex: 1;
+        min-width: 0;
+        padding-bottom: 0;
+    }
+}
+
+/* ==========================================================================
+   Tela de clientes
+   ========================================================================== */
+.clientes-page {
+    padding: 76px var(--space-4) 112px;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+@media (min-width: 900px) {
+    .clientes-page {
+        padding: var(--space-8) var(--space-8) var(--space-10);
+        max-width: 720px;
+    }
+}
+
+.busca {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: var(--radius-full);
+    padding: var(--space-1);
+    box-shadow: var(--shadow-sm);
+}
+
+.busca__campo {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: var(--space-2) var(--space-4);
+    font: inherit;
+    font-size: 14px;
+    color: var(--gray-900);
+    outline: none;
+}
+
+.busca__campo::placeholder {
+    color: var(--gray-400);
+}
+
+.busca__botao {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--blue-500);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.busca__botao svg {
+    width: 18px;
+    height: 18px;
+}
+
+.acoes-rapidas {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+}
+
+.acao-rapida {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.acao-rapida__icone {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform .1s ease;
+}
+
+.acao-rapida--azul .acao-rapida__icone {
+    background: var(--blue-500);
+}
+
+.acao-rapida--vermelho .acao-rapida__icone {
+    background: var(--red-400);
+}
+
+.acao-rapida.acao-rapida--ativa .acao-rapida__icone {
+    box-shadow: 0 0 0 3px var(--red-200);
+}
+
+.acao-rapida__icone svg {
+    width: 26px;
+    height: 26px;
+}
+
+.acao-rapida__label {
+    font-size: 13px;
+    color: var(--gray-700);
+    text-align: center;
+}
+
+.clientes-titulo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+}
+
+.clientes-titulo h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.clientes-contador {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.clientes-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.cliente-linha {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--gray-100);
+    transition: background-color .1s ease;
+}
+
+.cliente-linha:last-child {
+    border-bottom: none;
+}
+
+.cliente-linha--selecionado {
+    background: var(--blue-50);
+}
+
+.cliente-linha__checkbox {
+    display: none;
+    align-items: center;
+    padding-left: var(--space-4);
+}
+
+[data-clientes-page].modo-selecao .cliente-linha__checkbox {
+    display: flex;
+}
+
+.cliente-linha__checkbox input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--blue-600);
+}
+
+.cliente-linha__botao {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: none;
+    border: none;
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+}
+
+.avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    background: var(--gray-400);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cliente-linha__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cliente-linha__nome {
+    font-weight: 700;
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cliente-linha__data {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+.credito-badge {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+}
+
+.credito-badge--positivo {
+    background: var(--green-100);
+    color: var(--green-700);
+}
+
+.credito-badge--zero {
+    background: var(--olive-100);
+    color: var(--olive-700);
+}
+
+.cliente-linha__seta {
+    flex-shrink: 0;
+    display: flex;
+    color: var(--gray-300);
+    margin-left: var(--space-1);
+}
+
+.cliente-linha__seta svg {
+    width: 18px;
+    height: 18px;
+}
+
+.clientes-vazio {
+    text-align: center;
+    color: var(--gray-500);
+    padding: var(--space-8) var(--space-4);
+    font-size: 14px;
+}
+
+/* Barra de confirmação do modo de seleção (apagar clientes) */
+.barra-selecao {
+    position: fixed;
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: 88px;
+    background: #fff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    z-index: 45;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.barra-selecao__acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+@media (min-width: 900px) {
+    .barra-selecao {
+        left: auto;
+        right: var(--space-8);
+        bottom: var(--space-8);
+        max-width: 360px;
+    }
+}
+
+/* Mensagem flutuante de sucesso/erro */
+.mensagem-flutuante {
+    position: fixed;
+    top: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gray-900);
+    color: #fff;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 90;
+    box-shadow: var(--shadow-md);
+    max-width: calc(100vw - var(--space-8));
+    text-align: center;
+}
+
+.mensagem-flutuante--sucesso {
+    background: var(--green-700);
+}
+
+.mensagem-flutuante--erro {
+    background: var(--red-700);
+}
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+.botao {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background-color .12s ease;
+}
+
+.botao svg {
+    width: 16px;
+    height: 16px;
+}
+
+.botao--pill {
+    border-radius: var(--radius-full);
+}
+
+.botao--full {
+    width: 100%;
+}
+
+.botao--azul {
+    background: var(--blue-600);
+    color: #fff;
+}
+
+.botao--azul:hover {
+    background: var(--blue-700);
+}
+
+.botao--vermelho {
+    background: var(--red-400);
+    color: #fff;
+}
+
+.botao--vermelho:hover {
+    background: var(--red-600);
+}
+
+.botao-texto {
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   Modal de criar/editar cliente
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 24, 32, .45);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 80;
+    padding: 0;
+}
+
+.modal-overlay[hidden] {
+    display: none;
+}
+
+.modal-cliente {
+    width: 100%;
+    max-width: 480px;
+    max-height: 92vh;
+    overflow-y: auto;
+    background: var(--gray-50);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-5) var(--space-5) var(--space-8);
+}
+
+@media (min-width: 900px) {
+    .modal-overlay {
+        align-items: center;
+        padding: var(--space-6);
+    }
+
+    .modal-cliente {
+        border-radius: var(--radius-xl);
+        max-height: 88vh;
+    }
+}
+
+.modal-cliente__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+}
+
+.modal-cliente__topo h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.modal-cliente__fechar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--gray-900);
+    display: flex;
+    padding: var(--space-1);
+}
+
+.modal-cliente__fechar svg {
+    width: 22px;
+    height: 22px;
+}
+
+.modal-cliente__espaco {
+    width: 24px;
+}
+
+.modal-cliente__erros {
+    background: var(--red-50);
+    color: var(--red-700);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    font-size: 13px;
+    margin-bottom: var(--space-4);
+}
+
+.modal-cliente__erros ul {
+    margin: 0;
+    padding-left: var(--space-4);
+}
+
+.cartao {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.cartao__titulo {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 var(--space-3);
+}
+
+.cartao__linha-foto {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.avatar--grande {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.campo:last-child {
+    border-bottom: none;
+}
+
+.campo label {
+    font-size: 12px;
+    color: var(--gray-500);
+    font-weight: 700;
+}
+
+.campo input,
+.campo textarea {
+    border: none;
+    font: inherit;
+    font-size: 14px;
+    color: var(--gray-800);
+    padding: 0;
+    background: transparent;
+    outline: none;
+    resize: vertical;
+}
+
+.campo--textarea textarea {
+    min-height: 64px;
+}
+
+.cartao--creditos {
+    text-align: center;
+}
+
+.creditos__rotulo {
+    font-size: 12px;
+    color: var(--gray-500);
+    margin: 0 0 var(--space-1);
+}
+
+.creditos__valor {
+    font-size: 34px;
+    font-weight: 800;
+    margin: 0 0 var(--space-4);
+}
+
+.creditos__acoes {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.creditos__acoes .botao {
+    flex: 1;
+}
+
+.modal-cliente__rodape {
+    padding-top: var(--space-2);
+}
