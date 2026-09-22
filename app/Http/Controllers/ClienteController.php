@@ -102,11 +102,16 @@ class ClienteController extends Controller
     }
 
     /**
-     * Remove (soft delete) um único cliente.
+     * Remove definitivamente um único cliente (e sua foto, se houver).
      */
     public function destroy(Cliente $cliente): JsonResponse
     {
         $nome = $cliente->nome;
+
+        if ($cliente->foto) {
+            Storage::disk('public')->delete($cliente->foto);
+        }
+
         $cliente->delete();
 
         return response()->json([
@@ -116,8 +121,9 @@ class ClienteController extends Controller
     }
 
     /**
-     * Remove (soft delete) vários clientes de uma vez, usado pelo modo
-     * de seleção acionado pelo botão "apagar clientes".
+     * Remove definitivamente vários clientes de uma vez (e as fotos deles,
+     * se houver), usado pelo modo de seleção acionado pelo botão "apagar
+     * clientes".
      */
     public function destroyMultiple(Request $request): JsonResponse
     {
@@ -130,14 +136,21 @@ class ClienteController extends Controller
         ]);
 
         $ids = $validated['ids'];
-        $quantidade = Cliente::whereIn('id', $ids)->count();
+        $clientes = Cliente::whereIn('id', $ids)->get(['id', 'foto']);
+
+        foreach ($clientes as $cliente) {
+            if ($cliente->foto) {
+                Storage::disk('public')->delete($cliente->foto);
+            }
+        }
+
         Cliente::whereIn('id', $ids)->delete();
 
         return response()->json([
             'success' => true,
-            'message' => $quantidade === 1
+            'message' => $clientes->count() === 1
                 ? '1 cliente removido com sucesso!'
-                : "{$quantidade} clientes removidos com sucesso!",
+                : "{$clientes->count()} clientes removidos com sucesso!",
             'ids' => $ids,
         ]);
     }

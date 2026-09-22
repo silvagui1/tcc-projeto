@@ -1,12 +1,20 @@
 /**
- * Lógica da tela de Clientes: busca, seleção/exclusão em lote e o modal de
- * criar/editar cliente (incluindo o ajuste de créditos).
+ * Lógica da tela de Clientes: busca, seleção/exclusão em lote e os modais de
+ * criar e editar cliente (incluindo o ajuste de créditos).
+ *
+ * Criar e editar são dois modais independentes (não um só que se adapta),
+ * cada um com seu próprio formulário e sua própria foto de campo — o de
+ * criação usa um círculo vazio clicável (estilo redes sociais), o de edição
+ * mantém o avatar + botão "Editar foto".
  *
  * Escrito em JS puro (sem framework), no mesmo estilo do restante do
  * projeto, e só é inicializado quando a página atual é a de clientes.
  */
 
-const AVATAR_CORES = ['#68a6e9', '#e07180', '#87ca9e', '#d3c37e', '#a3a7ae'];
+// Mesmos valores de app/Models/Cliente.php (CORES_AVATAR) e dos tokens
+// --blue-400/--pink-400/--purple-500/--purple-light-800/--navy-900 em
+// resources/css/app.css — manter as três listas sincronizadas.
+const AVATAR_CORES = ['#8bbaed', '#b47194', '#53577d', '#6c6588', '#2e3045'];
 
 function formatarMoeda(valor) {
     return 'R$ ' + Number(valor || 0).toLocaleString('pt-BR', {
@@ -33,23 +41,6 @@ function iniciarPaginaClientes() {
     const botaoCancelarSelecao = pagina.querySelector('[data-cancelar-selecao]');
     const botaoConfirmarExclusao = pagina.querySelector('[data-confirmar-exclusao]');
     const mensagemEl = document.querySelector('[data-mensagem]');
-
-    const overlay = document.querySelector('[data-modal-overlay]');
-    const form = document.querySelector('[data-form-cliente]');
-    const modalTitulo = document.querySelector('[data-modal-titulo]');
-    const modalErros = document.querySelector('[data-modal-erros]');
-    const inputId = form.querySelector('[data-form-id]');
-    const inputMethod = form.querySelector('[data-form-method]');
-    const inputCreditos = form.querySelector('[data-form-creditos]');
-    const inputNome = form.querySelector('[data-input-nome]');
-    const inputNascimento = form.querySelector('[data-input-nascimento]');
-    const inputObservacoes = form.querySelector('[data-input-observacoes]');
-    const inputFoto = form.querySelector('[data-input-foto]');
-    const botaoSelecionarFoto = form.querySelector('[data-selecionar-foto]');
-    const previewAvatar = form.querySelector('[data-preview-avatar]');
-    const previewImagem = form.querySelector('[data-preview-imagem]');
-    const previewIniciais = form.querySelector('[data-preview-iniciais]');
-    const creditosExibicao = form.querySelector('[data-creditos-exibicao]');
 
     let termoAtual = '';
     let modoSelecao = false;
@@ -218,42 +209,169 @@ function iniciarPaginaClientes() {
         }
     });
 
-    // ---- Modal de criar/editar ---------------------------------------------
+    // ---- Modais de criar/editar --------------------------------------------
+    // Wiring compartilhado entre os dois modais (fechar, foto, créditos,
+    // envio) — cada modal tem seu próprio formulário/overlay, então isso é
+    // configurado uma vez para cada um, sem misturar estado entre eles.
 
-    function limparPreviewFoto(iniciais, cor) {
-        previewImagem.hidden = true;
-        previewImagem.src = '';
-        previewIniciais.hidden = false;
-        previewIniciais.textContent = iniciais || '--';
-        previewAvatar.style.backgroundColor = cor || AVATAR_CORES[0];
+    function configurarModal(raiz) {
+        const form = raiz.querySelector('[data-form-cliente]');
+        const modalErros = raiz.querySelector('[data-modal-erros]');
+        const inputCreditos = form.querySelector('[data-form-creditos]');
+        const inputFoto = form.querySelector('[data-input-foto]');
+        const botaoSelecionarFoto = form.querySelector('[data-selecionar-foto]');
+        const previewAvatar = form.querySelector('[data-preview-avatar]');
+        const previewImagem = form.querySelector('[data-preview-imagem]');
+        const previewIniciais = form.querySelector('[data-preview-iniciais]');
+        const iconeVazio = form.querySelector('[data-preview-icone-vazio]');
+        const creditosExibicao = form.querySelector('[data-creditos-exibicao]');
+
+        function abrir() {
+            raiz.hidden = false;
+            document.body.style.overflow = 'hidden';
+        }
+
+        function fechar() {
+            raiz.hidden = true;
+            document.body.style.overflow = '';
+            form.reset();
+            modalErros.hidden = true;
+            modalErros.innerHTML = '';
+            inputFoto.value = '';
+        }
+
+        raiz.querySelectorAll('[data-fechar-modal]').forEach((botao) => {
+            botao.addEventListener('click', fechar);
+        });
+
+        raiz.addEventListener('click', (evento) => {
+            if (evento.target === raiz) fechar();
+        });
+
+        document.addEventListener('keydown', (evento) => {
+            if (evento.key === 'Escape' && !raiz.hidden) fechar();
+        });
+
+        // Foto: seleção e pré-visualização (preenche a imagem escolhida e
+        // esconde o que estava no lugar dela antes — iniciais na edição,
+        // ícone de câmera na criação).
+        botaoSelecionarFoto.addEventListener('click', () => inputFoto.click());
+
+        inputFoto.addEventListener('change', () => {
+            const arquivo = inputFoto.files[0];
+            if (!arquivo) return;
+
+            const leitor = new FileReader();
+            leitor.onload = (evento) => {
+                previewImagem.src = evento.target.result;
+                previewImagem.hidden = false;
+                if (previewIniciais) previewIniciais.hidden = true;
+                if (iconeVazio) iconeVazio.hidden = true;
+                botaoSelecionarFoto.classList.add('tem-foto');
+            };
+            leitor.readAsDataURL(arquivo);
+        });
+
+        // Ajuste de créditos (adicionar / descontar)
+        form.querySelectorAll('[data-ajustar-creditos]').forEach((botao) => {
+            botao.addEventListener('click', () => {
+                const acao = botao.getAttribute('data-ajustar-creditos');
+                const rotulo = acao === 'adicionar' ? 'adicionar' : 'descontar';
+                const entrada = window.prompt('Valor a ' + rotulo + ' (R$):', '0,00');
+                if (entrada === null) return;
+
+                const valor = parseFloat(entrada.replace(/\./g, '').replace(',', '.'));
+                if (isNaN(valor) || valor <= 0) {
+                    mostrarMensagem('Informe um valor válido, maior que zero.', 'erro');
+                    return;
+                }
+
+                const atual = parseFloat(inputCreditos.value) || 0;
+                let novoValor = acao === 'adicionar' ? atual + valor : atual - valor;
+                if (novoValor < 0) {
+                    novoValor = 0;
+                    mostrarMensagem('O cliente não possui créditos suficientes; saldo ajustado para R$ 0,00.', 'erro');
+                }
+
+                inputCreditos.value = novoValor.toFixed(2);
+                creditosExibicao.textContent = formatarMoeda(novoValor);
+            });
+        });
+
+        // Envio do formulário
+        form.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+
+            const formData = new FormData(form);
+            const botaoSalvar = form.querySelector('[data-botao-salvar]');
+            const textoOriginal = botaoSalvar.textContent;
+            botaoSalvar.disabled = true;
+            botaoSalvar.textContent = 'Salvando...';
+
+            try {
+                const resposta = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: formData,
+                });
+
+                const dados = await resposta.json();
+
+                if (resposta.status === 422) {
+                    modalErros.hidden = false;
+                    const mensagens = Object.values(dados.errors || {}).flat();
+                    modalErros.innerHTML = '<ul>' + mensagens.map((m) => `<li>${m}</li>`).join('') + '</ul>';
+                    return;
+                }
+
+                if (!resposta.ok) {
+                    mostrarMensagem(dados.message || 'Não foi possível salvar o cliente.', 'erro');
+                    return;
+                }
+
+                mostrarMensagem(dados.message, 'sucesso');
+                fechar();
+                termoAtual = buscaCampo.value.trim();
+                await carregarLista();
+            } catch (erro) {
+                mostrarMensagem('Erro de conexão ao salvar cliente.', 'erro');
+            } finally {
+                botaoSalvar.disabled = false;
+                botaoSalvar.textContent = textoOriginal;
+            }
+        });
+
+        return {
+            form,
+            abrir,
+            fechar,
+            inputCreditos,
+            creditosExibicao,
+            previewAvatar,
+            previewImagem,
+            previewIniciais,
+            iconeVazio,
+            botaoSelecionarFoto,
+        };
     }
 
-    function abrirModal() {
-        overlay.hidden = false;
-        document.body.style.overflow = 'hidden';
-    }
-
-    function fecharModal() {
-        overlay.hidden = true;
-        document.body.style.overflow = '';
-        form.reset();
-        modalErros.hidden = true;
-        modalErros.innerHTML = '';
-        inputFoto.value = '';
-    }
+    const modalCriar = configurarModal(document.querySelector('[data-modal-criar]'));
+    const modalEditar = configurarModal(document.querySelector('[data-modal-editar]'));
 
     function abrirModalCriacao() {
-        form.reset();
-        inputId.value = '';
-        inputMethod.value = 'POST';
-        inputCreditos.value = '0';
-        creditosExibicao.textContent = formatarMoeda(0);
-        modalTitulo.textContent = 'Adicionar cliente';
-        modalErros.hidden = true;
-        modalErros.innerHTML = '';
-        limparPreviewFoto('--', AVATAR_CORES[0]);
-        abrirModal();
-        window.setTimeout(() => inputNome.focus(), 50);
+        modalCriar.form.reset();
+        modalCriar.inputCreditos.value = '0';
+        modalCriar.creditosExibicao.textContent = formatarMoeda(0);
+        modalCriar.previewImagem.hidden = true;
+        modalCriar.previewImagem.src = '';
+        if (modalCriar.iconeVazio) modalCriar.iconeVazio.hidden = false;
+        modalCriar.botaoSelecionarFoto.classList.remove('tem-foto');
+        modalCriar.abrir();
+        window.setTimeout(() => modalCriar.form.querySelector('[data-input-nome]').focus(), 50);
     }
 
     async function abrirModalEdicao(id) {
@@ -268,18 +386,16 @@ function iniciarPaginaClientes() {
             }
 
             const cliente = await resposta.json();
+            const { form, previewAvatar, previewImagem, previewIniciais, inputCreditos, creditosExibicao } = modalEditar;
 
             form.reset();
-            inputId.value = cliente.id;
-            inputMethod.value = 'PUT';
-            inputNome.value = cliente.nome;
-            inputNascimento.value = cliente.data_nascimento;
-            inputObservacoes.value = cliente.observacoes || '';
+            form.action = form.dataset.urlBase + '/' + cliente.id;
+            form.querySelector('[data-input-nome]').value = cliente.nome;
+            form.querySelector('[data-input-nascimento]').value = cliente.data_nascimento;
+            form.querySelector('[data-input-observacoes]').value = cliente.observacoes || '';
             inputCreditos.value = cliente.creditos;
             creditosExibicao.textContent = formatarMoeda(cliente.creditos);
-            modalTitulo.textContent = 'Editar cliente';
-            modalErros.hidden = true;
-            modalErros.innerHTML = '';
+            modalEditar.botaoSelecionarFoto.classList.remove('tem-foto');
 
             if (cliente.foto_url) {
                 previewImagem.hidden = false;
@@ -287,10 +403,14 @@ function iniciarPaginaClientes() {
                 previewIniciais.hidden = true;
                 previewAvatar.style.backgroundColor = '';
             } else {
-                limparPreviewFoto(cliente.iniciais, cliente.cor_avatar);
+                previewImagem.hidden = true;
+                previewImagem.src = '';
+                previewIniciais.hidden = false;
+                previewIniciais.textContent = cliente.iniciais || '--';
+                previewAvatar.style.backgroundColor = cliente.cor_avatar || AVATAR_CORES[0];
             }
 
-            abrirModal();
+            modalEditar.abrir();
         } catch (erro) {
             mostrarMensagem('Erro de conexão ao carregar cliente.', 'erro');
         }
@@ -298,109 +418,6 @@ function iniciarPaginaClientes() {
 
     botaoAbrirCriar.addEventListener('click', abrirModalCriacao);
     pagina.addEventListener('cliente:novo', abrirModalCriacao);
-
-    document.querySelectorAll('[data-fechar-modal]').forEach((botao) => {
-        botao.addEventListener('click', fecharModal);
-    });
-
-    overlay.addEventListener('click', (evento) => {
-        if (evento.target === overlay) fecharModal();
-    });
-
-    document.addEventListener('keydown', (evento) => {
-        if (evento.key === 'Escape' && !overlay.hidden) fecharModal();
-    });
-
-    // Foto: seleção e pré-visualização
-    botaoSelecionarFoto.addEventListener('click', () => inputFoto.click());
-
-    inputFoto.addEventListener('change', () => {
-        const arquivo = inputFoto.files[0];
-        if (!arquivo) return;
-
-        const leitor = new FileReader();
-        leitor.onload = (evento) => {
-            previewImagem.src = evento.target.result;
-            previewImagem.hidden = false;
-            previewIniciais.hidden = true;
-        };
-        leitor.readAsDataURL(arquivo);
-    });
-
-    // Ajuste de créditos (adicionar / descontar)
-    form.querySelectorAll('[data-ajustar-creditos]').forEach((botao) => {
-        botao.addEventListener('click', () => {
-            const acao = botao.getAttribute('data-ajustar-creditos');
-            const rotulo = acao === 'adicionar' ? 'adicionar' : 'descontar';
-            const entrada = window.prompt('Valor a ' + rotulo + ' (R$):', '0,00');
-            if (entrada === null) return;
-
-            const valor = parseFloat(entrada.replace(/\./g, '').replace(',', '.'));
-            if (isNaN(valor) || valor <= 0) {
-                mostrarMensagem('Informe um valor válido, maior que zero.', 'erro');
-                return;
-            }
-
-            const atual = parseFloat(inputCreditos.value) || 0;
-            let novoValor = acao === 'adicionar' ? atual + valor : atual - valor;
-            if (novoValor < 0) {
-                novoValor = 0;
-                mostrarMensagem('O cliente não possui créditos suficientes; saldo ajustado para R$ 0,00.', 'erro');
-            }
-
-            inputCreditos.value = novoValor.toFixed(2);
-            creditosExibicao.textContent = formatarMoeda(novoValor);
-        });
-    });
-
-    // Envio do formulário (criação ou edição)
-    form.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
-
-        const editando = Boolean(inputId.value);
-        const url = editando ? '/clientes/' + inputId.value : '/clientes';
-        const formData = new FormData(form);
-
-        const botaoSalvar = form.querySelector('[data-botao-salvar]');
-        botaoSalvar.disabled = true;
-        botaoSalvar.textContent = 'Salvando...';
-
-        try {
-            const resposta = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken(),
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: formData,
-            });
-
-            const dados = await resposta.json();
-
-            if (resposta.status === 422) {
-                modalErros.hidden = false;
-                const mensagens = Object.values(dados.errors || {}).flat();
-                modalErros.innerHTML = '<ul>' + mensagens.map((m) => `<li>${m}</li>`).join('') + '</ul>';
-                return;
-            }
-
-            if (!resposta.ok) {
-                mostrarMensagem(dados.message || 'Não foi possível salvar o cliente.', 'erro');
-                return;
-            }
-
-            mostrarMensagem(dados.message, 'sucesso');
-            fecharModal();
-            termoAtual = buscaCampo.value.trim();
-            await carregarLista();
-        } catch (erro) {
-            mostrarMensagem('Erro de conexão ao salvar cliente.', 'erro');
-        } finally {
-            botaoSalvar.disabled = false;
-            botaoSalvar.textContent = 'Salvar alterações';
-        }
-    });
 }
 
 document.addEventListener('DOMContentLoaded', iniciarPaginaClientes);

@@ -39,7 +39,17 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            // asset() em vez de env('APP_URL').'/storage': o Apache do XAMPP
+            // serve este projeto em http://localhost/tcc-projeto/public (sem
+            // vhost próprio), mas APP_URL é só "http://localhost" — usar
+            // env('APP_URL') aqui gerava uma URL sem o prefixo /tcc-projeto/public
+            // e as fotos davam 404. asset() monta a URL a partir da própria
+            // requisição atual, então funciona em qualquer subpasta/porta sem
+            // precisar hardcodar isso no .env (que aliás é compartilhado no
+            // repositório). Só não repare em asset() dentro de comandos
+            // artisan/tinker (sem requisição HTTP) — lá ele cai no fallback
+            // de APP_URL mesmo.
+            'url' => asset('storage'),
             'visibility' => 'public',
             'throw' => false,
         ],

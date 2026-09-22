@@ -1,4 +1,7 @@
-/* Fonte Inter (self-hosted via @fontsource, sem chamadas externas) */
+/* Fonte Inter (self-hosted via @fontsource, sem chamadas externas).
+   mobilenav_atualizado referencia "Inter" no font-family sem nunca carregá-la
+   de verdade (cai no fallback do sistema); manter este import aqui também
+   resolve isso para o app inteiro quando as branches forem unificadas. */
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
@@ -7,11 +10,69 @@
 
 /* ==========================================================================
    Design tokens
-   - Espaçamento: grid de 4 pontos (--space-1 = 4px)
-   - Cores: escalas de 50 a 900 geradas a partir do azul-base #6ea9e9
+   - Paleta de cores: portada de mobilenav_atualizado (extraída do protótipo
+     "Protótipo TCC" no Figma) para as duas branches ficarem visualmente
+     compatíveis numa fusão futura.
+   - --red, --green (tons de créditos/ações destrutivas) são acréscimos
+     pontuais desta tela, usando tons já com o mesmo espírito desaturado da
+     paleta original em vez de inventar uma família nova.
+   - --space, --shadow, --radius-xl, --radius-full são acréscimos próprios
+     desta tela, sem equivalente em mobilenav_atualizado, mas sem colisão de
+     nome com os tokens de lá.
    ========================================================================== */
 :root {
-    /* Espaçamento (grid de 4pt) */
+    /* cores base (mobilenav_atualizado) */
+    --bg: #dfdede;
+    --surface: #ededed;
+    --surface-border: #d5d5d5;
+    --white: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #999696;
+    --text-muted-2: #aaaaaa;
+
+    /* cartões escuros / navbar (mobilenav_atualizado) */
+    --navy-900: #2e3045;
+    --navy-glow: #4c4f72;
+    --blue-900: #2e4762;
+    --blue-glow: #395573;
+
+    /* azul (ações utilitárias / destaques) (mobilenav_atualizado) */
+    --blue-200: #bcd7f5;
+    --blue-300: #9ec5f0;
+    --blue-400: #8bbaed;
+
+    /* roxo (categorias / navegação) (mobilenav_atualizado) */
+    --purple-300: #8c8ea8;
+    --purple-500: #53577d;
+    --purple-light-800: #6c6588;
+    --purple-light-300: #d7cffa;
+
+    /* rosa (ações principais / destaques) (mobilenav_atualizado) */
+    --pink-200: #d4aec1;
+    --pink-300: #c088a5;
+    --pink-400: #b47194;
+    --pink-500: #a14e79;
+    --pink-700: #723756;
+
+    /* Vermelho (ações destrutivas: apagar, descontar) — acréscimo pontual */
+    --red-50: #faeaec;
+    --red-200: #eeb4bc;
+    --red-400: #e07180;
+    --red-600: #da4357;
+    --red-700: #c72239;
+
+    /* Verde (créditos positivos) — acréscimo pontual */
+    --green-100: #dcefe2;
+    --green-700: #338f53;
+
+    /* layout (mobilenav_atualizado) */
+    --topbar-height: 76px;
+    --bottom-nav-height: 16px;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+
+    /* Espaçamento (grid de 4pt) — acréscimo próprio */
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
@@ -22,91 +83,45 @@
     --space-10: 40px;
     --space-12: 48px;
 
-    /* Raios */
-    --radius-md: 12px;
-    --radius-lg: 16px;
+    /* Raios extras (avatares, pills, modal) — acréscimo próprio */
     --radius-xl: 24px;
     --radius-full: 999px;
 
-    /* Sombras */
+    /* Sombras — acréscimo próprio (mobilenav_atualizado usa valores inline) */
     --shadow-sm: 0 1px 2px rgba(20, 24, 32, .06), 0 1px 3px rgba(20, 24, 32, .08);
     --shadow-md: 0 4px 10px rgba(20, 24, 32, .12);
     --shadow-lg: 0 12px 24px rgba(20, 24, 32, .16);
-
-    /* Azul (cor base do produto: #6ea9e9 = azul-500) */
-    --blue-50: #e9f2fc;
-    --blue-100: #d3e5f8;
-    --blue-200: #afd0f3;
-    --blue-300: #8cbbee;
-    --blue-400: #68a6e9;
-    --blue-500: #6ea9e9;
-    --blue-600: #2a84e5;
-    --blue-700: #146bc9;
-    --blue-800: #0c529d;
-    --blue-900: #063970;
-
-    /* Vermelho / rosa (ações destrutivas: apagar, descontar) */
-    --red-50: #faeaec;
-    --red-100: #f5d6da;
-    --red-200: #eeb4bc;
-    --red-300: #e6939f;
-    --red-400: #e07180;
-    --red-500: #e2828f;
-    --red-600: #da4357;
-    --red-700: #c72239;
-    --red-800: #9f182a;
-    --red-900: #750f1d;
-
-    /* Verde (créditos positivos) */
-    --green-50: #edf7f1;
-    --green-100: #dcefe2;
-    --green-200: #bfe3cc;
-    --green-300: #a3d6b5;
-    --green-400: #87ca9e;
-    --green-500: #79c493;
-    --green-600: #45b16a;
-    --green-700: #338f53;
-    --green-800: #236c3d;
-    --green-900: #154727;
-
-    /* Oliva (créditos zerados) */
-    --olive-50: #f8f6ec;
-    --olive-100: #f2edd9;
-    --olive-200: #e7dfbb;
-    --olive-300: #ddd19c;
-    --olive-400: #d3c37e;
-    --olive-500: #cbb968;
-    --olive-600: #b59e37;
-    --olive-700: #917e28;
-    --olive-800: #6b5d1a;
-    --olive-900: #443a0f;
-
-    /* Cinza neutro (texto, bordas, fundos) */
-    --gray-50: #f1f2f3;
-    --gray-100: #e4e5e7;
-    --gray-200: #ced0d4;
-    --gray-300: #b8bbc1;
-    --gray-400: #a3a7ae;
-    --gray-500: #8a8f98;
-    --gray-600: #676f7f;
-    --gray-700: #4d5666;
-    --gray-800: #353d4b;
-    --gray-900: #1e242e;
 }
 
 /* ==========================================================================
-   Reset / base
+   Reset / base (portado de mobilenav_atualizado)
    ========================================================================== */
-*, *::before, *::after {
+* {
     box-sizing: border-box;
 }
 
-body {
+html, body {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    background: var(--gray-100);
-    color: var(--gray-900);
+    padding: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
 img {
@@ -114,150 +129,249 @@ img {
     display: block;
 }
 
-button {
-    font-family: inherit;
+/* O reset acima ("img { display: block }") é uma regra de autor, e regra de
+   autor sempre ganha da regra padrão do navegador para [hidden] ("[hidden] {
+   display: none }", que é só uma regra de user-agent) — na prática isso
+   fazia qualquer <img hidden> (as prévias de foto nos modais) aparecer como
+   ícone de imagem quebrada + texto alternativo, mesmo sem nenhuma foto
+   escolhida. Esta regra devolve o comportamento padrão do atributo. */
+[hidden] {
+    display: none !important;
 }
 
 /* ==========================================================================
-   Estrutura da aplicação (menu inferior no mobile -> barra lateral no desktop)
+   Estrutura da página (layouts/app.blade.php) — portado de
+   mobilenav_atualizado: navbar de largura total no desktop (.topbar) + menu
+   inferior em arco no mobile (.bottom-nav), sem sidebar própria.
    ========================================================================== */
 .app-shell {
     min-height: 100vh;
 }
 
-.app-nav__perfil {
-    position: fixed;
-    top: var(--space-4);
-    left: var(--space-4);
-    z-index: 40;
+.app-content {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 20px calc(var(--bottom-nav-height) + 24px);
+    position: relative;
 }
 
-.avatar--perfil {
-    width: 40px;
-    height: 40px;
-    background: var(--blue-200);
-    color: var(--blue-800);
-    box-shadow: var(--shadow-sm);
+@media (min-width: 992px) {
+    .app-content {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: calc(var(--topbar-height) + 40px) 24px 60px;
+    }
 }
 
-.avatar--perfil svg {
-    width: 24px;
-    height: 24px;
-}
-
-.app-nav__menu {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: var(--space-4);
-    display: flex;
-    justify-content: center;
-    z-index: 40;
-}
-
-.app-nav__item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--blue-600);
-    color: #fff;
-    box-shadow: var(--shadow-md);
-    text-decoration: none;
-}
-
-.app-nav__item svg {
-    width: 22px;
-    height: 22px;
-}
-
-.app-nav__item-label {
+/* ==========================================================================
+   Navbar superior (desktop) — portado de mobilenav_atualizado
+   ========================================================================== */
+.topbar {
     display: none;
 }
 
-.app-content {
-    padding-bottom: var(--space-12);
+@media (min-width: 992px) {
+    .topbar {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 24px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: var(--topbar-height);
+        padding: 0 40px;
+        background: var(--navy-900);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        z-index: 45;
+    }
+
+    .topbar__nav {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+    }
+
+    .topbar__nav--left {
+        justify-content: flex-end;
+    }
+
+    .topbar__nav--right {
+        justify-content: flex-start;
+    }
+
+    .topbar__nav a {
+        color: var(--white);
+        font-weight: 600;
+        font-size: 15px;
+        padding: 4px 2px;
+        opacity: 0.75;
+        border-bottom: 2px solid transparent;
+    }
+
+    .topbar__nav a:hover {
+        opacity: 1;
+    }
+
+    .topbar__nav a.is-current {
+        opacity: 1;
+        border-bottom-color: var(--pink-400);
+    }
+
+    .topbar__settings {
+        position: absolute;
+        top: 50%;
+        right: 40px;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 20px;
+        opacity: 0.75;
+    }
+
+    .topbar__settings:hover,
+    .topbar__settings.is-current {
+        opacity: 1;
+    }
+
+    .topbar__logo {
+        justify-self: center;
+        color: var(--white);
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: 0.5px;
+    }
 }
 
-@media (min-width: 900px) {
-    .app-shell {
-        display: flex;
-    }
+/* ==========================================================================
+   Menu inferior fixo (mobile) — portado de mobilenav_atualizado
+   ========================================================================== */
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--bottom-nav-height);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 40;
+    pointer-events: none;
+}
 
-    .app-nav {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        width: 104px;
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-8);
-        padding: var(--space-6) 0;
-        background: #fff;
-        border-right: 1px solid var(--gray-200);
-    }
+.bottom-nav__toggle {
+    pointer-events: auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--blue-400);
+    color: var(--navy-900);
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(139, 186, 237, 0.6);
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+}
 
-    .app-nav__perfil {
-        position: static;
-    }
+.bottom-nav__arc {
+    position: absolute;
+    left: 50%;
+    bottom: 52px;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
 
-    .app-nav__menu {
-        position: static;
-        flex-direction: column;
-        gap: var(--space-2);
-    }
+.bottom-nav.is-open .bottom-nav__arc {
+    opacity: 1;
+    pointer-events: auto;
+}
 
-    .app-nav__item {
-        flex-direction: column;
-        width: auto;
-        height: auto;
-        min-width: 72px;
-        padding: var(--space-2) var(--space-1);
-        border-radius: var(--radius-lg);
-        gap: var(--space-1);
-        box-shadow: none;
-    }
+.bottom-nav__arc a {
+    --angle: 0deg;
+    --radius: 92px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 46px;
+    height: 46px;
+    margin: -23px 0 0 -23px;
+    border-radius: 14px;
+    background: var(--blue-900);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    transform: translateY(8px) rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle)));
+}
 
-    .app-nav__item-label {
-        display: block;
-        font-size: 11px;
-        font-weight: 600;
-    }
+.bottom-nav__arc a:nth-child(1) { --angle: -75deg; }
+.bottom-nav__arc a:nth-child(2) { --angle: -45deg; }
+.bottom-nav__arc a:nth-child(3) { --angle: -15deg; }
+.bottom-nav__arc a:nth-child(4) { --angle: 15deg; }
+.bottom-nav__arc a:nth-child(5) { --angle: 45deg; }
+.bottom-nav__arc a:nth-child(6) { --angle: 75deg; }
 
-    .app-content {
-        flex: 1;
-        min-width: 0;
-        padding-bottom: 0;
+.bottom-nav__arc a.is-current {
+    background: var(--pink-400);
+    z-index: 1;
+}
+
+@media (min-width: 992px) {
+    .bottom-nav {
+        display: none;
     }
+}
+
+/* ==========================================================================
+   Cabeçalho de página simples (título + voltar/fechar) — portado de
+   mobilenav_atualizado, usado no topo da tela de Clientes.
+   ========================================================================== */
+.page-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 20px;
+}
+
+.page-topbar__title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--text);
+    font-size: 20px;
 }
 
 /* ==========================================================================
    Tela de clientes
    ========================================================================== */
-.clientes-page {
-    padding: 76px var(--space-4) 112px;
-    max-width: 480px;
-    margin: 0 auto;
-}
 
-@media (min-width: 900px) {
-    .clientes-page {
-        padding: var(--space-8) var(--space-8) var(--space-10);
-        max-width: 720px;
-    }
-}
-
+/* Barra de busca — visual portado de .search-bar (mobilenav_atualizado),
+   adaptado para um <input> funcional em vez de um bloco decorativo. */
 .busca {
     display: flex;
     align-items: center;
-    background: #fff;
-    border-radius: var(--radius-full);
-    padding: var(--space-1);
-    box-shadow: var(--shadow-sm);
+    background: var(--surface);
+    border-radius: 20px;
+    padding: var(--space-1) var(--space-2);
 }
 
 .busca__campo {
@@ -265,40 +379,33 @@ button {
     min-width: 0;
     border: none;
     background: transparent;
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-3);
     font: inherit;
     font-size: 14px;
-    color: var(--gray-900);
+    color: var(--text);
     outline: none;
 }
 
 .busca__campo::placeholder {
-    color: var(--gray-400);
+    color: var(--text-muted-2);
 }
 
 .busca__botao {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: var(--blue-500);
-    color: #fff;
-    border: none;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-}
-
-.busca__botao svg {
-    width: 18px;
-    height: 18px;
+    font-size: 16px;
 }
 
 .acoes-rapidas {
     display: flex;
     gap: var(--space-4);
-    margin-top: var(--space-6);
+    margin: var(--space-2) 0 var(--space-6);
 }
 
 .acao-rapida {
@@ -307,29 +414,28 @@ button {
     flex-direction: column;
     align-items: center;
     gap: var(--space-2);
-    background: none;
-    border: none;
     padding: 0;
-    cursor: pointer;
 }
 
 .acao-rapida__icone {
     width: 64px;
     height: 64px;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    box-shadow: var(--shadow-sm);
+    color: var(--white);
+    font-size: 22px;
     transition: transform .1s ease;
 }
 
-.acao-rapida--azul .acao-rapida__icone {
-    background: var(--blue-500);
+/* "adicionar clientes" — mesma cor das ações principais do app (rosa) */
+.acao-rapida--principal .acao-rapida__icone {
+    background: var(--pink-400);
 }
 
-.acao-rapida--vermelho .acao-rapida__icone {
+/* "apagar clientes" — vermelho, ação destrutiva */
+.acao-rapida--perigo .acao-rapida__icone {
     background: var(--red-400);
 }
 
@@ -337,50 +443,39 @@ button {
     box-shadow: 0 0 0 3px var(--red-200);
 }
 
-.acao-rapida__icone svg {
-    width: 26px;
-    height: 26px;
-}
-
 .acao-rapida__label {
     font-size: 13px;
-    color: var(--gray-700);
+    color: var(--text-muted);
     text-align: center;
-}
-
-.clientes-titulo {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-top: var(--space-8);
-    margin-bottom: var(--space-4);
-}
-
-.clientes-titulo h1 {
-    font-size: 22px;
-    font-weight: 800;
-    margin: 0;
 }
 
 .clientes-contador {
     font-size: 13px;
-    color: var(--gray-500);
+    color: var(--text-muted);
 }
 
+/* Lista de clientes — cada linha é seu próprio cartão, no padrão
+   .action-card de mobilenav_atualizado (mesmo usado nos cards de ação da
+   Home), em vez de uma lista contínua com bordas internas. */
+/* Mobile (padrão): lista única, um cliente por linha horizontal, separados
+   por uma divisória — não cartões soltos. Mesma organização de informações
+   (foto, nome, data, créditos, seta) dentro de cada linha, só muda o
+   "invólucro". A partir de 992px (desktop) volta a ser um cartão por
+   cliente, com espaço entre eles (ver media query abaixo). */
 .clientes-lista {
     list-style: none;
     margin: 0;
     padding: 0;
-    background: #fff;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
     overflow: hidden;
 }
 
 .cliente-linha {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--gray-100);
+    border-bottom: 1px solid var(--surface-border);
     transition: background-color .1s ease;
 }
 
@@ -389,7 +484,29 @@ button {
 }
 
 .cliente-linha--selecionado {
-    background: var(--blue-50);
+    background: var(--blue-200);
+}
+
+@media (min-width: 992px) {
+    .clientes-lista {
+        background: none;
+        border: none;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .cliente-linha {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+    }
+
+    .cliente-linha:last-child {
+        border-bottom: 1px solid var(--surface-border);
+    }
 }
 
 .cliente-linha__checkbox {
@@ -405,7 +522,7 @@ button {
 .cliente-linha__checkbox input {
     width: 20px;
     height: 20px;
-    accent-color: var(--blue-600);
+    accent-color: var(--blue-400);
 }
 
 .cliente-linha__botao {
@@ -413,9 +530,7 @@ button {
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    background: none;
-    border: none;
+    gap: var(--space-4);
     padding: var(--space-3) var(--space-4);
     cursor: pointer;
     text-align: left;
@@ -425,8 +540,8 @@ button {
 
 .avatar {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
@@ -434,8 +549,8 @@ button {
     justify-content: center;
     font-weight: 700;
     font-size: 14px;
-    color: #fff;
-    background: var(--gray-400);
+    color: var(--white);
+    background: #ccc;
 }
 
 .avatar img {
@@ -462,7 +577,7 @@ button {
 
 .cliente-linha__data {
     font-size: 13px;
-    color: var(--gray-500);
+    color: var(--text-muted);
 }
 
 .credito-badge {
@@ -480,25 +595,24 @@ button {
 }
 
 .credito-badge--zero {
-    background: var(--olive-100);
-    color: var(--olive-700);
+    background: var(--surface-border);
+    color: var(--text);
 }
 
 .cliente-linha__seta {
     flex-shrink: 0;
     display: flex;
-    color: var(--gray-300);
+    align-items: center;
+    color: var(--text-muted-2);
+    font-size: 20px;
+    border-left: 1px solid var(--surface-border);
+    padding-left: var(--space-3);
     margin-left: var(--space-1);
-}
-
-.cliente-linha__seta svg {
-    width: 18px;
-    height: 18px;
 }
 
 .clientes-vazio {
     text-align: center;
-    color: var(--gray-500);
+    color: var(--text-muted);
     padding: var(--space-8) var(--space-4);
     font-size: 14px;
 }
@@ -509,7 +623,7 @@ button {
     left: var(--space-4);
     right: var(--space-4);
     bottom: 88px;
-    background: #fff;
+    background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     padding: var(--space-3) var(--space-4);
@@ -528,7 +642,7 @@ button {
     gap: var(--space-3);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 992px) {
     .barra-selecao {
         left: auto;
         right: var(--space-8);
@@ -543,8 +657,8 @@ button {
     top: var(--space-4);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--gray-900);
-    color: #fff;
+    background: var(--navy-900);
+    color: var(--white);
     padding: var(--space-3) var(--space-5);
     border-radius: var(--radius-md);
     font-size: 13px;
@@ -570,7 +684,6 @@ button {
     font: inherit;
     font-size: 14px;
     font-weight: 700;
-    border: none;
     cursor: pointer;
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-5);
@@ -581,11 +694,6 @@ button {
     transition: background-color .12s ease;
 }
 
-.botao svg {
-    width: 16px;
-    height: 16px;
-}
-
 .botao--pill {
     border-radius: var(--radius-full);
 }
@@ -594,35 +702,38 @@ button {
     width: 100%;
 }
 
-.botao--azul {
-    background: var(--blue-600);
-    color: #fff;
+/* Ação principal — mesma cor rosa usada nas CTAs do resto do app
+   (.btn-pink / .championship-detail__cta em mobilenav_atualizado) */
+.botao--principal {
+    background: var(--pink-400);
+    color: var(--white);
 }
 
-.botao--azul:hover {
-    background: var(--blue-700);
+.botao--principal:hover {
+    background: var(--pink-500);
 }
 
-.botao--vermelho {
+/* Ação destrutiva */
+.botao--perigo {
     background: var(--red-400);
-    color: #fff;
+    color: var(--white);
 }
 
-.botao--vermelho:hover {
+.botao--perigo:hover {
     background: var(--red-600);
 }
 
 .botao-texto {
-    background: none;
-    border: none;
-    color: var(--gray-600);
+    color: var(--text-muted);
     font-weight: 700;
     font-size: 13px;
-    cursor: pointer;
 }
 
 /* ==========================================================================
    Modal de criar/editar cliente
+   Não existe componente de modal em mobilenav_atualizado hoje (as telas de
+   lá usam página inteira, não modal) — a estrutura fica como está, só com
+   cores/raios/inputs reskinados nos tokens compartilhados.
    ========================================================================== */
 .modal-overlay {
     position: fixed;
@@ -644,12 +755,12 @@ button {
     max-width: 480px;
     max-height: 92vh;
     overflow-y: auto;
-    background: var(--gray-50);
+    background: var(--surface);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     padding: var(--space-5) var(--space-5) var(--space-8);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 992px) {
     .modal-overlay {
         align-items: center;
         padding: var(--space-6);
@@ -675,17 +786,10 @@ button {
 }
 
 .modal-cliente__fechar {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--gray-900);
+    color: var(--text);
     display: flex;
     padding: var(--space-1);
-}
-
-.modal-cliente__fechar svg {
-    width: 22px;
-    height: 22px;
+    font-size: 22px;
 }
 
 .modal-cliente__espaco {
@@ -707,9 +811,9 @@ button {
 }
 
 .cartao {
-    background: #fff;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius-lg);
+    background: var(--white);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
     padding: var(--space-4);
     margin-bottom: var(--space-5);
 }
@@ -732,32 +836,95 @@ button {
     font-size: 18px;
 }
 
+/* Campo de foto do modal de CRIAÇÃO — círculo vazio clicável, estilo comum
+   de foto de perfil em redes sociais. Some com a foto real (via preview
+   local em base64) assim que o usuário escolhe um arquivo; o back-end só
+   recebe o upload de verdade no submit do formulário. */
+.cartao--foto-upload {
+    text-align: center;
+}
+
+.avatar-upload {
+    position: relative;
+    display: inline-flex;
+    width: 96px;
+    height: 96px;
+}
+
+.avatar-upload__preview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 2px dashed var(--surface-border);
+    color: var(--text-muted-2);
+    font-size: 28px;
+}
+
+.avatar-upload.tem-foto .avatar-upload__preview {
+    border-style: solid;
+}
+
+.avatar-upload__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-upload__badge {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--pink-400);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border: 2px solid var(--surface);
+}
+
+.avatar-upload__legenda {
+    margin: var(--space-2) 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Campos do formulário — mesmo visual de .form-field em
+   mobilenav_atualizado (input preenchido, sem borda, 5px de raio). */
 .campo {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--gray-100);
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
 }
 
 .campo:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .campo label {
     font-size: 12px;
-    color: var(--gray-500);
-    font-weight: 700;
+    color: var(--text-muted);
+    font-weight: 600;
 }
 
 .campo input,
 .campo textarea {
     border: none;
+    border-radius: 5px;
+    background: #d9d9d9;
     font: inherit;
     font-size: 14px;
-    color: var(--gray-800);
-    padding: 0;
-    background: transparent;
+    color: var(--text);
+    padding: 10px 12px;
     outline: none;
     resize: vertical;
 }
@@ -772,7 +939,7 @@ button {
 
 .creditos__rotulo {
     font-size: 12px;
-    color: var(--gray-500);
+    color: var(--text-muted);
     margin: 0 0 var(--space-1);
 }
 

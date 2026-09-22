@@ -56,7 +56,13 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'asset_url' => env('ASSET_URL', '/'),
+    // Sem valor padrão '/' (não é o padrão do Laravel): esse '/' fazia o
+    // helper asset() sempre devolver caminhos a partir da raiz do domínio
+    // (ex: "/storage/..."), ignorando a subpasta real da requisição
+    // (http://localhost/tcc-projeto/public no XAMPP sem vhost próprio) —
+    // por isso as fotos dos clientes davam 404. Sem valor padrão aqui,
+    // asset() volta a detectar a URL correta a partir da própria requisição.
+    'asset_url' => env('ASSET_URL'),
 
     /*
     |--------------------------------------------------------------------------

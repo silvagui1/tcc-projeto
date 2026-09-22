@@ -4,23 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 class Cliente extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     /**
-     * Paleta usada para gerar a cor de fundo do avatar padrão (iniciais),
-     * na mesma escala de cores (tom 400) usada no restante da tela.
+     * Paleta usada para gerar a cor de fundo do avatar padrão (iniciais).
+     * Mesmos valores dos tokens --blue-400/--pink-400/--purple-500/
+     * --purple-light-800/--navy-900 em resources/css/app.css (portados de
+     * mobilenav_atualizado) — se a paleta mudar lá, atualizar aqui e em
+     * resources/js/clientes.js (AVATAR_CORES) também, pois CSS não é
+     * acessível a partir do PHP/JS.
      */
     private const CORES_AVATAR = [
-        '#68a6e9', // azul-400
-        '#e07180', // vermelho-400
-        '#87ca9e', // verde-400
-        '#d3c37e', // oliva-400
-        '#a3a7ae', // cinza-400
+        '#8bbaed', // --blue-400
+        '#b47194', // --pink-400
+        '#53577d', // --purple-500
+        '#6c6588', // --purple-light-800
+        '#2e3045', // --navy-900
     ];
 
     protected $fillable = [
