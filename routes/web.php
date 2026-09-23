@@ -168,36 +168,94 @@ Route::get('/estoque/cartas', function () {
 
 // --- Campeonatos ---------------------------------------------------------
 
-Route::get('/campeonatos', function () {
-    $ativo = [
-        'id' => 1,
-        'data' => '21 de agosto de 2026',
-        'imagem' => 'https://www.figma.com/api/mcp/asset/9cb786cf-2723-4727-b9c3-eff84198ae91.png',
+// Dados de exemplo compartilhados pelas telas de campeonato (lista, acessar,
+// editar). Ainda é mock — quando o backend existir, isso vem do banco.
+// (function_exists evita erro de "função redeclarada" no route:cache)
+if (! function_exists('campeonatosMock')) {
+function campeonatosMock()
+{
+    $img = fn ($arquivo) => asset('images/campeonatos/' . $arquivo);
+
+    $participantes = [
+        ['id' => 1, 'nome' => 'Guilherme Soares', 'nascimento' => '20/06/2009', 'avatar' => $img('avatar-guilherme.jpg')],
+        ['id' => 2, 'nome' => 'Maria Garcez', 'nascimento' => '29/07/2008', 'avatar' => $img('avatar-maria.jpg')],
+        ['id' => 3, 'nome' => 'Leonardo Pietro', 'nascimento' => '24/06/2009', 'avatar' => $img('avatar-leonardo.jpg')],
+        ['id' => 4, 'nome' => 'Elielso Pedroso', 'nascimento' => '22/06/1979', 'avatar' => $img('avatar-elielso.jpg')],
     ];
 
-    $outras = [
-        [
+    $vencedores = [
+        ['posicao' => '1° Lugar', 'nome' => 'Guilherme Soares', 'credito' => 10.00, 'avatar' => $img('avatar-guilherme.jpg')],
+        ['posicao' => '2° Lugar', 'nome' => 'Guilherme Soares', 'credito' => 10.00, 'avatar' => $img('avatar-guilherme.jpg')],
+        ['posicao' => '3° Lugar', 'nome' => 'Guilherme Soares', 'credito' => 10.00, 'avatar' => $img('avatar-guilherme.jpg')],
+    ];
+
+    $premios = "1° lugar ganha carta e 200 créditos\n2° lugar ganha 100 créditos\n3° lugar ganha 50 créditos";
+
+    return [
+        1 => [
+            'id' => 1,
+            'nome' => 'Torneio Pokemon',
+            'status' => 'ativo',
+            'data' => '22 de agosto de 2026',
+            'dataCurta' => '22/08/2026',
+            'horario' => '10:30',
+            'deck' => 'deck base',
+            'inscricao' => 15.00,
+            'descricao' => 'terá prêmios e cartas, dando quantias de crédito para cada ganhador',
+            'imagem' => $img('banner-torneio-pokemon.png'),
+            'participantesLista' => $participantes,
+            'vencedores' => [],
+        ],
+        2 => [
             'id' => 2,
             'nome' => 'Pokemon',
+            'status' => 'finalizado',
             'data' => '21 de agosto de 2026',
-            'participantes' => 4,
+            'dataCurta' => '21/08/2026',
+            'horario' => '10:00',
             'deck' => 'deck ultra max',
-            'premios' => [
-                '1° lugar ganha carta e 200 créditos',
-                '2° lugar ganha 100 créditos',
-                '3° lugar ganha 50 créditos',
-            ],
-            'imagem' => 'https://www.figma.com/api/mcp/asset/61005cff-5fa2-4691-8d81-4af3e6727c8e.png',
+            'inscricao' => 15.00,
+            'descricao' => $premios,
+            'imagem' => $img('banner-pokemon.png'),
+            'participantesLista' => $participantes,
+            'vencedores' => $vencedores,
+        ],
+        3 => [
+            'id' => 3,
+            'nome' => 'Magic',
+            'status' => 'finalizado',
+            'data' => '21 de agosto de 2026',
+            'dataCurta' => '21/08/2026',
+            'horario' => '10:00',
+            'deck' => 'deck ultra max',
+            'inscricao' => 15.00,
+            'descricao' => $premios,
+            'imagem' => $img('banner-magic.png'),
+            // o banner do Magic é recortado mais para cima no Figma
+            'imagemPosicao' => 'center 35%',
+            'participantesLista' => $participantes,
+            'vencedores' => $vencedores,
         ],
     ];
+}
+}
 
-    return view('pages.campeonatos.index', compact('ativo', 'outras'));
+Route::get('/campeonatos', function () {
+    $todos = campeonatosMock();
+
+    // vários ativos viram um carrossel na página principal
+    $ativos = array_values(array_filter($todos, fn ($c) => $c['status'] === 'ativo'));
+    $outras = array_values(array_filter($todos, fn ($c) => $c['status'] !== 'ativo'));
+
+    return view('pages.campeonatos.index', compact('ativos', 'outras'));
 })->name('campeonatos.index');
 
 Route::get('/campeonatos/criar', function () {
+    $avatar = asset('images/campeonatos/avatar-rogerio.jpg');
+
     $clientesSugeridos = [
-        ['id' => 1, 'nome' => 'Rogério Cartinhas', 'nascimento' => '20/06/2009', 'avatar' => 'https://www.figma.com/api/mcp/asset/7d3b53c9-aae0-4c2f-be07-88d4777b0098.png'],
-        ['id' => 2, 'nome' => 'Roger', 'nascimento' => '11/07/1999', 'avatar' => 'https://www.figma.com/api/mcp/asset/7d3b53c9-aae0-4c2f-be07-88d4777b0098.png'],
+        ['id' => 1, 'nome' => 'Rogério Cartinhas', 'nascimento' => '20/06/2009', 'avatar' => $avatar],
+        ['id' => 2, 'nome' => 'Roger', 'nascimento' => '11/07/1999', 'avatar' => $avatar],
     ];
 
     return view('pages.campeonatos.criar', compact('clientesSugeridos'));
@@ -209,43 +267,18 @@ Route::post('/campeonatos', function () {
 });
 
 Route::get('/campeonatos/{id}', function ($id) {
-    $campeonato = [
-        'id' => $id,
-        'nome' => 'Torneio Pokemon',
-        'data' => '22 de agosto de 2026',
-        'horario' => '10:30',
-        'participantes' => 12,
-        'deck' => 'deck base',
-        'inscricao' => 15.00,
-        'descricao' => 'terá prêmios e cartas, dando quantias de crédito para cada ganhador',
-        'imagem' => 'https://www.figma.com/api/mcp/asset/0159aba5-d213-4de8-9043-f60e214d8e98.png',
-    ];
+    $campeonato = campeonatosMock()[$id] ?? abort(404);
 
     return view('pages.campeonatos.show', compact('campeonato'));
 })->name('campeonatos.show');
 
+Route::delete('/campeonatos/{id}', function ($id) {
+    // somente frontend por enquanto — sem persistência ainda.
+    return redirect()->route('campeonatos.index');
+})->name('campeonatos.apagar');
+
 Route::get('/campeonatos/{id}/editar', function ($id) {
-    $campeonato = [
-        'id' => $id,
-        'nome' => 'Pokemon',
-        'data' => '21/08/2026',
-        'horario' => '10:00',
-        'deck' => 'deck ultra max',
-        'inscricao' => 15.00,
-        'descricao' => "1° lugar ganha carta e 200 créditos\n2° lugar ganha 100 créditos\n3° lugar ganha 50 créditos",
-        'status' => 'ativo',
-        'vencedores' => [
-            ['posicao' => '1° Lugar', 'nome' => 'Guilherme Soares', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/ff7bf656-665a-48a3-ae39-c1ed512a5623.png'],
-            ['posicao' => '2° Lugar', 'nome' => 'Leonardo Pietro', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/a3742770-313c-426c-948b-f234001c46aa.png'],
-            ['posicao' => '3° Lugar', 'nome' => 'Maria Garcez', 'credito' => 10.00, 'avatar' => 'https://www.figma.com/api/mcp/asset/8668ad43-da37-42dc-9c7e-c7b20443e0f2.png'],
-        ],
-        'participantesLista' => [
-            ['nome' => 'Guilherme Soares', 'nascimento' => '20/06/2009', 'avatar' => 'https://www.figma.com/api/mcp/asset/ff7bf656-665a-48a3-ae39-c1ed512a5623.png'],
-            ['nome' => 'Maria Garcez', 'nascimento' => '29/07/2008', 'avatar' => 'https://www.figma.com/api/mcp/asset/8668ad43-da37-42dc-9c7e-c7b20443e0f2.png'],
-            ['nome' => 'Leonardo Pietro', 'nascimento' => '24/06/2009', 'avatar' => 'https://www.figma.com/api/mcp/asset/a3742770-313c-426c-948b-f234001c46aa.png'],
-            ['nome' => 'Elielso Pedroso', 'nascimento' => '22/06/1979', 'avatar' => 'https://www.figma.com/api/mcp/asset/7f6ad8c5-0a2d-4240-b12f-dae2fbaf973b.png'],
-        ],
-    ];
+    $campeonato = campeonatosMock()[$id] ?? abort(404);
 
     return view('pages.campeonatos.editar', compact('campeonato'));
 })->name('campeonatos.editar');
@@ -256,19 +289,18 @@ Route::put('/campeonatos/{id}/editar', function ($id) {
 });
 
 Route::get('/campeonatos/{id}/premiacoes', function ($id) {
-    $avatar = 'https://www.figma.com/api/mcp/asset/059f6265-ed5b-4526-98fa-bb92f0b11654.png';
-
-    // Um bloco por colocação: quem ficou no lugar, quanto de crédito recebe
-    // e a descrição do prêmio. Ainda é mock — sem banco de dados.
+    // Um bloco por colocação: busca de quem ficou no lugar, quanto de
+    // crédito recebe e a descrição do prêmio. Ainda é mock — sem banco.
     $colocacoes = [
-        ['posicao' => '1° Lugar', 'nome' => 'Guilherme Soares', 'nascimento' => '20/06/2009', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
-        ['posicao' => '2° Lugar', 'nome' => 'Leonardo Pietro', 'nascimento' => '24/06/2009', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
-        ['posicao' => '3° Lugar', 'nome' => 'Maria Garcez', 'nascimento' => '29/07/2008', 'avatar' => $avatar, 'valor' => 0.00, 'descricao' => ''],
+        ['posicao' => '1° Lugar', 'valor' => 0.00, 'descricao' => ''],
+        ['posicao' => '2° Lugar', 'valor' => 0.00, 'descricao' => ''],
+        ['posicao' => '3° Lugar', 'valor' => 0.00, 'descricao' => ''],
     ];
 
+    $participantes = campeonatosMock()[$id]['participantesLista'] ?? [];
     $campeonatoId = $id;
 
-    return view('pages.campeonatos.premiacoes', compact('colocacoes', 'campeonatoId'));
+    return view('pages.campeonatos.premiacoes', compact('colocacoes', 'participantes', 'campeonatoId'));
 })->name('campeonatos.premiacoes');
 
 Route::post('/campeonatos/{id}/premiacoes', function ($id) {

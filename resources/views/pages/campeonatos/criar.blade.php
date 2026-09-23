@@ -5,87 +5,47 @@
 @section('content')
 
     <div class="page-topbar">
-        <a href="{{ route('campeonatos.index') }}" class="icon-btn"><i class="bi bi-x-lg"></i></a>
+        <a href="{{ route('campeonatos.index') }}" class="icon-btn" aria-label="Fechar">
+            <img src="{{ asset('images/campeonatos/x.svg') }}" alt="" width="30" height="30">
+        </a>
         <p class="page-topbar__title">criar campeonato</p>
         <span style="width: 30px;"></span>
     </div>
 
-    {{-- somente frontend: o form ainda não envia dados, é só a estrutura da tela --}}
-    <form class="form-card" method="POST" action="{{ route('campeonatos.index') }}">
+    {{-- somente frontend: o form ainda não salva nada, é só a estrutura da tela --}}
+    <form method="POST" action="{{ route('campeonatos.index') }}">
         @csrf
 
-        <h3>Informações Principais</h3>
+        <div class="champ-form">
+            @include('pages.campeonatos.partials.campos-principais', ['campeonato' => null])
 
-        <div class="form-field" style="margin-bottom: 12px;">
-            <label for="nome">nome do campeonato</label>
-            <input type="text" id="nome" name="nome" placeholder="nome do campeonato">
-        </div>
+            <h3>Participantes</h3>
 
-        <div class="form-row">
-            <div class="form-field">
-                <label for="data">data</label>
-                <input type="date" id="data" name="data">
-            </div>
-            <div class="form-field">
-                <label for="horario">Horário</label>
-                <input type="time" id="horario" name="horario">
-            </div>
-        </div>
+            {{-- busca: digitar filtra a lista de clientes logo abaixo; o "+"
+                 marca o cliente como participante (checkbox escondido) --}}
+            <div class="champ-search" data-participant-search>
+                <div class="champ-search__field">
+                    <input type="search" placeholder="Rog..." aria-label="Pesquisar clientes" data-participant-search-input>
+                    <img src="{{ asset('images/campeonatos/search.svg') }}" alt="" width="14.6409" height="14.6409">
+                </div>
 
-        <div class="form-row">
-            <div class="form-field">
-                <label for="deck">deck</label>
-                <select id="deck" name="deck">
-                    <option value="">selecione um deck</option>
-                    <option>deck ultra max</option>
-                    <option>deck base</option>
-                </select>
-            </div>
-            <div class="form-field">
-                <label for="inscricao">valor da inscrição</label>
-                <input type="text" id="inscricao" name="inscricao" placeholder="R$ 0,00">
+                <div class="champ-search__results">
+                    @foreach ($clientesSugeridos as $cliente)
+                        <label class="participant-row participant-row--pick" data-participant-name="{{ $cliente['nome'] }}">
+                            <img class="participant-row__avatar" src="{{ $cliente['avatar'] }}" alt="">
+                            <span class="participant-row__info">
+                                <strong>{{ $cliente['nome'] }}</strong>
+                                <span>{{ $cliente['nascimento'] }}</span>
+                            </span>
+                            <input type="checkbox" name="participantes[]" value="{{ $cliente['id'] }}">
+                            <img class="participant-row__add" src="{{ asset('images/campeonatos/plus-circle.png') }}" alt="Adicionar" width="24" height="24">
+                        </label>
+                    @endforeach
+                </div>
             </div>
         </div>
 
-        <div class="form-field" style="margin-bottom: 20px;">
-            <label for="descricao">descrição</label>
-            <textarea id="descricao" name="descricao" placeholder="descrição do campeonato e premiação"></textarea>
-        </div>
-
-        <div class="status-field">
-            <span>Status</span>
-            <div class="status-chips">
-                <input type="radio" id="status-ativo" name="status" value="ativo" checked>
-                <label for="status-ativo"><span class="dot"></span> Ativo</label>
-
-                <input type="radio" id="status-finalizado" name="status" value="finalizado">
-                <label for="status-finalizado"><span class="dot"></span> Finalizado</label>
-            </div>
-        </div>
-
-        <h3>Participantes</h3>
-
-        <div class="participants-search">
-            <input type="text" placeholder="Rog...">
-            <span class="icon"><i class="bi bi-search"></i></span>
-        </div>
-
-        <div>
-            @foreach ($clientesSugeridos as $cliente)
-                <label class="participant-row" style="cursor: pointer;">
-                    <input type="checkbox" name="participantes[]" value="{{ $cliente['id'] }}" style="margin-right: 4px;">
-                    <span class="participant-row__avatar" style="background-image: url('{{ $cliente['avatar'] }}');"></span>
-                    <span class="participant-row__info">
-                        <strong>{{ $cliente['nome'] }}</strong>
-                        <span>{{ $cliente['nascimento'] }}</span>
-                    </span>
-                </label>
-            @endforeach
-        </div>
-
-        <div class="form-submit-row">
-            <button type="submit" class="btn-pink">Criar</button>
-        </div>
+        <button type="submit" class="champ-submit">Criar</button>
     </form>
 
 @endsection

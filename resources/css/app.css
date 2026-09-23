@@ -36,6 +36,7 @@
     --pink-400: #b47194;
     --pink-500: #a14e79;
     --pink-700: #723756;
+    --pink-900: #442133;
 
     /* layout */
     --topbar-height: 76px;
@@ -677,391 +678,6 @@ img {
     margin-bottom: 24px;
 }
 
-.championship-card {
-    background: var(--pink-400);
-    border-radius: var(--radius-lg);
-    padding: 12px;
-    margin-bottom: 24px;
-}
-
-.championship-card__banner {
-    border-radius: 10px;
-    overflow: hidden;
-    background: #504c4c;
-    aspect-ratio: 16 / 10;
-    background-size: cover;
-    background-position: center;
-    margin-bottom: 12px;
-}
-
-.championship-card__access {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 14px;
-    color: var(--pink-700);
-    font-weight: 600;
-    font-size: 18px;
-}
-
-.championship-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 2px 10px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.championship-status .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.championship-status .dot--active { background: #2ecc71; }
-.championship-status .dot--done { background: #ff383c; }
-
-.other-championship {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    margin-bottom: 16px;
-}
-
-.other-championship__banner {
-    width: 100%;
-    height: 170px;
-    border-radius: 10px;
-    background-size: cover;
-    background-position: center;
-    margin-bottom: 14px;
-}
-
-.other-championship__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 4px;
-}
-
-.other-championship__header h3 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.other-championship p {
-    margin: 2px 0;
-}
-
-.other-championship__prizes {
-    margin: 10px 0;
-    font-size: 15px;
-}
-
-.other-championship__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 10px;
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-.other-championship__footer .actions {
-    display: flex;
-    gap: 12px;
-    font-size: 16px;
-}
-
-/* Detalhe do campeonato (acessar_campeonato) */
-
-.championship-detail {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-.championship-detail__banner {
-    height: 170px;
-    background-size: cover;
-    background-position: center;
-}
-
-.championship-detail__body {
-    padding: 20px;
-}
-
-.championship-detail__body h2 {
-    margin: 0 0 12px;
-}
-
-.championship-detail__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 0;
-    color: var(--pink-700);
-    font-weight: 600;
-    font-size: 18px;
-    margin-bottom: 16px;
-}
-
-.championship-detail__desc {
-    color: var(--pink-700);
-    font-weight: 600;
-    border-top: 1px solid #c8c8c8;
-    padding-top: 16px;
-}
-
-.championship-detail__cta {
-    display: block;
-    text-align: center;
-    background: var(--pink-400);
-    color: var(--white);
-    font-weight: 600;
-    padding: 16px;
-}
-
-/* Formulário criar/editar campeonato */
-
-.form-card {
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 20px;
-}
-
-.form-card h3 {
-    margin: 0 0 14px;
-}
-
-.form-row {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.form-field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.form-field label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.form-field input,
-.form-field select,
-.form-field textarea {
-    border: none;
-    border-radius: 5px;
-    background: #d9d9d9;
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: inherit;
-    color: var(--text);
-}
-
-.form-field textarea {
-    resize: vertical;
-    min-height: 76px;
-}
-
-.participants-search {
-    position: relative;
-    margin: 16px 0 8px;
-}
-
-.participants-search input {
-    width: 100%;
-    border: none;
-    border-radius: 5px;
-    background: #d9d9d9;
-    padding: 12px 40px 12px 14px;
-    font-size: 14px;
-}
-
-.participants-search .icon {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-}
-
-.participant-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid #d5d5d5;
-}
-
-.participant-row:last-child {
-    border-bottom: none;
-}
-
-.participant-row__avatar {
-    width: 33px;
-    height: 33px;
-    border-radius: 12px;
-    background: #ccc;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-
-.participant-row__info {
-    flex: 1;
-}
-
-.participant-row__info strong {
-    display: block;
-    font-size: 16px;
-}
-
-.participant-row__info span {
-    display: block;
-    font-size: 12px;
-    color: #414141;
-}
-
-.participant-row__remove {
-    color: var(--pink-500);
-    font-size: 18px;
-}
-
-.form-submit-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-.btn-pink {
-    background: var(--pink-300);
-    color: var(--surface);
-    font-weight: 600;
-    font-size: 14px;
-    padding: 10px 22px;
-    border-radius: 5px;
-}
-
-/* Premiações (pódio) */
-
-.podium-hero {
-    background: var(--pink-300);
-    margin: -20px -20px 24px;
-    padding: 20px 20px 90px;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-    position: relative;
-}
-
-@media (min-width: 992px) {
-    .podium-hero {
-        margin: -40px -24px 24px;
-        border-radius: var(--radius-lg);
-    }
-}
-
-.podium {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 12px;
-    margin-top: -70px;
-    position: relative;
-}
-
-.podium__place {
-    background: var(--surface);
-    border-radius: 5px 5px 0 0;
-    text-align: center;
-    flex: 1;
-    max-width: 130px;
-    padding-top: 44px;
-    position: relative;
-}
-
-.podium__place .avatar {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    background: var(--pink-300);
-    background-size: cover;
-    background-position: center;
-    border: 3px solid var(--pink-300);
-    position: absolute;
-    left: 50%;
-    top: -34px;
-    transform: translateX(-50%);
-}
-
-.podium__place strong {
-    display: block;
-    font-size: 36px;
-    padding: 12px 0;
-}
-
-.podium__place--first {
-    padding-top: 60px;
-}
-
-.podium__place--first .avatar {
-    width: 76px;
-    height: 76px;
-    top: -46px;
-}
-
-.credit-transfer-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 32px;
-}
-
-.credit-transfer-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: 5px;
-    padding: 12px 16px;
-}
-
-.credit-transfer-row .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 12px;
-    background: #ccc;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-
-.credit-transfer-row strong {
-    flex: 1;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.credit-transfer-row button {
-    background: var(--pink-200);
-    border-radius: 5px;
-    padding: 4px 12px;
-    font-size: 12px;
-}
-
 /* ==========================================================================
    Configurações
    ========================================================================== */
@@ -1350,236 +966,802 @@ img {
 }
 
 /* ==========================================================================
-   Campeonatos — Status (chips ativo / finalizado)
-   Usado em criar e editar campeonato. São radios de verdade por baixo:
-   o input fica escondido e quem aparece é o <label>, que muda de cor
-   quando o input irmão está :checked.
+   Campeonatos (Figma: "seção de campeonato")
+   Telas: campeonatos (lista), acessar_camp_ativo / acessar_camp_finalizado,
+   criar_campeonato, editar_campeonato, premiações e pop up apagar.
+   Ícones e imagens ficam em public/images/campeonatos/.
    ========================================================================== */
 
-.status-field {
-    margin-bottom: 20px;
-}
+/* --- Lista: botão "Criar campeonato" ------------------------------------- */
 
-.status-field > span {
-    display: block;
+.champ-create {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 74px;
+    padding: 0 22px 0 24px;
+    margin-bottom: 26px;
+    background: var(--pink-400);
+    border-radius: var(--radius-md);
+    color: var(--pink-900);
+    font-size: 24px;
     font-weight: 600;
-    font-size: 15px;
-    margin-bottom: 8px;
 }
 
-.status-chips {
+/* --- Lista: card do campeonato ativo (+ carrossel) ----------------------- */
+
+.champ-carousel {
     display: flex;
     gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
 }
 
-.status-chips input {
+.champ-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.champ-carousel > .champ-active {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+}
+
+/* com mais de um ativo, o próximo card "espia" pela direita */
+.champ-carousel--multi > .champ-active {
+    flex-basis: 90%;
+}
+
+.champ-active {
+    background: var(--pink-400);
+    border-radius: var(--radius-lg);
+    padding: 9px 12px 12px;
+}
+
+.champ-active__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.champ-active__date {
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.champ-active__banner {
+    width: 100%;
+    height: 259px;
+    margin-top: 6px;
+    object-fit: cover;
+    background: #504c4c;
+    border: 1px solid var(--pink-700);
+    border-radius: var(--radius-sm);
+}
+
+.champ-active__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+}
+
+.champ-active__access {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 14px;
+    background: var(--bg);
+    border-radius: var(--radius-md);
+    color: var(--pink-700);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* chip de status ("ativo" / "Finalizado") com a bolinha depois do texto */
+.champ-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 19px;
+    padding: 0 3px 0 9px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.champ-status--sm {
+    height: 17px;
+    padding: 0 3px 0 6px;
+    gap: 6px;
+}
+
+/* lápis + lixeira */
+.champ-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.champ-actions--lg {
+    gap: 4px;
+}
+
+.champ-actions a,
+.champ-actions button {
+    display: inline-flex;
+    padding: 0;
+}
+
+/* --- Lista: "Outras competições" ----------------------------------------- */
+
+.champ-section-title {
+    margin: 24px 0 10px 6px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.champ-other {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 14px 12px 13px 11px;
+    margin-bottom: 29px;
+}
+
+.champ-other__banner {
+    display: block;
+    height: 170px;
+    background: #504c4c;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.champ-other__banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champ-other__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 12px;
+}
+
+.champ-other__header h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.champ-other p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.champ-other__prizes {
+    margin-top: 20px !important;
+}
+
+.champ-other__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* --- Acessar campeonato (ativo / finalizado) ----------------------------- */
+
+.champ-detail {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+}
+
+/* bolinha de status "saindo" do canto superior esquerdo do card. O SVG do
+   Figma tem 256.5px de largura (sobra do frame), por isso o recorte 30×30. */
+.champ-detail__status {
+    position: absolute;
+    top: -7px;
+    left: -11px;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.champ-detail__status img {
+    max-width: none;
+}
+
+.champ-detail__banner {
+    width: 100%;
+    height: 268.6px;
+    object-fit: cover;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: #504c4c;
+}
+
+.champ-detail__body {
+    padding: 14px 13px 0;
+}
+
+.champ-detail__body h2 {
+    margin: 0 0 15px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.champ-detail__info {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 12px;
+    font-size: clamp(16px, 5.4vw, 20px);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.champ-detail__info span:nth-child(even) {
+    text-align: right;
+}
+
+.champ-detail__desc {
+    margin: 21px 13px 17px;
+    padding-top: 15px;
+    border-top: 0.5px solid var(--text);
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* seções que abrem/fecham: "participantes cadastrados" e "vencedores" */
+.champ-accordion {
+    margin: 0 -1px;
+}
+
+.champ-accordion summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    padding: 0 12px 0 13px;
+    background: #d9d9d9;
+    border: 0.5px solid var(--text-muted-2);
+    font-size: 16px;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.champ-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+/* a seta do Figma aponta para a direita; girada fica para baixo */
+.champ-accordion summary img {
+    transform: rotate(90deg);
+    transition: transform .2s;
+}
+
+.champ-accordion[open] summary img {
+    transform: rotate(-90deg);
+}
+
+.champ-accordion__content {
+    padding: 8px 13px;
+}
+
+.champ-detail__prize {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 270px;
+    max-width: calc(100% - 26px);
+    height: 47px;
+    margin: 16px auto 24px;
+    background: var(--pink-300);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* --- Criar / editar campeonato ------------------------------------------- */
+
+.champ-form {
+    margin: 0;
+    min-width: 0;
+    border: 0;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 15px 14px 20px;
+}
+
+.champ-form h3 {
+    margin: 15px 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.champ-form h3:first-child {
+    margin: 0 0 11px;
+}
+
+.champ-form__row {
+    display: flex;
+    gap: 16px;
+}
+
+.champ-form__row > * {
+    flex: 1;
+    min-width: 0;
+}
+
+.champ-input,
+.champ-input--icon input {
+    width: 100%;
+    height: 35px;
+    padding: 0 7px;
+    border: none;
+    border-radius: 5px;
+    background: #d9d9d9;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.champ-form > .champ-input,
+.champ-form__row {
+    margin-bottom: 13px;
+}
+
+.champ-input::placeholder,
+.champ-input--icon input::placeholder,
+.champ-search__field input::placeholder,
+.prize-block__desc::placeholder,
+.prize-amount__input input::placeholder {
+    color: var(--text-muted);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.champ-input--area {
+    height: 76px;
+    padding: 8px 7px;
+    resize: vertical;
+}
+
+/* campo com ícone (data / horário): o ícone do Figma fica por cima do
+   seletor nativo, que continua clicável mas invisível */
+.champ-input--icon {
+    position: relative;
+    display: block;
+    padding: 0;
+}
+
+.champ-input--icon input {
+    padding-right: 34px;
+}
+
+.champ-input--icon img {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.champ-input--icon input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0;
+    width: 34px;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Status: radios escondidos, o <label> é o chip */
+.champ-status-chips {
+    display: flex;
+    gap: 16px;
+}
+
+.champ-status-chips input {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
 
-.status-chips label {
+.champ-status-chips label {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    font-size: 13px;
+    gap: 5px;
+    height: 29px;
+    padding: 0 12px 0 7px;
+    background: #d9d9d9;
+    border: 0.5px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 
-.status-chips label .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+.champ-status-chips input:checked + label {
     background: var(--text-muted-2);
+    border-color: #888;
 }
 
-.status-chips input:checked + label {
-    background: var(--pink-200);
-    border-color: var(--pink-400);
-    font-weight: 600;
-}
-
-.status-chips input:focus-visible + label {
+.champ-status-chips input:focus-visible + label {
     outline: 2px solid var(--pink-500);
     outline-offset: 2px;
 }
 
-.status-chips input[value="ativo"]:checked + label .dot { background: #2ecc71; }
-.status-chips input[value="finalizado"]:checked + label .dot { background: #ff383c; }
-
-/* ==========================================================================
-   Campeonatos — Premiações (um bloco por colocação)
-   ========================================================================== */
-
-.prize-block {
-    background: var(--white);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: 20px;
+/* busca de participantes */
+.champ-search__field {
+    position: relative;
 }
 
-.prize-block__header {
-    background: var(--pink-300);
-    color: var(--white);
-    text-align: center;
+.champ-search__field input {
+    width: 100%;
+    height: 40px;
+    padding: 0 36px 0 12px;
+    border: none;
+    border-radius: 5px;
+    background: #d9d9d9;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
     font-weight: 600;
-    font-size: 16px;
-    padding: 10px;
 }
 
-.prize-block__body {
-    padding: 16px;
+.champ-search__field img {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    pointer-events: none;
 }
 
-.prize-winner {
+/* resultados da busca (criar): painel que "sai" de baixo do campo */
+.champ-search__results {
+    position: relative;
+    margin-top: -6px;
+    padding: 13px 16px 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 5px;
+}
+
+.champ-search__results:empty,
+.champ-search__results:not(:has(.participant-row:not([hidden]))) {
+    display: none;
+}
+
+.champ-form__count {
+    margin: 16px 0 4px;
+    color: #4a4242;
+    font-size: 12px;
+}
+
+/* linha de participante (avatar + nome + nascimento) */
+.participant-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 7px;
+    padding: 11px 0;
 }
 
-.prize-winner .avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: #d9d9d9;
-    background-size: cover;
-    background-position: center;
+.champ-participants .participant-row + .participant-row,
+.champ-accordion .participant-row + .participant-row {
+    border-top: 0.5px solid #bebebe;
+}
+
+.participant-row__avatar {
+    width: 32.5px;
+    height: 32.5px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ff2828;
     flex-shrink: 0;
 }
 
-.prize-winner__info {
+.participant-row__info {
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
+    gap: 4px;
 }
 
-.prize-winner__info strong {
-    font-size: 15px;
+.participant-row__info strong {
+    font-size: 16px;
+    font-weight: 600;
 }
 
-.prize-winner__info span {
+.participant-row__info span {
+    color: #414141;
     font-size: 12px;
-    color: var(--text-muted);
 }
 
-.prize-amount {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+.participant-row__remove {
+    display: inline-flex;
+    padding: 0;
+    margin-right: 20px;
 }
 
-.prize-amount input {
-    width: 123px;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--surface-border);
-    background: var(--surface);
-    font-family: inherit;
-    font-size: 14px;
+.participant-row[hidden] {
+    display: none;
 }
 
-.prize-amount .stepper {
-    width: 29px;
-    height: 29px;
-    border-radius: 8px;
-    background: var(--pink-200);
-    color: var(--pink-700);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
+/* resultado da busca com "+": o checkbox fica escondido e o "+" gira em x
+   quando o cliente já foi adicionado */
+.participant-row--pick {
+    padding: 4px 0;
+    cursor: pointer;
 }
 
-.prize-block__body textarea {
-    width: 100%;
-    min-height: 60px;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--surface-border);
-    background: var(--surface);
-    font-family: inherit;
-    font-size: 14px;
-    resize: vertical;
+.participant-row--pick + .participant-row--pick {
+    margin-top: 11px;
 }
 
-/* ==========================================================================
-   Campeonatos — Vencedores (tela de editar)
-   ========================================================================== */
+.participant-row--pick input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
 
+.participant-row__add {
+    transition: transform .2s;
+}
+
+.participant-row--pick input:checked + .participant-row__add {
+    transform: rotate(45deg);
+}
+
+.participant-row--pick input:focus-visible + .participant-row__add {
+    outline: 2px solid var(--pink-500);
+    border-radius: 50%;
+}
+
+/* vencedores */
 .winner-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    margin-bottom: 8px;
+    gap: 3px;
+    height: 50px;
+    padding-left: 3px;
+    margin-bottom: 7px;
+    background: #d9d9d9;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
-.winner-row .avatar {
-    width: 33px;
-    height: 33px;
-    border-radius: 8px;
-    background: #d9d9d9;
-    background-size: cover;
-    background-position: center;
+.winner-row__avatar {
+    width: 32.5px;
+    height: 32.5px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ff2828;
     flex-shrink: 0;
 }
 
 .winner-row__info {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    gap: 4px;
+    min-width: 0;
+    padding-left: 2px;
 }
 
 .winner-row__info strong {
-    font-size: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 .winner-row__info span {
+    color: #414141;
     font-size: 12px;
-    color: var(--text-muted);
 }
 
 .winner-row__value {
-    background: var(--pink-200);
-    color: var(--pink-700);
-    border-radius: 6px;
-    padding: 4px 8px;
-    font-size: 11px;
-    font-weight: 600;
+    align-self: flex-start;
+    margin: 6px auto 0 8px;
+    padding: 4px;
+    background: #6bac68;
+    border-radius: 12px;
+    color: #344d33;
+    font-size: 8px;
+    white-space: nowrap;
 }
 
 .winner-row__action {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: var(--pink-300);
-    color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 30px;
+    height: 100%;
+    margin-left: auto;
+    background: var(--pink-200);
+    flex-shrink: 0;
 }
 
-/* Botão secundário (contorno) — usado no "Premiação" da tela do campeonato */
-.btn-outline-pink {
-    display: block;
-    width: 270px;
-    max-width: 100%;
-    margin: 12px auto 0;
-    padding: 12px;
-    border-radius: 999px;
-    border: 2px solid var(--pink-400);
-    color: var(--pink-700);
-    background: transparent;
-    text-align: center;
+.champ-empty {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.champ-locked {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: var(--pink-200);
+    border-radius: 5px;
+    color: var(--pink-900);
+    font-size: 13px;
     font-weight: 600;
-    font-size: 15px;
 }
 
+/* botão principal de rodapé (Criar / Salvar alterações / Finalizar) */
+.champ-submit {
+    display: block;
+    width: 100%;
+    height: 46px;
+    margin-top: 24px;
+    background: var(--pink-300);
+    border-radius: var(--radius-md);
+    color: var(--surface);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.champ-submit--bottom {
+    margin-top: 110px;
+}
+
+/* --- Premiações (um bloco por colocação) --------------------------------- */
+
+.prize-block {
+    margin-bottom: 21px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.prize-block__header {
+    height: 38px;
+    line-height: 38px;
+    margin: -1px -1px 0;
+    background: var(--pink-200);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.prize-block--2 .prize-block__header { background: var(--pink-300); }
+.prize-block--3 .prize-block__header { background: var(--pink-400); }
+
+.prize-block__body {
+    padding: 14px 14px 12px;
+}
+
+.prize-block__search input,
+.prize-block__desc,
+.prize-amount__input {
+    height: 35px;
+    background: var(--bg);
+    border: 0.5px solid #d9d9d9;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.prize-block__search input {
+    padding: 0 36px 0 8px;
+}
+
+.prize-block__desc {
+    width: 100%;
+    padding: 0 8px;
+    color: var(--text);
+}
+
+.prize-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+}
+
+.prize-amount__input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 123px;
+    padding: 0 8px;
+}
+
+.prize-amount__input input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: var(--text);
+}
+
+/* o SVG do Figma tem 49px porque inclui a sombra; o botão tem 29px */
+.prize-amount__step {
+    position: relative;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+}
+
+.prize-amount__step img {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    max-width: none;
+}
+
+/* --- Pop-up "apagar campeonato" ------------------------------------------ */
+
+.confirm-popup {
+    width: 298px;
+    max-width: calc(100% - 32px);
+    padding: 16px 16px 15px;
+    background: var(--bg);
+    border: 1px solid #6d6c6c;
+    border-radius: 20px;
+    box-shadow: 8px 8px 10px rgba(0, 0, 0, .04),
+                inset -33px -33px 46px #ccc7c7,
+                inset 28px 28px 54px rgba(0, 0, 0, .16);
+    color: var(--text);
+}
+
+.confirm-popup::backdrop {
+    background: rgba(0, 0, 0, .7);
+}
+
+.confirm-popup__title {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.confirm-popup__actions {
+    display: flex;
+    gap: 26px;
+}
+
+.confirm-popup__actions button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 16px;
+}
+
+.confirm-popup__yes { background: #e96e70; }
+.confirm-popup__no { background: #c4b7f7; }
+
+.confirm-popup__hint {
+    margin: 9px 0 0;
+    color: #686868;
+    font-size: 12px;
+}
