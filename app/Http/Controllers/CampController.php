@@ -12,7 +12,6 @@ class CampController extends Controller
     // Campeonato(s) em destaque no topo (carrossel se houver mais de um)
     $ativos = CampModel::where('status', 'ativo')
         ->orderBy('data')
-        ->orderBy('horario')
         ->get();
 
     // Lista "Outras competições"
@@ -30,12 +29,19 @@ class CampController extends Controller
         $validator = Validator::make(
 		      $dados->all(),
 	            [
-	                'nome' => 'required|min:3|max:255',
+	                'nome' => 'required',
+                    'deck' => 'required', 
+                    'data' => 'required',
+                    'participantes' => 'required',
+                    'valor' => 'required'
+
 	            ],
 	            [
 	                'nome.required' => 'O campo nome é obrigatório.',
-	                'nome.min' => 'O campo nome deve conter no mínimo 3 caracteres.',
-	                'nome.max' => 'O campo nome deve conter no máximo 255 caracteres.',
+	                'deck.required' => 'O campo deck é obrigatório.',
+	                'data.required' => 'O campo data é obrigatório.',
+	                'participantes.required' => 'O campo participantes é obrigatório.',
+	                'valor.required' => 'O campo valor é obrigatório.',
 	            ]
         );
 
@@ -51,14 +57,14 @@ class CampController extends Controller
 
         $camp = new \App\Models\CampModel();
 
-        return view('campeonato.index', ['success'=>'Cadastrado!', 'campeonatos'=>$camp::all()]);
+        return view('campeonato.index', ['success'=>'Cadastrado!', 'campeonato'=>$camp::all()]);
     }
 
     function remove(string $id) {
         $camp = new \App\Models\CampModel();
         $camp::destroy($id);
 
-        return view('campeonato.index', ['success'=>'mostrou!', 'campeonatos'=>$camp::all()]);
+        return view('campeonato.index', ['success'=>'mostrou!', 'campeonato'=>$camp::all()]);
 
     }
         public function update(Request $request){
@@ -83,7 +89,7 @@ class CampController extends Controller
 
     return view('campeonato.index', [
         'success' => 'Salvo!',
-        'campeonatos' => CampModel::all(),
+        'campeonato' => CampModel::all(),
     ]);
 }
 
@@ -94,6 +100,6 @@ function save(Request $dados) {
         $camp = $camp::find($dados->id);
         $camp->update($dados->all());
 
-        return view('campeonato.index', ['success'=>'salvo!', 'campeonatos'=>$camp::all()]);
+        return view('campeonato.index', ['success'=>'salvo!', 'campeonato'=>$camp::all()]);
     }
 }

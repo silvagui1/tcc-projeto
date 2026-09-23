@@ -9,6 +9,6 @@ class CampModel extends Model
 {
     use HasFactory;
 
-    protected $table = 'campeonatos'
-    protected $fillable = ['nome', 'deck', 'hora', 'data', 'valor', 'participantes', 'descricao' ]
+    protected $table = 'campeonatos';
+    protected $fillable = ['nome', 'deck', 'data', 'valor', 'participantes', 'descricao' ];
 }
