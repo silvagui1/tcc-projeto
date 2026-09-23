@@ -43,6 +43,7 @@ function iniciarPaginaClientes() {
     const mensagemEl = document.querySelector('[data-mensagem]');
 
     let termoAtual = '';
+    let paginaAtual = 1;
     let modoSelecao = false;
     const selecionados = new Set();
     let timeoutBusca = null;
@@ -67,6 +68,9 @@ function iniciarPaginaClientes() {
         if (termoAtual) {
             url.searchParams.set('nome', termoAtual);
         }
+        if (paginaAtual > 1) {
+            url.searchParams.set('page', paginaAtual);
+        }
 
         const resposta = await fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -83,7 +87,10 @@ function iniciarPaginaClientes() {
     }
 
     function atualizarContador() {
-        const total = listaWrapper.querySelectorAll('[data-cliente-linha]').length;
+        // O total vem do servidor (data-total na <ul>), não da contagem de
+        // linhas na tela — com paginação, cada página só mostra 20 por vez.
+        const lista = listaWrapper.querySelector('[data-lista]');
+        const total = lista ? parseInt(lista.dataset.total || '0', 10) : 0;
         if (contador) {
             contador.textContent = total === 1 ? '1 cadastrado' : total + ' cadastrados';
         }
@@ -94,6 +101,7 @@ function iniciarPaginaClientes() {
     buscaForm.addEventListener('submit', (evento) => {
         evento.preventDefault();
         termoAtual = buscaCampo.value.trim();
+        paginaAtual = 1;
         carregarLista();
     });
 
@@ -101,8 +109,29 @@ function iniciarPaginaClientes() {
         window.clearTimeout(timeoutBusca);
         timeoutBusca = window.setTimeout(() => {
             termoAtual = buscaCampo.value.trim();
+            paginaAtual = 1;
             carregarLista();
         }, 300);
+    });
+
+    // ---- Paginação ----------------------------------------------------------
+
+    listaWrapper.addEventListener('click', (evento) => {
+        const linkPagina = evento.target.closest('[data-pagina-link]');
+        if (!linkPagina) return;
+
+        evento.preventDefault();
+
+        if (linkPagina.classList.contains('paginacao__link--desabilitado')) {
+            return;
+        }
+
+        const novaPagina = parseInt(linkPagina.getAttribute('data-pagina'), 10);
+        if (isNaN(novaPagina) || novaPagina < 1) return;
+
+        paginaAtual = novaPagina;
+        carregarLista();
+        listaWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     // ---- Modo de seleção (apagar clientes) ---------------------------------
@@ -203,6 +232,9 @@ function iniciarPaginaClientes() {
 
             mostrarMensagem(dados.message, 'sucesso');
             termoAtual = buscaCampo.value.trim();
+            // Volta para a primeira página: a página em que o usuário estava
+            // pode não existir mais depois de excluir os clientes dela.
+            paginaAtual = 1;
             await carregarLista();
         } catch (erro) {
             mostrarMensagem('Erro de conexão ao excluir clientes.', 'erro');

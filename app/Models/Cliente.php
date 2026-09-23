@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class Cliente extends Model
 {
@@ -42,10 +41,17 @@ class Cliente extends Model
     /**
      * URL pública da foto do cliente, ou null quando ele ainda não tem
      * foto cadastrada (nesse caso a tela usa o avatar de iniciais).
+     *
+     * Usa asset() em vez de Storage::disk('public')->url() (que só
+     * concatena env('APP_URL'), sem saber da subpasta real da requisição —
+     * ver config/filesystems.php) porque este atributo só é acessado durante
+     * uma requisição HTTP de verdade (views, respostas JSON do
+     * ClienteController), então asset() sempre tem uma requisição para
+     * calcular a URL certa, mesmo servindo o app numa subpasta.
      */
     public function getFotoUrlAttribute(): ?string
     {
-        return $this->foto ? Storage::disk('public')->url($this->foto) : null;
+        return $this->foto ? asset('storage/'.$this->foto) : null;
     }
 
     /**

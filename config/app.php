@@ -114,7 +114,9 @@ return [
     |
     */
 
-    'faker_locale' => 'en_US',
+    // pt_BR em vez do padrão en_US: o app inteiro é em português, então os
+    // dados fake (nomes, frases) ficam mais realistas para testar a tela.
+    'faker_locale' => 'pt_BR',
 
     /*
     |--------------------------------------------------------------------------

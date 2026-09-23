@@ -12,7 +12,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(FornecedorSeeder::class);
-        $this->call(ContatoSeeder::class);
+        // FornecedorSeeder/ContatoSeeder (chamados aqui antes) não existem
+        // no projeto — resíduo de outra atividade, quebrava `db:seed` por
+        // completo com "class not found". Removidos.
+        $this->call(ClienteSeeder::class);
     }
 }

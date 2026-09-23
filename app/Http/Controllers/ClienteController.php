@@ -14,17 +14,23 @@ use Illuminate\View\View;
 class ClienteController extends Controller
 {
     /**
-     * Tela principal: lista de clientes cadastrados.
+     * Quantos clientes carregar por página (lista e busca).
+     */
+    private const CLIENTES_POR_PAGINA = 20;
+
+    /**
+     * Tela principal: lista de clientes cadastrados (paginada).
      */
     public function index(): View
     {
-        $clientes = Cliente::orderBy('nome')->get();
+        $clientes = Cliente::orderBy('nome')->paginate(self::CLIENTES_POR_PAGINA);
 
         return view('clientes.index', compact('clientes'));
     }
 
     /**
-     * Busca clientes pelo nome (usada pela barra de busca via AJAX).
+     * Busca clientes pelo nome (usada pela barra de busca via AJAX) e também
+     * atende a troca de página da lista (com ou sem termo de busca).
      * Retorna apenas o fragmento HTML da lista, para ser injetado na página.
      */
     public function buscar(Request $request): View
@@ -35,7 +41,8 @@ class ClienteController extends Controller
                 $query->where('nome', 'like', "%{$termo}%");
             })
             ->orderBy('nome')
-            ->get();
+            ->paginate(self::CLIENTES_POR_PAGINA)
+            ->withQueryString();
 
         return view('clientes.partials._lista', compact('clientes'));
     }

@@ -9,6 +9,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Clientes') — ArtPlay</title>
 
+    {{-- logo sobre fundo azul-marinho, para aparecer tanto em abas claras quanto escuras --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
+
     {{-- Ícones (Bootstrap Icons), mesma fonte de ícones usada no resto do
          app em mobilenav_atualizado, no lugar dos SVGs desenhados à mão. --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
@@ -21,7 +24,9 @@
              o menu inferior em arco. --}}
         @include('partials.topbar')
 
-        <main class="app-content">
+        {{-- páginas podem pedir uma área mais larga no desktop com
+             @section('main_class', 'app-content--wide') --}}
+        <main class="app-content @yield('main_class')">
             @yield('content')
         </main>
 
