@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
 class Cliente extends Model
 {
@@ -28,6 +29,8 @@ class Cliente extends Model
     protected $fillable = [
         'nome',
         'data_nascimento',
+        'whatsapp',
+        'status',
         'foto',
         'observacoes',
         'creditos',
@@ -37,6 +40,63 @@ class Cliente extends Model
         'data_nascimento' => 'date',
         'creditos' => 'decimal:2',
     ];
+
+    /**
+     * Expõe a paleta de avatares para quem precisa gerar a mesma cor fora do
+     * PHP (ver resources/views/layouts/app.blade.php, que injeta este valor
+     * num <script type="application/json"> lido por resources/js/clientes.js)
+     * — evita manter a lista duplicada "de cabeça" em dois arquivos.
+     *
+     * @return array<int, string>
+     */
+    public static function coresAvatar(): array
+    {
+        return self::CORES_AVATAR;
+    }
+
+    public function historicoCreditos()
+    {
+        return $this->hasMany(ClienteCreditoHistorico::class)->latest('id');
+    }
+
+    public function scopeAtivos(Builder $query): Builder
+    {
+        return $query->where('status', 'ativo');
+    }
+
+    public function scopeInativos(Builder $query): Builder
+    {
+        return $query->where('status', 'inativo');
+    }
+
+    public function scopeComSaldo(Builder $query): Builder
+    {
+        return $query->where('creditos', '>', 0);
+    }
+
+    public function scopeSemSaldo(Builder $query): Builder
+    {
+        return $query->where('creditos', '<=', 0);
+    }
+
+    /**
+     * Clientes cujo dia de nascimento cai no mês informado (mês corrente por
+     * padrão) — usado no card de resumo "Aniversariantes do mês" e no filtro
+     * de mesmo nome na listagem. Compara só o mês (whereMonth), não o dia,
+     * pois o objetivo é planejar contato/campanha ao longo do mês inteiro.
+     */
+    public function scopeAniversariantesDoMes(Builder $query, ?int $mes = null): Builder
+    {
+        return $query->whereMonth('data_nascimento', $mes ?? now()->month);
+    }
+
+    /**
+     * Idade atual do cliente, em anos completos.
+     */
+    public function getIdadeAttribute(): int
+    {
+        return $this->data_nascimento->age;
+    }
 
     /**
      * URL pública da foto do cliente, ou null quando ele ainda não tem
@@ -70,5 +130,19 @@ class Cliente extends Model
     public function getCorAvatarAttribute(): string
     {
         return self::CORES_AVATAR[$this->id % count(self::CORES_AVATAR)];
+    }
+
+    /**
+     * Link "wa.me" pronto para abrir uma conversa com o cliente, ou null
+     * quando ele não tem WhatsApp cadastrado. Assume DDI 55 (Brasil), já
+     * que `whatsapp` é armazenado só com DDD + número (ver migration).
+     */
+    public function getWhatsappUrlAttribute(): ?string
+    {
+        if (! $this->whatsapp) {
+            return null;
+        }
+
+        return 'https://wa.me/55'.preg_replace('/\D/', '', $this->whatsapp);
     }
 }

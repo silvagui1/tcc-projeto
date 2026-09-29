@@ -17,6 +17,22 @@ class UpdateClienteRequest extends FormRequest
     }
 
     /**
+     * Normaliza o WhatsApp para só dígitos antes de validar — o campo chega
+     * formatado ("(11) 98765-4321") porque o front-end aplica uma máscara
+     * enquanto o usuário digita.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('whatsapp')) {
+            $digitos = preg_replace('/\D/', '', (string) $this->whatsapp);
+
+            $this->merge([
+                'whatsapp' => $digitos !== '' ? $digitos : null,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -26,6 +42,8 @@ class UpdateClienteRequest extends FormRequest
         return [
             'nome' => ['required', 'string', 'max:255'],
             'data_nascimento' => ['required', 'date', 'before_or_equal:today'],
+            'whatsapp' => ['nullable', 'string', 'regex:/^\d{10,11}$/'],
+            'status' => ['nullable', 'in:ativo,inativo'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'observacoes' => ['nullable', 'string', 'max:1000'],
             'creditos' => ['required', 'numeric', 'min:0'],
@@ -40,6 +58,8 @@ class UpdateClienteRequest extends FormRequest
         return [
             'nome' => 'nome',
             'data_nascimento' => 'data de nascimento',
+            'whatsapp' => 'WhatsApp',
+            'status' => 'status',
             'foto' => 'foto',
             'observacoes' => 'observações',
             'creditos' => 'créditos',
@@ -58,6 +78,8 @@ class UpdateClienteRequest extends FormRequest
             'data_nascimento.required' => 'Informe a data de nascimento.',
             'data_nascimento.date' => 'Informe uma data de nascimento válida.',
             'data_nascimento.before_or_equal' => 'A data de nascimento não pode ser no futuro.',
+            'whatsapp.regex' => 'Informe um número de WhatsApp válido, com DDD (10 ou 11 dígitos).',
+            'status.in' => 'Status inválido.',
             'foto.image' => 'O arquivo enviado precisa ser uma imagem.',
             'foto.mimes' => 'A foto deve estar em formato JPG, PNG ou WEBP.',
             'foto.max' => 'A foto deve ter no máximo 2MB.',

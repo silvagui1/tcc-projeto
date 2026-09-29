@@ -83,9 +83,19 @@
     --space-10: 40px;
     --space-12: 48px;
 
-    /* Raios extras (avatares, pills, modal) — acréscimo próprio */
+    /* Raios extras (avatares, pills, modal) — acréscimo próprio.
+       --radius-xl/--radius-full seguem existindo (usados pela navbar/menu
+       inferior herdados de mobilenav_atualizado), mas os componentes da tela
+       de Clientes (cards, inputs, botões, badges) passam a usar os raios
+       contidos abaixo em vez desses — ver revisão de design: cantos muito
+       arredondados em tudo é uma das características que mais denunciam UI
+       genérica de IA. */
     --radius-xl: 24px;
     --radius-full: 999px;
+    --radius-modal: 14px;
+    --radius-card: 12px;
+    --radius-control: 8px;
+    --radius-chip: 6px;
 
     /* Sombras — acréscimo próprio (mobilenav_atualizado usa valores inline) */
     --shadow-sm: 0 1px 2px rgba(20, 24, 32, .06), 0 1px 3px rgba(20, 24, 32, .08);
@@ -389,7 +399,7 @@ img {
 }
 
 .page-topbar__title {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 700;
     margin: 0;
 }
@@ -408,14 +418,58 @@ img {
    Tela de clientes
    ========================================================================== */
 
+/* Foco visível por teclado (Tab) — a página zera outline nos resets globais
+   e usava inputs sem substituto nenhum, o que escondia onde o foco estava.
+   Escopado só à tela de Clientes e seus modais (não mexe na navbar). */
+[data-clientes-page] button:focus-visible,
+[data-clientes-page] a:focus-visible,
+[data-clientes-page] input:focus-visible,
+[data-clientes-page] select:focus-visible,
+.modal-overlay button:focus-visible,
+.modal-overlay a:focus-visible,
+.modal-overlay input:focus-visible,
+.modal-overlay textarea:focus-visible,
+.modal-overlay select:focus-visible {
+    outline: 2px solid var(--blue-400);
+    outline-offset: 2px;
+}
+
+.campo input:focus-visible,
+.campo textarea:focus-visible,
+.campo select:focus-visible {
+    outline: none;
+    border-color: var(--blue-400);
+}
+
 /* Barra de busca — visual portado de .search-bar (mobilenav_atualizado),
-   adaptado para um <input> funcional em vez de um bloco decorativo. */
+   adaptado para um <input> funcional em vez de um bloco decorativo. Ícone de
+   lupa fica fixo à esquerda (decorativo — a busca já roda com debounce
+   enquanto o usuário digita, ver clientes.js), e um botão de limpar (×)
+   aparece à direita assim que há texto no campo. */
 .busca {
+    position: relative;
     display: flex;
     align-items: center;
     background: var(--surface);
-    border-radius: 20px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
     padding: var(--space-1) var(--space-2);
+    transition: box-shadow .12s ease;
+}
+
+.busca:focus-within {
+    box-shadow: 0 0 0 2px var(--blue-300);
+}
+
+.busca__icone {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 15px;
 }
 
 .busca__campo {
@@ -423,7 +477,7 @@ img {
     min-width: 0;
     border: none;
     background: transparent;
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-1);
     font: inherit;
     font-size: 14px;
     color: var(--text);
@@ -434,63 +488,68 @@ img {
     color: var(--text-muted-2);
 }
 
-.busca__botao {
+/* O ring de foco já aparece no .busca inteiro (:focus-within acima); sem
+   isso o input ganharia um segundo contorno próprio, redundante. */
+.busca__campo:focus-visible {
+    outline: none;
+}
+
+/* Esconde os ícones nativos do <input type="search"> (o "x" do Chrome/Edge)
+   para não duplicar com o nosso .busca__limpar, que tem estilo consistente
+   entre navegadores. */
+.busca__campo::-webkit-search-cancel-button,
+.busca__campo::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.busca__limpar {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    color: var(--text-muted);
+    color: var(--text-muted-2);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 16px;
 }
 
-.acoes-rapidas {
-    display: flex;
-    gap: var(--space-4);
-    margin: var(--space-2) 0 var(--space-6);
-}
-
-.acao-rapida {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    padding: 0;
-}
-
-.acao-rapida__icone {
-    width: 64px;
-    height: 64px;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-size: 22px;
-    transition: transform .1s ease;
-}
-
-/* "adicionar clientes" — mesma cor das ações principais do app (rosa) */
-.acao-rapida--principal .acao-rapida__icone {
-    background: var(--pink-400);
-}
-
-/* "apagar clientes" — vermelho, ação destrutiva */
-.acao-rapida--perigo .acao-rapida__icone {
-    background: var(--red-400);
-}
-
-.acao-rapida.acao-rapida--ativa .acao-rapida__icone {
-    box-shadow: 0 0 0 3px var(--red-200);
-}
-
-.acao-rapida__label {
-    font-size: 13px;
+.busca__limpar:hover {
     color: var(--text-muted);
-    text-align: center;
+}
+
+.busca__spinner {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-right: var(--space-2);
+    border-radius: 50%;
+    border: 2px solid var(--surface-border);
+    border-top-color: var(--blue-400);
+    animation: busca-spinner-girar .6s linear infinite;
+}
+
+@keyframes busca-spinner-girar {
+    to { transform: rotate(360deg); }
+}
+
+/* "Adicionar cliente" (ação principal, mais usada) e "Selecionar" (entra no
+   modo de seleção — não é destrutivo por si só) reaproveitam o componente
+   .botao comum do app em vez de um componente próprio: dois botões normais,
+   de mesma altura, só com pesos visuais diferentes (preenchido vs. fantasma)
+   — antes eram blocos de ícone grande estilo atalho de app, o que pesava
+   demais pra uma ação de toolbar. O botão vermelho de verdade só aparece
+   depois, na barra de confirmação (.barra-selecao), quando a exclusão já é
+   uma ação explícita e deliberada. */
+.clientes-acoes {
+    display: flex;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+}
+
+.clientes-acoes .botao {
+    flex: 1;
 }
 
 @media (min-width: 992px) {
@@ -502,46 +561,110 @@ img {
         grid-template-columns: minmax(0, 1fr) auto;
         align-items: center;
         gap: var(--space-4);
-        margin-bottom: var(--space-6);
+        margin-bottom: var(--space-5);
     }
 
     .busca {
         padding: var(--space-2) var(--space-3);
     }
 
-    .acoes-rapidas {
+    .clientes-acoes {
         flex-shrink: 0;
         margin: 0;
     }
 
-    /* Vira botão de barra de ferramentas (ícone + rótulo lado a lado, em
-       pill), em vez do quadrado grande empilhado do mobile. */
-    .acao-rapida {
-        flex-direction: row;
+    .clientes-acoes .botao {
         flex: none;
-        gap: var(--space-2);
-        padding: var(--space-2) var(--space-4) var(--space-2) var(--space-2);
-        border-radius: var(--radius-full);
-        background: var(--surface);
-        border: 1px solid var(--surface-border);
-    }
-
-    .acao-rapida__icone {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        font-size: 15px;
-    }
-
-    .acao-rapida__label {
-        white-space: nowrap;
-        font-weight: 600;
     }
 }
 
 .clientes-contador {
     font-size: 13px;
     color: var(--text-muted);
+}
+
+/* Resumo do cadastro (ver ClienteController::resumo()) — uma tira de
+   números com uma única borda inferior, não quatro cartões com ícone, fundo
+   e borda próprios: são métricas auxiliares da tela de Clientes, então
+   precisam pesar visualmente menos que a busca/ações e muito menos que a
+   listagem. O número de aniversariantes só fica em cor de destaque quando
+   há algum (resumo-item--destaque, aplicado condicionalmente no Blade) —
+   a cor tem função de alerta, não é decoração fixa do card. */
+.resumo-tira {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+    column-gap: var(--space-6);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.resumo-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    white-space: nowrap;
+}
+
+.resumo-item__valor {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.resumo-item--destaque .resumo-item__valor {
+    color: var(--pink-700);
+}
+
+.resumo-item__rotulo {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Filtros da listagem — status, saldo e aniversariantes do mês, somados à
+   busca por nome e à ordenação do cabeçalho da lista (ver clientes.js).
+   Controles de formulário discretos (select com borda fina, checkbox de
+   verdade), não badges/pills fingindo ser filtros. */
+.clientes-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin: 0 0 var(--space-4);
+    font-size: 13px;
+}
+
+.filtro {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.filtro__rotulo {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.filtro select {
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--white);
+    padding: 5px var(--space-2);
+    font: inherit;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.filtro--checkbox {
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.filtro--checkbox input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--pink-400);
 }
 
 /* Lista de clientes — cada linha é seu próprio cartão, no padrão
@@ -556,14 +679,13 @@ img {
    continua uma lista única (não vira cartões soltos) — o que muda é que
    cada linha passa a se organizar em colunas alinhadas, tipo tabela (ver
    .clientes-lista-cabecalho e .cliente-linha__botao mais abaixo). */
+/* Sem fundo/borda/raio de card — só as linhas divisórias entre clientes
+   (ver .cliente-linha, border-bottom). A lista deve ler como uma tabela
+   sentada na página, não como mais um cartão flutuante. */
 .clientes-lista {
     list-style: none;
     margin: 0;
     padding: 0;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
 }
 
 .cliente-linha {
@@ -571,6 +693,12 @@ img {
     align-items: center;
     border-bottom: 1px solid var(--surface-border);
     transition: background-color .1s ease;
+}
+
+/* Hover discreto (só indica a linha ativa, sem efeito de elevação/escala) —
+   antes não existia hover nenhum na lista. */
+.cliente-linha:hover {
+    background: var(--white);
 }
 
 .cliente-linha:last-child {
@@ -581,6 +709,17 @@ img {
     background: var(--blue-200);
 }
 
+/* Estado transitório entre "excluir" e o DELETE de verdade (ver
+   agendarExclusao em clientes.js — sem soft delete no banco, o "desfazer"
+   é só essa janela no front-end). Fica visualmente clara e sem clique
+   funcionando, mas a linha continua no DOM até a janela expirar ou o
+   usuário clicar em "Desfazer" no toast. */
+.cliente-linha--removendo {
+    opacity: .4;
+    pointer-events: none;
+    text-decoration: line-through;
+}
+
 /* Cabeçalho de colunas — só existe no desktop (ver
    resources/views/clientes/partials/_lista.blade.php). No mobile fica
    escondido: a linha já mostra tudo organizado verticalmente. */
@@ -589,22 +728,57 @@ img {
 }
 
 @media (min-width: 992px) {
+    /* padding-right reserva os mesmos 44px que .cliente-linha__whatsapp
+       ocupa fora do botão da linha (ver mais abaixo) — sem isso, o grid do
+       cabeçalho fica mais largo que o da linha e as colunas desalinham. */
     .clientes-lista-cabecalho {
         display: grid;
-        grid-template-columns: 46px minmax(0, 1fr) 130px 120px 32px;
+        grid-template-columns: 36px minmax(0, 1fr) 130px 120px;
         align-items: center;
         gap: var(--space-4);
-        padding: 0 var(--space-4) var(--space-2);
-        font-size: 12px;
+        padding: 0 calc(var(--space-4) + 44px) var(--space-2) var(--space-4);
+        margin-bottom: var(--space-1);
+        border-bottom: 1px solid var(--surface-border);
+        font-size: 11px;
         font-weight: 700;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: .04em;
     }
 
-    .clientes-lista-cabecalho span:nth-child(4) {
-        text-align: right;
+    .cabecalho-ordenar--fim {
+        justify-content: flex-end;
     }
+}
+
+/* Colunas viram botões clicáveis (ordenação — ver clientes.js), não só
+   rótulos decorativos: reset do estilo padrão de <button>, mantendo a
+   mesma tipografia do cabeçalho. O ícone de seta só aparece na coluna
+   ativa (cabecalho-ordenar--ativo), direção definida via classe
+   bi-caret-up-fill/bi-caret-down-fill trocada em JS. */
+.cabecalho-ordenar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+}
+
+.cabecalho-ordenar:hover,
+.cabecalho-ordenar--ativo {
+    color: var(--text);
+}
+
+.cabecalho-ordenar__icone {
+    font-size: 10px;
 }
 
 .cliente-linha__checkbox {
@@ -628,8 +802,8 @@ img {
     min-width: 0;
     display: flex;
     align-items: center;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
     cursor: pointer;
     text-align: left;
     font: inherit;
@@ -638,15 +812,15 @@ img {
 
 .avatar {
     flex-shrink: 0;
-    width: 46px;
-    height: 46px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
     color: var(--white);
     background: #ccc;
 }
@@ -666,11 +840,32 @@ img {
 }
 
 .cliente-linha__nome {
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Selo de status — só aparece pra quem está inativo (ver _linha.blade.php),
+   pra não poluir a lista inteira com um selo "Ativo" repetido em toda
+   linha, já que ativo é o estado padrão/esperado. */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    padding: 2px 7px;
+    border-radius: var(--radius-chip);
+    margin-left: var(--space-2);
+    vertical-align: middle;
+}
+
+.status-badge--inativo {
+    background: var(--surface-border);
+    color: var(--text);
 }
 
 .cliente-linha__data {
@@ -678,23 +873,30 @@ img {
     color: var(--text-muted);
 }
 
-.credito-badge {
+/* Texto colorido, não badge/pill (ver revisão de design) — a cor já é
+   suficiente pra escanear saldo positivo vs. zerado numa lista densa; uma
+   cápsula de fundo só adicionava peso visual sem adicionar informação. */
+.credito-valor {
     flex-shrink: 0;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
-.credito-badge--positivo {
-    background: var(--green-100);
+.credito-valor i {
+    font-size: 12px;
+}
+
+.credito-valor--positivo {
     color: var(--green-700);
 }
 
-.credito-badge--zero {
-    background: var(--surface-border);
-    color: var(--text);
+.credito-valor--zero {
+    color: var(--text-muted);
 }
 
 .cliente-linha__seta {
@@ -708,15 +910,59 @@ img {
     margin-left: var(--space-1);
 }
 
+/* Atalho de contato rápido — ícone fora do botão principal da linha (não é
+   mais um clique a fundo no modal só pra chamar no WhatsApp). Escondido no
+   modo de seleção pra não competir com o toque de marcar/desmarcar.
+
+   O elemento agora é renderizado em TODA linha, com ou sem WhatsApp
+   cadastrado (vazio via <span> quando não há — ver _linha.blade.php): antes
+   só aparecia em quem tinha WhatsApp, então a largura da linha variava de
+   cliente pra cliente e a coluna de créditos "pulava" de lugar. Reservando
+   sempre os mesmos 44px, todo mundo alinha igual (ver também o padding-right
+   equivalente em .clientes-lista-cabecalho, acima). */
+.cliente-linha__whatsapp {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    align-self: stretch;
+    font-size: 18px;
+}
+
+a.cliente-linha__whatsapp {
+    color: var(--green-700);
+}
+
+a.cliente-linha__whatsapp:hover {
+    background: var(--green-100);
+}
+
+[data-clientes-page].modo-selecao .cliente-linha__whatsapp {
+    display: none;
+}
+
+/* Em telas bem estreitas, essa coluna extra competia demais com o espaço do
+   nome (ver .cliente-linha__nome, que já trunca com reticências). O atalho
+   continua disponível pelo modal de detalhes — aqui ele só recua até a tela
+   ter espaço de sobra pra não prejudicar a leitura do nome. */
+@media (max-width: 399.98px) {
+    .cliente-linha__whatsapp {
+        display: none;
+    }
+}
+
 @media (min-width: 992px) {
     /* Mesmas colunas do cabeçalho (.clientes-lista-cabecalho): avatar,
-       nome, nascimento, créditos, seta — nome e nascimento hoje são um só
-       item (.cliente-linha__info) no HTML; "display: contents" faz o
-       wrapper sumir da grade e os dois filhos dele (nome e data) viram
-       colunas independentes, sem precisar mudar o HTML. */
+       nome, nascimento, créditos — nome e nascimento hoje são um só item
+       (.cliente-linha__info) no HTML; "display: contents" faz o wrapper
+       sumir da grade e os dois filhos dele (nome e data) viram colunas
+       independentes, sem precisar mudar o HTML. A seta não vira coluna: no
+       desktop a linha inteira já é clicável, então ela só repetiria essa
+       mesma informação em cada linha sem necessidade — ver .cliente-linha__seta. */
     .cliente-linha__botao {
         display: grid;
-        grid-template-columns: 46px minmax(0, 1fr) 130px 120px 32px;
+        grid-template-columns: 36px minmax(0, 1fr) 130px 120px;
         gap: var(--space-4);
         padding: var(--space-2) var(--space-4);
     }
@@ -726,26 +972,58 @@ img {
     }
 
     .cliente-linha__data {
-        font-size: 14px;
+        font-size: 13px;
     }
 
-    .credito-badge {
+    .credito-valor {
         justify-self: end;
     }
 
     .cliente-linha__seta {
-        justify-self: center;
-        border-left: none;
-        padding-left: 0;
-        margin-left: 0;
+        display: none;
     }
 }
 
+/* Estado vazio — diferencia "nenhum cliente cadastrado ainda" (com CTA para
+   adicionar o primeiro) de "busca sem resultado" (sem CTA, já que a ação
+   certa ali é ajustar o termo buscado, não cadastrar um duplicado). */
 .clientes-vazio {
     text-align: center;
     color: var(--text-muted);
-    padding: var(--space-8) var(--space-4);
+    padding: var(--space-12) var(--space-4);
     font-size: 14px;
+}
+
+.clientes-vazio__icone {
+    display: block;
+    font-size: 32px;
+    color: var(--text-muted-2);
+    margin-bottom: var(--space-3);
+}
+
+.clientes-vazio__titulo {
+    margin: 0 0 var(--space-1);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.clientes-vazio__texto {
+    margin: 0 0 var(--space-4);
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Estado de carregamento (busca/paginação) — some sutilmente em vez de
+   piscar/trocar o conteúdo sem aviso. */
+.clientes-lista-wrapper {
+    transition: opacity .15s ease;
+}
+
+.clientes-lista-wrapper.esta-carregando {
+    opacity: .45;
+    pointer-events: none;
 }
 
 /* Paginação (20 clientes por página) */
@@ -757,28 +1035,59 @@ img {
     margin-top: var(--space-4);
 }
 
-.paginacao__link {
+.paginacao__seta {
+    flex-shrink: 0;
     display: inline-flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-full);
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-control);
     background: var(--surface);
     border: 1px solid var(--surface-border);
     color: var(--text);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
 }
 
-.paginacao__link--desabilitado {
+.paginacao__seta--desabilitado {
     color: var(--text-muted-2);
     pointer-events: none;
 }
 
-.paginacao__info {
-    font-size: 13px;
+.paginacao__numeros {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.paginacao__numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-control);
     color: var(--text-muted);
-    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.paginacao__numero:hover {
+    background: var(--surface);
+}
+
+.paginacao__numero--atual {
+    background: var(--navy-900);
+    color: var(--white);
+}
+
+.paginacao__reticencias {
+    color: var(--text-muted-2);
+    font-size: 13px;
+    padding: 0 2px;
 }
 
 /* Barra de confirmação do modo de seleção (apagar clientes) */
@@ -788,8 +1097,9 @@ img {
     right: var(--space-4);
     bottom: 88px;
     background: var(--white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
     padding: var(--space-3) var(--space-4);
     display: flex;
     align-items: center;
@@ -815,22 +1125,32 @@ img {
     }
 }
 
-/* Mensagem flutuante de sucesso/erro */
+/* Mensagem flutuante de sucesso/erro — ícone + texto, para não depender só
+   da cor de fundo (acessibilidade para quem tem dificuldade de perceber
+   cor). */
 .mensagem-flutuante {
     position: fixed;
     top: var(--space-4);
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     background: var(--navy-900);
     color: var(--white);
     padding: var(--space-3) var(--space-5);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     font-size: 13px;
     font-weight: 600;
     z-index: 90;
     box-shadow: var(--shadow-md);
     max-width: calc(100vw - var(--space-8));
-    text-align: center;
+    text-align: left;
+}
+
+.mensagem-flutuante i {
+    flex-shrink: 0;
+    font-size: 16px;
 }
 
 .mensagem-flutuante--sucesso {
@@ -841,6 +1161,22 @@ img {
     background: var(--red-700);
 }
 
+.mensagem-flutuante__desfazer {
+    flex-shrink: 0;
+    margin-left: var(--space-2);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, .5);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.mensagem-flutuante__desfazer:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
 /* ==========================================================================
    Botões
    ========================================================================== */
@@ -849,7 +1185,7 @@ img {
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-control);
     padding: var(--space-3) var(--space-5);
     display: inline-flex;
     align-items: center;
@@ -858,8 +1194,12 @@ img {
     transition: background-color .12s ease;
 }
 
+/* Antes deixava o botão em formato de cápsula (pill); hoje usa o mesmo raio
+   contido do resto dos botões — a classe continua existindo pra não exigir
+   trocar dezenas de elementos nos templates, só deixou de significar
+   "arredondado ao extremo". */
 .botao--pill {
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-control);
 }
 
 .botao--full {
@@ -885,6 +1225,41 @@ img {
 
 .botao--perigo:hover {
     background: var(--red-600);
+}
+
+/* Ação neutra — nem "principal" (rosa) nem destrutiva (vermelho): usada em
+   "Exportar", "Definir como novo saldo" e "Cancelar" do modal de
+   confirmação, onde a cor forte dos outros dois botões sugeriria uma ênfase
+   que essas ações não têm. */
+.botao--neutro {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--surface-border);
+}
+
+.botao--neutro:hover {
+    background: var(--surface-border);
+}
+
+/* Ação "fantasma" (sem preenchimento) — usada em "Selecionar" na toolbar de
+   Clientes: precisa ficar claramente abaixo de "Adicionar cliente" na
+   hierarquia visual, então não compete com contorno nem cor de fundo até
+   que o modo de seleção esteja ativo (ver .acao-rapida--ativa abaixo). */
+.botao--fantasma {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-border);
+}
+
+.botao--fantasma:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.botao--fantasma.acao-rapida--ativa {
+    background: var(--blue-200);
+    border-color: var(--blue-300);
+    color: var(--navy-900);
 }
 
 .botao-texto {
@@ -920,7 +1295,7 @@ img {
     max-height: 92vh;
     overflow-y: auto;
     background: var(--surface);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-radius: var(--radius-modal) var(--radius-modal) 0 0;
     padding: var(--space-5) var(--space-5) var(--space-8);
 }
 
@@ -931,7 +1306,7 @@ img {
     }
 
     .modal-cliente {
-        border-radius: var(--radius-xl);
+        border-radius: var(--radius-modal);
         max-height: 88vh;
     }
 }
@@ -963,7 +1338,7 @@ img {
 .modal-cliente__erros {
     background: var(--red-50);
     color: var(--red-700);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     padding: var(--space-3) var(--space-4);
     font-size: 13px;
     margin-bottom: var(--space-4);
@@ -977,7 +1352,7 @@ img {
 .cartao {
     background: var(--white);
     border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     padding: var(--space-4);
     margin-bottom: var(--space-5);
 }
@@ -1081,20 +1456,56 @@ img {
 }
 
 .campo input,
-.campo textarea {
-    border: none;
+.campo textarea,
+.campo select {
+    border: 2px solid transparent;
     border-radius: 5px;
     background: #d9d9d9;
     font: inherit;
     font-size: 14px;
     color: var(--text);
-    padding: 10px 12px;
+    padding: 8px 10px;
     outline: none;
     resize: vertical;
+    transition: border-color .12s ease;
 }
 
 .campo--textarea textarea {
     min-height: 64px;
+}
+
+/* Campo com erro de validação (preenchido pelo servidor, ver clientes.js
+   exibirErrosDeCampos) — contorno vermelho no input + mensagem específica
+   abaixo dele, em vez de só um resumo genérico no topo do modal. */
+.campo__erro {
+    font-size: 12px;
+    color: var(--red-600);
+    font-weight: 600;
+}
+
+.campo--invalido input,
+.campo--invalido textarea {
+    border-color: var(--red-400);
+}
+
+/* Campo com ícone fixo à esquerda (ex: WhatsApp) */
+.campo__com-icone {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.campo__com-icone i {
+    position: absolute;
+    left: 12px;
+    color: var(--green-700);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.campo__com-icone input {
+    width: 100%;
+    padding-left: 36px;
 }
 
 .cartao--creditos {
@@ -1113,6 +1524,58 @@ img {
     margin: 0 0 var(--space-4);
 }
 
+/* Ajuste de créditos: campo de valor + botões, no lugar do antigo
+   window.prompt() nativo. O input tem min="0" (ver blade) e o JS clampa
+   qualquer resultado negativo em zero — créditos nunca ficam abaixo de
+   R$ 0,00, o servidor também recusa valores negativos. */
+.creditos__ajuste {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.creditos__campo-valor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    background: #d9d9d9;
+    border-radius: 5px;
+    padding: 8px 12px;
+}
+
+.creditos__prefixo {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.creditos__input-valor {
+    flex: 1;
+    max-width: 140px;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    outline: none;
+}
+
+/* Remove as setinhas do <input type="number"> — aqui o valor é digitado,
+   não incrementado por clique. */
+.creditos__input-valor::-webkit-outer-spin-button,
+.creditos__input-valor::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.creditos__input-valor[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
 .creditos__acoes {
     display: flex;
     gap: var(--space-3);
@@ -1122,6 +1585,182 @@ img {
     flex: 1;
 }
 
+.creditos__acoes .botao:disabled {
+    cursor: not-allowed;
+}
+
+.creditos__mensagem {
+    margin: var(--space-3) 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red-600);
+}
+
+.botao--whatsapp {
+    background: var(--green-700);
+    color: var(--white);
+    margin-top: var(--space-3);
+}
+
+.botao--whatsapp:hover {
+    background: #2a7343;
+}
+
 .modal-cliente__rodape {
     padding-top: var(--space-2);
+}
+
+/* ==========================================================================
+   Modal de confirmação (substitui window.confirm() nativo)
+   ========================================================================== */
+.modal-overlay--confirmar {
+    z-index: 95;
+    align-items: center;
+    padding: var(--space-5);
+}
+
+.modal-confirmar {
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border-radius: var(--radius-modal);
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    text-align: center;
+}
+
+.modal-confirmar__icone {
+    font-size: 32px;
+    color: var(--red-600);
+    margin-bottom: var(--space-3);
+}
+
+.modal-confirmar h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0 0 var(--space-2);
+}
+
+.modal-confirmar p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0 0 var(--space-5);
+}
+
+.modal-confirmar__acoes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+/* ==========================================================================
+   Modal de detalhes (somente leitura) — aberto ao clicar numa linha da
+   lista; "Editar" leva pro modal de edição de verdade (ver clientes.js).
+   ========================================================================== */
+.modal-detalhes__cabecalho {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.modal-detalhes__identificacao {
+    min-width: 0;
+}
+
+.modal-detalhes__nome {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 var(--space-1);
+    overflow-wrap: break-word;
+}
+
+.modal-detalhes__lista {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.modal-detalhes__lista > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-size: 13px;
+}
+
+.modal-detalhes__lista dt {
+    color: var(--text-muted);
+}
+
+.modal-detalhes__lista dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+.modal-detalhes__observacoes {
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--surface-border);
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+}
+
+.modal-detalhes__historico-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin: var(--space-4) 0 var(--space-2);
+    text-align: left;
+}
+
+.modal-detalhes__sem-historico {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: left;
+    margin: 0;
+}
+
+.modal-detalhes__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.modal-detalhes__acoes .botao {
+    flex: 1;
+    min-width: 110px;
+}
+
+/* Extrato de créditos — mesma lista usada no modal de detalhes (ver acima). */
+.creditos__historico-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.creditos__historico-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 12px;
+}
+
+.creditos__historico-item:last-child {
+    border-bottom: none;
+}
+
+.creditos__historico-tipo {
+    font-weight: 700;
+}
+
+.creditos__historico-data {
+    color: var(--text-muted);
 }

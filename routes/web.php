@@ -19,6 +19,7 @@ Route::get('/', [App\Http\Controllers\Principal::class, 'principal']);
 Route::prefix('clientes')->name('clientes.')->group(function () {
     Route::get('/', [ClienteController::class, 'index'])->name('index');
     Route::get('/buscar', [ClienteController::class, 'buscar'])->name('buscar');
+    Route::get('/exportar', [ClienteController::class, 'exportar'])->name('exportar');
     Route::post('/', [ClienteController::class, 'store'])->name('store');
     Route::delete('/', [ClienteController::class, 'destroyMultiple'])->name('destroyMultiple');
     Route::get('/{cliente}', [ClienteController::class, 'show'])->name('show');

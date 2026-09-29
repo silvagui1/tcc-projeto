@@ -19,6 +19,8 @@ class ClienteFactory extends Factory
         return [
             'nome' => fake()->name(),
             'data_nascimento' => fake()->dateTimeBetween('-70 years', '-5 years')->format('Y-m-d'),
+            'whatsapp' => fake()->boolean(80) ? fake()->numerify('119########') : null,
+            'status' => fake()->boolean(85) ? 'ativo' : 'inativo',
             'foto' => null,
             'observacoes' => fake()->boolean(30) ? fake()->sentence() : null,
             'creditos' => fake()->randomFloat(2, 0, 500),
@@ -32,6 +34,13 @@ class ClienteFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'creditos' => 0,
+        ]);
+    }
+
+    public function inativo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'inativo',
         ]);
     }
 }

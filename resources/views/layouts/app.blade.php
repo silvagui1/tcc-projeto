@@ -9,6 +9,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Clientes') — ArtPlay</title>
 
+    {{-- Config compartilhada com resources/js/clientes.js — evita manter a
+         paleta de cores do avatar (App\Models\Cliente::CORES_AVATAR) e o DDI
+         do WhatsApp duplicados "de cabeça" em PHP e em JS. --}}
+    <script id="app-config" type="application/json">{!! json_encode([
+        'avatarCores' => \App\Models\Cliente::coresAvatar(),
+        'whatsappDdi' => '55',
+    ]) !!}</script>
+
     {{-- logo sobre fundo azul-marinho, para aparecer tanto em abas claras quanto escuras --}}
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
 
