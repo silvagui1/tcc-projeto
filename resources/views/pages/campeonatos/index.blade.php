@@ -21,6 +21,12 @@
         </a>
     </div>
 
+    @include('pages.campeonatos.partials.filtros')
+
+    @if (! count($ativos) && ! count($outras))
+        <p class="champ-vazio">Nenhum campeonato encontrado com esses filtros.</p>
+    @endif
+
     {{-- Campeonatos ativos: com mais de um, vira um carrossel (rolagem
          horizontal com scroll-snap, arrastando para o lado no celular). --}}
     @if (count($ativos))
@@ -58,6 +64,7 @@
         </div>
     @endif
 
+    @if (count($outras))
     <h2 class="champ-section-title">Outras competições</h2>
 
     {{-- no mobile os cards ficam empilhados; no desktop viram uma grade --}}
@@ -95,6 +102,7 @@
         </div>
     @endforeach
     </div>
+    @endif
 
     @include('pages.campeonatos.partials.apagar-popup')
 

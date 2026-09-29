@@ -77,7 +77,7 @@
                 <div class="product-grid">
                     @foreach ($produtos as $produto)
                         <div class="product-card">
-                            <div class="product-card__image" style="background-image: url('{{ $produto['imagem'] }}');">
+                            <div class="product-card__image" style="background-image: url('{{ $produto['imagem'] }}'), url('{{ $produto['imagemPadrao'] }}');">
                                 <span class="product-card__tag">{{ $produto['categoria'] }}</span>
                                 <button type="button" class="product-card__delete"><i class="bi bi-trash"></i></button>
                             </div>
@@ -118,7 +118,7 @@
                         <a href="{{ route('estoque.cartas.show', [$carta['jogo'], $carta['id']]) }}" class="trading-card__link"
                            aria-label="Ver detalhes de {{ $carta['nome'] }}"></a>
                         @include('pages.estoque.partials.carta-acoes')
-                        <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}');"></div>
+                        <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}'), url('{{ $carta['imagemPadrao'] }}');"></div>
                         <div class="trading-card__title-row">
                             <strong>{{ $carta['nome'] }}</strong>
                             <span class="price">R$ {{ number_format($carta['preco'], 2, ',', '.') }}</span>

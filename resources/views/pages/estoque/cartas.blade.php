@@ -37,7 +37,10 @@
 
     @include('pages.estoque.partials.adicionar-carta', ['jogoPadrao' => $jogoAtual])
 
-    <div class="card-list">
+    {{-- os filtros entram na própria grade: no desktop ocupam a 1ª coluna --}}
+    <div class="card-list card-list--com-filtros" data-card-list>
+        @include('pages.estoque.partials.filtros-cartas')
+
         @forelse ($cartas as $carta)
             <article class="trading-card--link">
                 {{-- o link cobre a carta inteira; os botões ficam por cima dele --}}
@@ -46,19 +49,21 @@
                 <h3 style="font-size: 20px; margin-bottom: 12px;">{{ $carta['nome'] }}</h3>
                 <div class="trading-card" style="position: relative;">
                     @include('pages.estoque.partials.carta-acoes')
-                    <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}');"></div>
+                    <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}'), url('{{ $carta['imagemPadrao'] }}');"></div>
                     <p style="margin: 0 0 4px;"><strong>Estado:</strong> {{ $carta['estado'] }}</p>
                     <p style="margin: 0 0 4px;"><strong>Coleção:</strong> {{ $carta['colecao'] }}</p>
                     <p style="margin: 0 0 4px;"><strong>Raridade:</strong> {{ $carta['raridade'] }}</p>
                     <p style="margin: 0 0 4px;"><strong>Idioma:</strong> {{ $carta['idioma'] }}</p>
                     <p style="margin: 0 0 12px;"><strong>Quantidade:</strong> {{ $carta['quantidade'] }}</p>
                     <p style="font-size: 16.5px; font-weight: 600;">
-                        Preço: <span style="color: var(--blue-900);">R$ {{ number_format($carta['preco'], 2, ',', '.') }}</span>
+                        Preço: <span style="color: var(--text-accent);">R$ {{ number_format($carta['preco'], 2, ',', '.') }}</span>
                     </p>
                 </div>
             </article>
         @empty
-            <p style="text-align:center; color: var(--text-muted-2);">Nenhuma carta cadastrada para este jogo ainda.</p>
+            <p style="text-align:center; color: var(--text-muted-2);">
+                {{ $filtrosAtivos ? 'Nenhuma carta encontrada com esses filtros.' : 'Nenhuma carta cadastrada para este jogo ainda.' }}
+            </p>
         @endforelse
     </div>
 

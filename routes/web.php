@@ -53,11 +53,22 @@ Route::get('/inicio', function () {
 Route::get('/estoque', function () {
     $tab = request('tab', 'produtos');
 
+    // cartas avulsas de todos os jogos (catálogo + adicionadas pelo formulário):
+    // total de unidades em estoque e quanto elas valem (quantidade × preço)
+    $cartasAvulsas = 0;
+    $valorCartasAvulsas = 0;
+    foreach (jogosDeCartas() as $jogo) {
+        foreach (cartasDoJogo($jogo) as $carta) {
+            $cartasAvulsas += $carta['quantidade'];
+            $valorCartasAvulsas += $carta['quantidade'] * $carta['preco'];
+        }
+    }
+
     $resumo = [
         'valorEstoque' => 0,
         'quantidadeProdutos' => 25,
-        'cartasAvulsas' => 21,
-        'valorCartasAvulsas' => 101.00,
+        'cartasAvulsas' => $cartasAvulsas,
+        'valorCartasAvulsas' => $valorCartasAvulsas,
     ];
 
     $categorias = ['comida', 'cartas', 'bebida', 'Acessórios'];
@@ -68,28 +79,28 @@ Route::get('/estoque', function () {
             'preco' => 0.00,
             'descricao' => 'breve descrição....',
             'categoria' => 'comida',
-            'imagem' => 'https://www.figma.com/api/mcp/asset/af714202-2a92-45e9-8104-9c4bdc34f0f1.png',
+            'imagem' => null,
         ],
         [
             'nome' => 'Booster Pokémon',
             'preco' => 12.00,
             'descricao' => 'booster pokemon evolving skies',
             'categoria' => 'cartas',
-            'imagem' => 'https://www.figma.com/api/mcp/asset/d0fe1f59-6bc7-449c-84ef-fcaaedb6f705.png',
+            'imagem' => null,
         ],
         [
             'nome' => 'Chaveiro Gengar',
             'preco' => 10.00,
             'descricao' => 'Chaveiro gengar 10cm',
             'categoria' => 'Acessório',
-            'imagem' => 'https://www.figma.com/api/mcp/asset/e40d5570-cb99-4be0-a065-e1eb3c63a839.png',
+            'imagem' => null,
         ],
         [
             'nome' => 'Coca-Cola',
             'preco' => 8.00,
             'descricao' => 'lata de coca-cola 350ml.',
             'categoria' => 'bebida',
-            'imagem' => 'https://www.figma.com/api/mcp/asset/3d2dd4f5-16ba-4c5c-a32a-82ee622a2bd0.png',
+            'imagem' => null,
         ],
         [
             'nome' => 'Produto #2',
@@ -106,6 +117,13 @@ Route::get('/estoque', function () {
             'imagem' => '',
         ],
     ];
+
+    // produto sem foto usa a imagem genérica da categoria
+    foreach ($produtos as &$produto) {
+        $produto['imagemPadrao'] = imagemPadraoProduto($produto['categoria']);
+        $produto['imagem'] = $produto['imagem'] ?: $produto['imagemPadrao'];
+    }
+    unset($produto);
 
     // prévia da aba "estoque cartas": as primeiras cartas de Pokémon (as
     // adicionadas pelo formulário aparecem primeiro), antes do "ver todas"
@@ -124,6 +142,32 @@ if (! function_exists('jogosDeCartas')) {
 function jogosDeCartas()
 {
     return ['pokemon', 'magic', 'onepiece'];
+}
+}
+
+// imagens genéricas (public/images/placeholders) para carta ou produto sem
+// foto — e também de reserva quando a url informada não carrega.
+if (! function_exists('imagemPadraoCarta')) {
+function imagemPadraoCarta($jogo)
+{
+    $arquivo = in_array($jogo, jogosDeCartas()) ? "carta-{$jogo}.svg" : 'carta-generica.svg';
+
+    return asset('images/placeholders/' . $arquivo);
+}
+}
+
+if (! function_exists('imagemPadraoProduto')) {
+function imagemPadraoProduto($categoria)
+{
+    $arquivo = match (mb_strtolower($categoria)) {
+        'comida' => 'produto-comida.svg',
+        'bebida' => 'produto-bebida.svg',
+        'cartas' => 'produto-cartas.svg',
+        'acessório', 'acessórios' => 'produto-acessorios.svg',
+        default => 'produto-generico.svg',
+    };
+
+    return asset('images/placeholders/' . $arquivo);
 }
 }
 
@@ -153,7 +197,7 @@ function catalogoCartas()
                 'idioma' => 'Inglês',
                 'quantidade' => 1,
                 'preco' => 120.50,
-                'imagem' => 'https://www.figma.com/api/mcp/asset/4d0ac0c5-494d-4511-8833-5fc497fae753.png',
+                'imagem' => null,
             ],
             [
                 'nome' => 'Shiftry 163/162',
@@ -163,7 +207,7 @@ function catalogoCartas()
                 'idioma' => 'Japonês',
                 'quantidade' => 2,
                 'preco' => 35.50,
-                'imagem' => 'https://www.figma.com/api/mcp/asset/40aa70be-6cb1-4fd0-9401-0656b6addef6.png',
+                'imagem' => null,
             ],
             [
                 'nome' => 'Carta genérica 001/100',
@@ -216,8 +260,134 @@ function catalogoCartas()
                 'imagem' => null,
             ],
         ],
-        'magic' => [],
-        'onepiece' => [],
+        'magic' => [
+            [
+                'nome' => 'Llanowar Elves 234/280',
+                'estado' => 'Semi-Novo',
+                'colecao' => 'Dominaria',
+                'raridade' => 'Comum',
+                'idioma' => 'Inglês',
+                'quantidade' => 12,
+                'preco' => 1.50,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Sheoldred, the Apocalypse 107/281',
+                'foil' => true,
+                'estado' => 'Novo',
+                'colecao' => 'Dominaria United',
+                'raridade' => 'Mítica',
+                'idioma' => 'Inglês',
+                'quantidade' => 1,
+                'preco' => 389.90,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Counterspell 045/281',
+                'estado' => 'Usado',
+                'colecao' => 'Modern Horizons 2',
+                'raridade' => 'Incomum',
+                'idioma' => 'Português',
+                'quantidade' => 5,
+                'preco' => 4.00,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Lightning Bolt 146/303',
+                'estado' => 'Novo',
+                'colecao' => 'Magic 2011',
+                'raridade' => 'Comum',
+                'idioma' => 'Português',
+                'quantidade' => 9,
+                'preco' => 6.50,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'The One Ring 246/281',
+                'foil' => true,
+                'estado' => 'Semi-Novo',
+                'colecao' => 'O Senhor dos Anéis',
+                'raridade' => 'Mítica',
+                'idioma' => 'Japonês',
+                'quantidade' => 2,
+                'preco' => 214.00,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Sol Ring 263/361',
+                'estado' => 'Novo',
+                'colecao' => 'Commander Masters',
+                'raridade' => 'Incomum',
+                'idioma' => 'Inglês',
+                'quantidade' => 7,
+                'preco' => 8.90,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Thoughtseize 107/269',
+                'estado' => 'Danificado',
+                'colecao' => 'Theros',
+                'raridade' => 'Rara',
+                'idioma' => 'Inglês',
+                'quantidade' => 3,
+                'preco' => 45.00,
+                'imagem' => null,
+            ],
+        ],
+        'onepiece' => [
+            [
+                'nome' => 'Monkey.D.Luffy OP01-003',
+                'estado' => 'Novo',
+                'colecao' => 'Romance Dawn',
+                'raridade' => 'Líder',
+                'idioma' => 'Japonês',
+                'quantidade' => 4,
+                'preco' => 18.00,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Roronoa Zoro OP01-025',
+                'foil' => true,
+                'estado' => 'Semi-Novo',
+                'colecao' => 'Romance Dawn',
+                'raridade' => 'Super Rara',
+                'idioma' => 'Inglês',
+                'quantidade' => 2,
+                'preco' => 32.50,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Nami OP01-016',
+                'estado' => 'Novo',
+                'colecao' => 'Romance Dawn',
+                'raridade' => 'Rara',
+                'idioma' => 'Inglês',
+                'quantidade' => 6,
+                'preco' => 7.00,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Trafalgar Law OP05-069',
+                'estado' => 'Usado',
+                'colecao' => 'Awakening of the New Era',
+                'raridade' => 'Incomum',
+                'idioma' => 'Japonês',
+                'quantidade' => 11,
+                'preco' => 2.20,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Shanks OP09-004',
+                'foil' => true,
+                'estado' => 'Novo',
+                'colecao' => 'Emperors in the New World',
+                'raridade' => 'Secreta Rara',
+                'idioma' => 'Japonês',
+                'quantidade' => 1,
+                'preco' => 540.00,
+                'imagem' => null,
+            ],
+        ],
     ];
 }
 }
@@ -239,6 +409,8 @@ function cartasDoJogo($jogo)
         $carta['id'] = $id;
         $carta['jogo'] = $jogo;
         $carta['foil'] = $carta['foil'] ?? false;
+        $carta['imagemPadrao'] = imagemPadraoCarta($jogo);
+        $carta['imagem'] = ($carta['imagem'] ?? null) ?: $carta['imagemPadrao'];
         $carta['tags'] = array_values(array_filter([
             mb_strtolower($carta['estado']),
             mb_strtolower($carta['raridade']),
@@ -297,9 +469,52 @@ Route::get('/estoque/cartas', function () {
     $jogosDisponiveis = jogosDeCartas();
     $jogoAtual = request('jogo', 'pokemon');
 
-    $cartas = cartasDoJogo($jogoAtual);
+    $todas = cartasDoJogo($jogoAtual);
 
-    return view('pages.estoque.cartas', compact('jogosDisponiveis', 'jogoAtual', 'cartas'));
+    // opções dos filtros laterais: só os valores que existem nas cartas do jogo
+    $opcoes = [];
+    foreach (['estado', 'raridade', 'idioma'] as $campo) {
+        $valores = array_unique(array_column($todas, $campo));
+        $valores = array_values(array_filter($valores, fn ($valor) => $valor && $valor !== '—'));
+        sort($valores);
+        $opcoes[$campo] = $valores;
+    }
+
+    // filtros escolhidos (vêm na url, ex.: ?estado[]=Novo&foil=1&preco_max=10)
+    $filtros = [
+        'estado' => (array) request('estado', []),
+        'raridade' => (array) request('raridade', []),
+        'idioma' => (array) request('idioma', []),
+        'foil' => request()->boolean('foil'),
+        'preco_min' => is_numeric(request('preco_min')) ? (float) request('preco_min') : null,
+        'preco_max' => is_numeric(request('preco_max')) ? (float) request('preco_max') : null,
+        'ordenar' => request('ordenar', 'recentes'),
+    ];
+
+    // array_filter mantém as chaves, então o 'id' de cada carta continua certo
+    $cartas = array_filter($todas, function ($carta) use ($filtros) {
+        foreach (['estado', 'raridade', 'idioma'] as $campo) {
+            if ($filtros[$campo] && ! in_array($carta[$campo], $filtros[$campo])) {
+                return false;
+            }
+        }
+
+        return (! $filtros['foil'] || $carta['foil'])
+            && ($filtros['preco_min'] === null || $carta['preco'] >= $filtros['preco_min'])
+            && ($filtros['preco_max'] === null || $carta['preco'] <= $filtros['preco_max']);
+    });
+
+    match ($filtros['ordenar']) {
+        'menor_preco' => uasort($cartas, fn ($a, $b) => $a['preco'] <=> $b['preco']),
+        'maior_preco' => uasort($cartas, fn ($a, $b) => $b['preco'] <=> $a['preco']),
+        'nome' => uasort($cartas, fn ($a, $b) => strcasecmp($a['nome'], $b['nome'])),
+        default => null,
+    };
+
+    $filtrosAtivos = count($filtros['estado']) + count($filtros['raridade']) + count($filtros['idioma'])
+        + ($filtros['foil'] ? 1 : 0) + ($filtros['preco_min'] !== null ? 1 : 0) + ($filtros['preco_max'] !== null ? 1 : 0);
+
+    return view('pages.estoque.cartas', compact('jogosDisponiveis', 'jogoAtual', 'cartas', 'opcoes', 'filtros', 'filtrosAtivos'));
 })->name('estoque.cartas');
 
 // Detalhes de uma carta (abre ao clicar numa carta em qualquer das listas).
@@ -339,6 +554,7 @@ function campeonatosMock()
         1 => [
             'id' => 1,
             'nome' => 'Torneio Pokemon',
+            'jogo' => 'pokemon',
             'status' => 'ativo',
             'data' => '22 de agosto de 2026',
             'dataCurta' => '22/08/2026',
@@ -353,6 +569,7 @@ function campeonatosMock()
         2 => [
             'id' => 2,
             'nome' => 'Pokemon',
+            'jogo' => 'pokemon',
             'status' => 'finalizado',
             'data' => '21 de agosto de 2026',
             'dataCurta' => '21/08/2026',
@@ -367,6 +584,7 @@ function campeonatosMock()
         3 => [
             'id' => 3,
             'nome' => 'Magic',
+            'jogo' => 'magic',
             'status' => 'finalizado',
             'data' => '21 de agosto de 2026',
             'dataCurta' => '21/08/2026',
@@ -380,6 +598,52 @@ function campeonatosMock()
             'participantesLista' => $participantes,
             'vencedores' => $vencedores,
         ],
+        4 => [
+            'id' => 4,
+            'nome' => 'Liga One Piece',
+            'jogo' => 'onepiece',
+            'status' => 'ativo',
+            'data' => '5 de setembro de 2026',
+            'dataCurta' => '05/09/2026',
+            'horario' => '14:00',
+            'deck' => 'deck livre',
+            'inscricao' => 20.00,
+            'descricao' => 'liga mensal com premiação em booster para os 3 primeiros',
+            'imagem' => $img('banner-onepiece.svg'),
+            'participantesLista' => array_slice($participantes, 0, 3),
+            'vencedores' => [],
+        ],
+        5 => [
+            'id' => 5,
+            'nome' => 'Magic Commander',
+            'jogo' => 'magic',
+            'status' => 'finalizado',
+            'data' => '12 de julho de 2026',
+            'dataCurta' => '12/07/2026',
+            'horario' => '15:00',
+            'deck' => 'commander',
+            'inscricao' => 25.00,
+            'descricao' => $premios,
+            'imagem' => $img('banner-magic.png'),
+            'imagemPosicao' => 'center 35%',
+            'participantesLista' => $participantes,
+            'vencedores' => $vencedores,
+        ],
+        6 => [
+            'id' => 6,
+            'nome' => 'Liga Pokémon de Julho',
+            'jogo' => 'pokemon',
+            'status' => 'finalizado',
+            'data' => '4 de julho de 2026',
+            'dataCurta' => '04/07/2026',
+            'horario' => '09:30',
+            'deck' => 'deck base',
+            'inscricao' => 10.00,
+            'descricao' => $premios,
+            'imagem' => $img('banner-pokemon.png'),
+            'participantesLista' => array_slice($participantes, 1),
+            'vencedores' => $vencedores,
+        ],
     ];
 }
 }
@@ -387,11 +651,35 @@ function campeonatosMock()
 Route::get('/campeonatos', function () {
     $todos = campeonatosMock();
 
+    // filtros da barra acima da lista (vêm na url, ex.: ?jogo=magic&status=finalizado)
+    $filtros = [
+        'busca' => trim((string) request('busca', '')),
+        'jogo' => in_array(request('jogo'), jogosDeCartas()) ? request('jogo') : '',
+        'status' => in_array(request('status'), ['ativo', 'finalizado']) ? request('status') : '',
+        'ordenar' => request('ordenar') === 'antigos' ? 'antigos' : 'recentes',
+    ];
+
+    $todos = array_filter($todos, fn ($c) =>
+        ($filtros['busca'] === '' || mb_stripos($c['nome'], $filtros['busca']) !== false)
+        && ($filtros['jogo'] === '' || $c['jogo'] === $filtros['jogo'])
+        && ($filtros['status'] === '' || $c['status'] === $filtros['status'])
+    );
+
+    // ordena pela data (dataCurta é dd/mm/aaaa)
+    $data = fn ($c) => DateTime::createFromFormat('d/m/Y', $c['dataCurta'])->format('Y-m-d');
+    usort($todos, fn ($a, $b) => $filtros['ordenar'] === 'antigos'
+        ? strcmp($data($a), $data($b))
+        : strcmp($data($b), $data($a)));
+
+    $filtrosAtivos = ($filtros['busca'] !== '') + ($filtros['jogo'] !== '') + ($filtros['status'] !== '');
+
     // vários ativos viram um carrossel na página principal
     $ativos = array_values(array_filter($todos, fn ($c) => $c['status'] === 'ativo'));
     $outras = array_values(array_filter($todos, fn ($c) => $c['status'] !== 'ativo'));
 
-    return view('pages.campeonatos.index', compact('ativos', 'outras'));
+    $jogosDisponiveis = jogosDeCartas();
+
+    return view('pages.campeonatos.index', compact('ativos', 'outras', 'filtros', 'filtrosAtivos', 'jogosDisponiveis'));
 })->name('campeonatos.index');
 
 Route::get('/campeonatos/criar', function () {

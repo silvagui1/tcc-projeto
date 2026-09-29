@@ -22,6 +22,19 @@
          exportados do Figma se quiser fidelidade 100% ao design. --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
 
+    {{-- Tema escuro: aplicado aqui, antes do CSS, para a página não piscar
+         branca ao carregar. A escolha fica salva no navegador ("tema":
+         claro | escuro | sistema) e é trocada em Configurações > Aparência. --}}
+    <script>
+        (function () {
+            var tema = 'claro';
+            try { tema = localStorage.getItem('tema') || 'claro'; } catch (e) {}
+            var escuro = tema === 'escuro'
+                || (tema === 'sistema' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (escuro) document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>

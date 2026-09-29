@@ -113,3 +113,136 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+
+// Estoque de cartas — filtros laterais. No desktop o painel ocupa o lugar de
+// uma carta: fica na 1ª coluna da primeira fileira, alinhado com a borda de
+// cima das cartas (abaixo do título delas) e com a mesma altura. Da segunda
+// fileira em diante as cartas usam as 4 colunas. Como a altura da carta muda
+// com a largura da tela, medimos de novo a cada redimensionamento.
+document.addEventListener('DOMContentLoaded', () => {
+    const lista = document.querySelector('[data-card-list]');
+    const filtros = lista?.querySelector('[data-cartas-filtros]');
+
+    if (!lista || !filtros) {
+        return;
+    }
+
+    const desktop = window.matchMedia('(min-width: 992px)');
+
+    const ajustar = () => {
+        if (!desktop.matches) {
+            lista.style.removeProperty('--filtros-topo');
+            lista.style.removeProperty('--filtros-altura');
+            return;
+        }
+
+        // no desktop o painel fica sempre aberto
+        filtros.open = true;
+
+        // mede as cartas no tamanho natural (sem esticar para a altura da fileira)
+        lista.classList.add('is-medindo');
+
+        const cartas = [...lista.querySelectorAll(':scope > article')].slice(0, 3);
+        const quadros = cartas.map((carta) => carta.querySelector('.trading-card')).filter(Boolean);
+
+        if (quadros.length) {
+            const topo = quadros[0].getBoundingClientRect().top - cartas[0].getBoundingClientRect().top;
+            const altura = Math.max(...quadros.map((quadro) => quadro.offsetHeight));
+
+            lista.style.setProperty('--filtros-topo', `${topo}px`);
+            lista.style.setProperty('--filtros-altura', `${altura}px`);
+        } else {
+            // sem cartas: o painel fica no tamanho do próprio conteúdo
+            lista.style.removeProperty('--filtros-topo');
+            lista.style.removeProperty('--filtros-altura');
+        }
+
+        lista.classList.remove('is-medindo');
+    };
+
+    ajustar();
+    window.addEventListener('load', ajustar);
+    window.addEventListener('resize', ajustar);
+    filtros.addEventListener('toggle', ajustar);
+});
+
+// Filtros que se aplicam sozinhos: qualquer form com data-auto-submit é
+// enviado ao trocar uma opção (chips e selects). Campos de texto continuam
+// sendo enviados com Enter ou pelo botão.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[data-auto-submit]').forEach((form) => {
+        form.addEventListener('change', (event) => {
+            if (event.target.matches('input[type="radio"], input[type="checkbox"], select')) {
+                form.requestSubmit();
+            }
+        });
+    });
+});
+
+// Filtros por GET: campos vazios não vão para a url (evita "?busca=&status=").
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[data-auto-submit]').forEach((form) => {
+        form.addEventListener('submit', () => {
+            form.querySelectorAll('input, select').forEach((campo) => {
+                const vazio = campo.type === 'radio' || campo.type === 'checkbox'
+                    ? campo.checked && campo.value === ''
+                    : campo.value.trim() === '';
+                campo.disabled = vazio;
+            });
+        });
+
+        // ao voltar com o botão "voltar" do navegador, reativa os campos
+        window.addEventListener('pageshow', () => {
+            form.querySelectorAll(':disabled').forEach((campo) => { campo.disabled = false; });
+        });
+    });
+});
+
+// Tema do site (claro / escuro / automático). A escolha fica salva no
+// navegador; o script no <head> do layout já aplica ao carregar cada página.
+// Aqui: o seletor em Configurações > Aparência e a troca automática quando o
+// tema do aparelho muda (opção "Automático").
+const temaDoSistema = window.matchMedia('(prefers-color-scheme: dark)');
+
+const lerTema = () => {
+    try {
+        return localStorage.getItem('tema') || 'claro';
+    } catch (e) {
+        return 'claro';
+    }
+};
+
+const aplicarTema = (tema) => {
+    const escuro = tema === 'escuro' || (tema === 'sistema' && temaDoSistema.matches);
+    if (escuro) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+};
+
+temaDoSistema.addEventListener('change', () => aplicarTema(lerTema()));
+
+document.addEventListener('DOMContentLoaded', () => {
+    const seletor = document.querySelector('[data-theme-switch]');
+
+    if (!seletor) {
+        return;
+    }
+
+    const atual = seletor.querySelector(`input[value="${lerTema()}"]`);
+    if (atual) {
+        atual.checked = true;
+    }
+
+    seletor.addEventListener('change', (event) => {
+        const tema = event.target.value;
+        try {
+            localStorage.setItem('tema', tema);
+        } catch (e) {
+            // navegador sem armazenamento: o tema vale só até recarregar
+        }
+        aplicarTema(tema);
+    });
+});

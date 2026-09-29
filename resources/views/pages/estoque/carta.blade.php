@@ -17,7 +17,7 @@
 
     {{-- imagem grande à esquerda e informações à direita (empilhadas no mobile) --}}
     <div class="card-detail">
-        <div class="card-detail__image" style="background-image: url('{{ $carta['imagem'] }}');">
+        <div class="card-detail__image" style="background-image: url('{{ $carta['imagem'] }}'), url('{{ $carta['imagemPadrao'] }}');">
             @if ($carta['foil'])
                 <span class="card-detail__foil"><i class="bi bi-stars"></i> foil</span>
             @endif
