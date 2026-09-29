@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('campeonato', function (Blueprint $table) {
+        Schema::create('campeonatos', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->string('nome');
             $table->string('deck');
-            $table->datetime('horário');
-            $table->bobobobo('valor');
-            $table->string('participantes');
-            $table->string('descricao');
-            
-
+            $table->date('data');
+            $table->time('horario')->nullable();
+            $table->decimal('valor', 10, 2); // valor da inscrição
+            $table->text('descricao')->nullable();
+            $table->string('imagem', 500)->nullable(); // url do banner
+            $table->string('status')->default('ativo'); // ativo | finalizado
+            $table->timestamps();
         });
     }
 
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('campeonato');
+        Schema::dropIfExists('campeonatos');
     }
 };

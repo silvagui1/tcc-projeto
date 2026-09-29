@@ -2,104 +2,141 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCampeonatoRequest;
+use App\Http\Requests\UpdateCampeonatoRequest;
+use App\Models\Campeonato;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
-class CampController extends Controller
+class CampeonatoController extends Controller
 {
     public function index()
-{
-    // Campeonato(s) em destaque no topo (carrossel se houver mais de um)
-    $ativos = CampModel::where('status', 'ativo')
-        ->orderBy('data')
-        ->get();
+    {
+        // Campeonato(s) em destaque no topo (carrossel se houver mais de um)
+        $ativos = Campeonato::where('status', 'ativo')
+            ->orderBy('data')
+            ->get();
 
-    // Lista "Outras competições"
-    $finalizados = CampModel::where('status', 'finalizado')
-        ->orderBy('data', 'desc')
-        ->get();
+        // Lista "Outras competições"
+        $finalizados = Campeonato::where('status', 'finalizado')
+            ->orderByDesc('data')
+            ->get();
 
-    return view('campeonato.index', [
-        'ativos' => $ativos,
-        'finalizados' => $finalizados,
-    ]);
-}
+        return view('campeonato.index', compact('ativos', 'finalizados'));
+    }
 
-    function add(Request $dados) { 
-        $validator = Validator::make(
-		      $dados->all(),
-	            [
-	                'nome' => 'required',
-                    'deck' => 'required', 
-                    'data' => 'required',
-                    'participantes' => 'required',
-                    'valor' => 'required'
+    public function create()
+    {
+        return view('campeonato.create');
+    }
 
-	            ],
-	            [
-	                'nome.required' => 'O campo nome é obrigatório.',
-	                'deck.required' => 'O campo deck é obrigatório.',
-	                'data.required' => 'O campo data é obrigatório.',
-	                'participantes.required' => 'O campo participantes é obrigatório.',
-	                'valor.required' => 'O campo valor é obrigatório.',
-	            ]
+    public function store(StoreCampeonatoRequest $request)
+    {
+        Campeonato::create($request->validated() + ['status' => 'ativo']);
+
+        return redirect()
+            ->route('campeonatos.index')
+            ->with('success', 'Campeonato cadastrado!');
+    }
+
+    public function show(Campeonato $campeonato)
+    {
+        return view('campeonato.show', [
+            'campeonato' => $campeonato->load('users'),
+        ]);
+    }
+
+    public function edit(Campeonato $campeonato)
+    {
+        if ($campeonato->finalizado()) {
+            return $this->bloqueado();
+        }
+
+        return view('campeonato.edit', compact('campeonato'));
+    }
+
+    public function update(UpdateCampeonatoRequest $request, Campeonato $campeonato)
+    {
+        if ($campeonato->finalizado()) {
+            return $this->bloqueado();
+        }
+
+        $campeonato->update($request->validated());
+
+        return redirect()
+            ->route('campeonatos.show', $campeonato)
+            ->with('success', 'Campeonato atualizado!');
+    }
+
+    public function destroy(Campeonato $campeonato)
+    {
+        $campeonato->delete();
+
+        return redirect()
+            ->route('campeonatos.index')
+            ->with('success', 'Campeonato excluído!');
+    }
+
+    public function finalizar(Campeonato $campeonato)
+    {
+        $campeonato->update(['status' => 'finalizado']);
+
+        return redirect()
+            ->route('campeonatos.show', $campeonato)
+            ->with('success', 'Campeonato finalizado!');
+    }
+
+    public function participantes(Campeonato $campeonato)
+    {
+        $campeonato->load('users');
+
+        return view('campeonato.participantes', [
+            'campeonato' => $campeonato,
+            // Usuários que ainda podem ser adicionados
+            'usuarios' => User::whereNotIn('id', $campeonato->users->pluck('id'))
+                ->orderBy('name')
+                ->get(),
+        ]);
+    }
+
+    public function adicionarParticipante(Request $request, Campeonato $campeonato)
+    {
+        $request->validate(
+            ['user_id' => 'required|exists:users,id'],
+            [
+                'user_id.required' => 'Selecione um usuário.',
+                'user_id.exists' => 'Usuário não encontrado.',
+            ]
         );
 
-        if ($validator->fails()) {
-            return redirect()
-                ->route('campeonato.index')
-                ->withErrors($validator)
-                ->withInput();
+        if ($campeonato->finalizado()) {
+            return $this->bloqueado();
         }
-        
-        $camp = new \App\Models\CampModel();
-        $camp::create($dados->all());
 
-        $camp = new \App\Models\CampModel();
+        if ($campeonato->users()->count() >= $campeonato->participantes) {
+            return back()->withErrors(['user_id' => 'O campeonato já atingiu o limite de participantes.']);
+        }
 
-        return view('campeonato.index', ['success'=>'Cadastrado!', 'campeonato'=>$camp::all()]);
+        $campeonato->users()->syncWithoutDetaching([$request->user_id]);
+
+        return back()->with('success', 'Participante adicionado!');
     }
 
-    function remove(string $id) {
-        $camp = new \App\Models\CampModel();
-        $camp::destroy($id);
+    public function removerParticipante(Campeonato $campeonato, User $user)
+    {
+        if ($campeonato->finalizado()) {
+            return $this->bloqueado();
+        }
 
-        return view('campeonato.index', ['success'=>'mostrou!', 'campeonato'=>$camp::all()]);
+        $campeonato->users()->detach($user->id);
 
+        return back()->with('success', 'Participante removido!');
     }
-        public function update(Request $request){
-    $camp = CampModel::find($request->id);
 
-    if ($camp->status === 'finalizado') {
+    private function bloqueado()
+    {
         return redirect()
-            ->route('campeonato.index')
+            ->route('campeonatos.index')
             ->withErrors(['status' => 'Campeonatos finalizados não podem ser editados.']);
-    }
-
-    $validator = $this->validarDados($request);
-
-    if ($validator->fails()) {
-        return redirect()
-            ->route('campeonato.index')
-            ->withErrors($validator)
-            ->withInput();
-    }
-
-    $camp->update($validator->validated());
-
-    return view('campeonato.index', [
-        'success' => 'Salvo!',
-        'campeonato' => CampModel::all(),
-    ]);
-}
-
-    
-
-function save(Request $dados) {
-        $camp = new \App\Models\CampModel();
-        $camp = $camp::find($dados->id);
-        $camp->update($dados->all());
-
-        return view('campeonato.index', ['success'=>'salvo!', 'campeonato'=>$camp::all()]);
     }
 }
