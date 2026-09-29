@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'TCC Projeto') — ArtPlay</title>
 
-    {{-- logo sobre fundo azul-marinho, para aparecer tanto em abas claras quanto escuras --}}
+    {{-- Favicons: favicon.ico (logo sobre fundo azul-marinho) é a reserva para Safari e navegadores antigos;
+         favicon.svg é a logo da navbar com fundo transparente, que troca de cor conforme o tema claro/escuro;
+         apple-touch-icon.png (180x180, fundo sólido) é o ícone usado ao salvar o site na tela inicial do celular. --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
     {{-- Fonte Inter (a mesma do protótipo no Figma; já é a primeira do font-family no app.css) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
