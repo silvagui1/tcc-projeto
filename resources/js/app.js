@@ -53,6 +53,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// Estoque de cartas — pop-up "Adicionar carta". Qualquer botão com
+// data-card-dialog-open abre o <dialog>; se o form voltou com erros de
+// validação, o pop-up já abre sozinho (data-open-on-load).
+document.addEventListener('DOMContentLoaded', () => {
+    const dialog = document.querySelector('[data-card-dialog]');
+
+    if (!dialog) {
+        return;
+    }
+
+    document.querySelectorAll('[data-card-dialog-open]').forEach((botao) => {
+        botao.addEventListener('click', () => dialog.showModal());
+    });
+
+    dialog.querySelectorAll('[data-card-dialog-close]').forEach((botao) => {
+        botao.addEventListener('click', () => dialog.close());
+    });
+
+    // clicar no fundo escuro também fecha
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) {
+            dialog.close();
+        }
+    });
+
+    if (dialog.hasAttribute('data-open-on-load')) {
+        dialog.showModal();
+    }
+});
+
 // Campeonatos — busca de participantes (criar): esconde os clientes cujo
 // nome não contém o texto digitado.
 document.addEventListener('DOMContentLoaded', () => {

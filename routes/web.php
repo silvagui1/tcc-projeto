@@ -107,26 +107,36 @@ Route::get('/estoque', function () {
         ],
     ];
 
-    $cartaDestaque = [
-        'nome' => 'Trevenant do Lupo 096/217',
-        'preco' => 0.90,
-        'imagem' => 'https://www.figma.com/api/mcp/asset/43628ec4-4244-44fd-b56a-f1ce4fade14d.png',
-        'tags' => ['semi-novo', 'rara comum', 'português', 'qtd 4', 'foil'],
-    ];
+    // prévia da aba "estoque cartas": as primeiras cartas de Pokémon (as
+    // adicionadas pelo formulário aparecem primeiro), antes do "ver todas"
+    $cartasDestaque = array_slice(cartasDoJogo('pokemon'), 0, 4);
 
-    return view('pages.estoque.index', compact('tab', 'resumo', 'categorias', 'produtos', 'cartaDestaque'));
+    $jogosDisponiveis = jogosDeCartas();
+
+    return view('pages.estoque.index', compact('tab', 'resumo', 'categorias', 'produtos', 'cartasDestaque', 'jogosDisponiveis'));
 })->name('estoque.index');
 
-Route::get('/estoque/cartas', function () {
-    $jogosDisponiveis = ['pokemon', 'magic', 'onepiece'];
-    $jogoAtual = request('jogo', 'pokemon');
+// --- Estoque de cartas: dados compartilhados --------------------------------
+// (function_exists evita erro de "função redeclarada" no route:cache)
 
-    // catálogo de exemplo por jogo — todas as cartas ficam guardadas aqui
-    // por enquanto; futuramente isso vem do banco de dados.
-    $catalogo = [
+// jogos aceitos no estoque de cartas (filtro da página e campo do formulário)
+if (! function_exists('jogosDeCartas')) {
+function jogosDeCartas()
+{
+    return ['pokemon', 'magic', 'onepiece'];
+}
+}
+
+// catálogo de exemplo por jogo — por enquanto as cartas ficam guardadas
+// aqui; futuramente isso vem do banco de dados.
+if (! function_exists('catalogoCartas')) {
+function catalogoCartas()
+{
+    return [
         'pokemon' => [
             [
                 'nome' => 'Trevenant 096/217',
+                'foil' => true,
                 'estado' => 'Semi-Novo',
                 'colecao' => 'teste',
                 'raridade' => 'Rara Comum',
@@ -155,15 +165,149 @@ Route::get('/estoque/cartas', function () {
                 'preco' => 35.50,
                 'imagem' => 'https://www.figma.com/api/mcp/asset/40aa70be-6cb1-4fd0-9401-0656b6addef6.png',
             ],
+            [
+                'nome' => 'Carta genérica 001/100',
+                'estado' => 'Novo',
+                'colecao' => 'teste',
+                'raridade' => 'Comum',
+                'idioma' => 'Português',
+                'quantidade' => 6,
+                'preco' => 0.50,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Carta genérica 002/100',
+                'estado' => 'Semi-Novo',
+                'colecao' => 'teste',
+                'raridade' => 'Incomum',
+                'idioma' => 'Inglês',
+                'quantidade' => 3,
+                'preco' => 1.50,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Carta genérica 003/100',
+                'estado' => 'Novo',
+                'colecao' => 'teste',
+                'raridade' => 'Rara',
+                'idioma' => 'Português',
+                'quantidade' => 2,
+                'preco' => 5.00,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Carta genérica 004/100',
+                'estado' => 'Usado',
+                'colecao' => 'teste',
+                'raridade' => 'Comum',
+                'idioma' => 'Japonês',
+                'quantidade' => 8,
+                'preco' => 0.30,
+                'imagem' => null,
+            ],
+            [
+                'nome' => 'Carta genérica 005/100',
+                'estado' => 'Novo',
+                'colecao' => 'teste',
+                'raridade' => 'Rara Holo',
+                'idioma' => 'Inglês',
+                'quantidade' => 1,
+                'preco' => 12.00,
+                'imagem' => null,
+            ],
         ],
         'magic' => [],
         'onepiece' => [],
     ];
+}
+}
 
-    $cartas = $catalogo[$jogoAtual] ?? [];
+// Lista completa de um jogo: cartas adicionadas pelo formulário (sessão, mais
+// novas primeiro) + catálogo de exemplo. Cada carta ganha 'jogo' e 'id' (a
+// posição na lista), usados no link da página de detalhes.
+if (! function_exists('cartasDoJogo')) {
+function cartasDoJogo($jogo)
+{
+    $adicionadas = array_filter(
+        array_reverse(session('cartasAdicionadas', [])),
+        fn ($carta) => $carta['jogo'] === $jogo
+    );
+
+    $cartas = array_merge($adicionadas, catalogoCartas()[$jogo] ?? []);
+
+    foreach ($cartas as $id => &$carta) {
+        $carta['id'] = $id;
+        $carta['jogo'] = $jogo;
+        $carta['foil'] = $carta['foil'] ?? false;
+        $carta['tags'] = array_values(array_filter([
+            mb_strtolower($carta['estado']),
+            mb_strtolower($carta['raridade']),
+            mb_strtolower($carta['idioma']),
+            'qtd ' . $carta['quantidade'],
+            $carta['foil'] ? 'foil' : null,
+        ], fn ($tag) => $tag && $tag !== '—'));
+    }
+
+    return $cartas;
+}
+}
+
+// Formulário "Adicionar carta" (aba estoque cartas e página de cartas).
+// Ainda sem banco de dados: a carta fica guardada na sessão, então aparece
+// nas duas telas até a sessão expirar.
+Route::post('/estoque/cartas', function () {
+    $dados = request()->validate([
+        'jogo' => ['required', 'in:' . implode(',', jogosDeCartas())],
+        'nome' => ['required', 'string', 'max:120'],
+        'colecao' => ['nullable', 'string', 'max:120'],
+        'raridade' => ['nullable', 'string', 'max:60'],
+        'estado' => ['required', 'in:Novo,Semi-Novo,Usado,Danificado'],
+        'idioma' => ['required', 'string', 'max:40'],
+        'quantidade' => ['required', 'integer', 'min:1', 'max:9999'],
+        'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
+        'imagem' => ['nullable', 'url', 'max:500'],
+        'foil' => ['nullable', 'boolean'],
+    ], [
+        // mensagens em português (o projeto ainda não tem lang/pt_BR)
+        'required' => 'O campo :attribute é obrigatório.',
+        'in' => 'Escolha uma opção válida em :attribute.',
+        'string' => 'O campo :attribute deve ser um texto.',
+        'max' => 'O campo :attribute passou do limite (máx. :max).',
+        'min' => 'O campo :attribute deve ser no mínimo :min.',
+        'integer' => 'O campo :attribute deve ser um número inteiro.',
+        'numeric' => 'O campo :attribute deve ser um número.',
+        'url' => 'O campo :attribute deve ser um link válido (https://...).',
+        'boolean' => 'O campo :attribute é inválido.',
+    ], [
+        'colecao' => 'coleção',
+        'preco' => 'preço',
+        'imagem' => 'url da imagem',
+    ]);
+
+    $dados['foil'] = request()->boolean('foil');
+    $dados['colecao'] = $dados['colecao'] ?? '—';
+    $dados['raridade'] = $dados['raridade'] ?? '—';
+
+    session()->push('cartasAdicionadas', $dados);
+
+    return back()->with('cartaAdicionada', $dados['nome']);
+})->name('estoque.cartas.adicionar');
+
+Route::get('/estoque/cartas', function () {
+    $jogosDisponiveis = jogosDeCartas();
+    $jogoAtual = request('jogo', 'pokemon');
+
+    $cartas = cartasDoJogo($jogoAtual);
 
     return view('pages.estoque.cartas', compact('jogosDisponiveis', 'jogoAtual', 'cartas'));
 })->name('estoque.cartas');
+
+// Detalhes de uma carta (abre ao clicar numa carta em qualquer das listas).
+Route::get('/estoque/cartas/{jogo}/{id}', function ($jogo, $id) {
+    $carta = cartasDoJogo($jogo)[$id] ?? abort(404);
+
+    return view('pages.estoque.carta', compact('carta'));
+})->whereNumber('id')->name('estoque.cartas.show');
 
 
 // --- Campeonatos ---------------------------------------------------------

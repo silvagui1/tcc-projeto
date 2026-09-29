@@ -102,21 +102,37 @@
     @else
 
         <div class="estoque-cartas-preview">
-            {{-- prévia de uma carta em destaque, com link para o catálogo completo --}}
-            <div class="trading-card">
-                <div class="trading-card__image" style="background-image: url('{{ $cartaDestaque['imagem'] }}');"></div>
-                <div class="trading-card__title-row">
-                    <strong>{{ $cartaDestaque['nome'] }}</strong>
-                    <span class="price">R$ {{ number_format($cartaDestaque['preco'], 2, ',', '.') }}</span>
-                </div>
-                <div class="trading-card__meta">
-                    @foreach ($cartaDestaque['tags'] as $tag)
-                        <span>{{ $tag }}</span>
-                    @endforeach
-                </div>
+            <div class="cartas-header">
+                <h2>Cartas em destaque</h2>
+                @include('pages.estoque.partials.adicionar-carta-botao')
             </div>
 
-            <a href="{{ route('estoque.cartas') }}" class="btn-primary" style="margin-top: 20px;">
+            @include('pages.estoque.partials.adicionar-carta', ['jogoPadrao' => 'pokemon'])
+
+            {{-- prévia de algumas cartas, com link para o catálogo completo.
+                 No mobile vira um carrossel lateral; no desktop, uma fileira de 4. --}}
+            <div class="estoque-cartas-grid">
+                @foreach ($cartasDestaque as $carta)
+                    <div class="trading-card trading-card--link">
+                        {{-- o link cobre a carta inteira; os botões ficam por cima dele --}}
+                        <a href="{{ route('estoque.cartas.show', [$carta['jogo'], $carta['id']]) }}" class="trading-card__link"
+                           aria-label="Ver detalhes de {{ $carta['nome'] }}"></a>
+                        @include('pages.estoque.partials.carta-acoes')
+                        <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}');"></div>
+                        <div class="trading-card__title-row">
+                            <strong>{{ $carta['nome'] }}</strong>
+                            <span class="price">R$ {{ number_format($carta['preco'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="trading-card__meta">
+                            @foreach ($carta['tags'] as $tag)
+                                <span>{{ $tag }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <a href="{{ route('estoque.cartas') }}" class="btn-primary estoque-cartas-preview__all" style="margin-top: 20px;">
                 ver todas as cartas
                 <i class="bi bi-arrow-90deg-up"></i>
             </a>

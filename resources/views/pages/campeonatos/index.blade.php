@@ -2,16 +2,30 @@
 
 @section('title', 'Campeonatos')
 
+{{-- no desktop a página usa a mesma área larga do estoque (ver .app-content--wide) --}}
+@section('main_class', 'app-content--wide')
+
 @section('content')
 
-    <a href="{{ route('campeonatos.criar') }}" class="champ-create">
-        Criar campeonato
-        <img src="{{ asset('images/campeonatos/plus-circle.png') }}" alt="" width="73" height="73">
-    </a>
+    {{-- cabeçalho: no mobile só o botão aparece; no desktop entra o título
+         à esquerda e o botão fica compacto à direita --}}
+    <div class="champ-page-header">
+        <div class="champ-page-header__text">
+            <h1>Campeonatos</h1>
+            <p>Acompanhe os torneios em andamento e o histórico de competições.</p>
+        </div>
+
+        <a href="{{ route('campeonatos.criar') }}" class="champ-create">
+            Criar campeonato
+            <img src="{{ asset('images/campeonatos/plus-circle.png') }}" alt="" width="73" height="73">
+        </a>
+    </div>
 
     {{-- Campeonatos ativos: com mais de um, vira um carrossel (rolagem
          horizontal com scroll-snap, arrastando para o lado no celular). --}}
     @if (count($ativos))
+        <h2 class="champ-section-title champ-section-title--desktop">Em andamento</h2>
+
         <div class="champ-carousel {{ count($ativos) > 1 ? 'champ-carousel--multi' : '' }}">
             @foreach ($ativos as $ativo)
                 <div class="champ-active">
@@ -46,6 +60,8 @@
 
     <h2 class="champ-section-title">Outras competições</h2>
 
+    {{-- no mobile os cards ficam empilhados; no desktop viram uma grade --}}
+    <div class="champ-other-grid">
     @foreach ($outras as $campeonato)
         <div class="champ-other">
             <a href="{{ route('campeonatos.show', $campeonato['id']) }}" class="champ-other__banner">
@@ -78,6 +94,7 @@
             </div>
         </div>
     @endforeach
+    </div>
 
     @include('pages.campeonatos.partials.apagar-popup')
 

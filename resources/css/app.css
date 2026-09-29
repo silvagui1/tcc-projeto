@@ -38,6 +38,14 @@
     --pink-700: #723756;
     --pink-900: #442133;
 
+    /* amarelo (vendas) — base (300) tirada do fundo da logo ArtPlay */
+    --yellow-200: #ffe9c2;
+    --yellow-300: #ffdc9b;
+    --yellow-400: #f5c874;
+    --yellow-500: #e3ad4c;
+    --yellow-700: #a8772a;
+    --yellow-900: #5e4217;
+
     /* layout */
     --topbar-height: 76px;
     --bottom-nav-height: 16px;
@@ -55,6 +63,16 @@
 html, body {
     margin: 0;
     padding: 0;
+}
+
+/* esconde a barra de rolagem lateral da página; a rolagem continua
+   funcionando normalmente (roda do mouse, touch, teclado) */
+html {
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
 }
 
 body {
@@ -585,8 +603,39 @@ img {
         padding: 24px 0;
     }
 
-    .estoque-cartas-preview {
-        max-width: 360px;
+    /* prévia de cartas: fileira de 4 na largura toda — cada carta fica
+       maior que um card de produto (que divide o espaço com os filtros) */
+    .estoque-cartas-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .estoque-cartas-preview__all {
+        width: fit-content;
+        gap: 16px;
+        margin-left: auto;
+    }
+}
+
+/* no mobile a prévia vira um carrossel lateral (arrasta para o lado),
+   com a próxima carta "espiando" pela direita */
+@media (max-width: 991.98px) {
+    .estoque-cartas-grid {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .estoque-cartas-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .estoque-cartas-grid > .trading-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
     }
 }
 
@@ -628,9 +677,14 @@ img {
     font-size: 18px;
 }
 
+.trading-card__title-row {
+    gap: 12px;
+}
+
 .trading-card__title-row .price {
     font-weight: 600;
     color: var(--text);
+    white-space: nowrap;
 }
 
 .trading-card__meta {
@@ -644,6 +698,497 @@ img {
     border-radius: 16px;
     padding: 6px 12px;
     font-size: 12px;
+}
+
+/* --- Carta clicável + botões de editar / apagar -------------------------- */
+
+/* um link invisível cobre a carta toda (abre os detalhes); os botões de
+   ação ficam por cima dele para continuarem clicáveis */
+.trading-card--link {
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trading-card--link:hover {
+    transform: translateY(-2px);
+}
+
+.trading-card.trading-card--link:hover,
+.trading-card--link:hover .trading-card {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.trading-card__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--radius-md);
+}
+
+.trading-card__link:focus-visible {
+    outline: 2px solid var(--purple-500);
+    outline-offset: 2px;
+}
+
+.card-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+}
+
+.card-actions__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--purple-500);
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.card-actions__btn:hover {
+    background: var(--purple-500);
+    color: var(--white);
+}
+
+.card-actions__btn--danger:hover {
+    background: #d9534f;
+}
+
+/* --- Detalhes de uma carta (estoque/cartas/{jogo}/{id}) ------------------ */
+
+.card-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card-detail__image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #d9d9d9;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius-md);
+}
+
+.card-detail__foil {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--yellow-300);
+    border-radius: 20px;
+    color: var(--yellow-900);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.card-detail__game {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--purple-light-300);
+    border-radius: 20px;
+    color: var(--purple-500);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.card-detail__info h1 {
+    margin: 12px 0 6px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.card-detail__price {
+    margin: 0 0 16px;
+    color: var(--blue-900);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.card-detail__price span {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card-detail__specs {
+    margin: 20px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.card-detail__specs > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 15px;
+}
+
+.card-detail__specs > div:last-child {
+    border-bottom: none;
+}
+
+.card-detail__specs dt {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.card-detail__specs dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+.card-detail__total {
+    background: var(--white);
+}
+
+.card-detail__total dd {
+    color: var(--blue-900);
+}
+
+.card-detail__actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.card-detail__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 12px;
+    background: var(--purple-500);
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+
+.card-detail__btn:hover {
+    background: var(--purple-light-800);
+}
+
+.card-detail__btn--danger {
+    background: transparent;
+    border: 1px solid #d9534f;
+    color: #c0392b;
+}
+
+.card-detail__btn--danger:hover {
+    background: #d9534f;
+    color: var(--white);
+}
+
+@media (max-width: 991.98px) {
+    .card-detail__btn {
+        flex: 1;
+    }
+}
+
+@media (min-width: 992px) {
+    .card-detail {
+        display: grid;
+        grid-template-columns: 420px minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+    }
+
+    .card-detail__info h1 {
+        font-size: 32px;
+    }
+}
+
+/* --- Adicionar carta (botão, aviso e pop-up com o formulário) ------------ */
+
+/* título da lista + botão "Adicionar carta", logo acima das cartas */
+.cartas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cartas-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.add-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 18px 0 8px;
+    background: var(--purple-500);
+    border-radius: 12px;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(83, 87, 125, 0.35);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.add-card-btn:hover {
+    background: var(--purple-light-800);
+    transform: translateY(-1px);
+}
+
+.add-card-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--purple-light-300);
+    color: var(--purple-500);
+    font-size: 16px;
+}
+
+.card-added-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    background: #e3f4e6;
+    border: 1px solid #b7dfbf;
+    border-radius: var(--radius-sm);
+    color: #25623a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card-dialog {
+    width: 640px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100vh - 40px);
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.card-dialog::backdrop {
+    background: rgba(20, 21, 32, 0.6);
+}
+
+.card-form {
+    padding: 22px 24px 24px;
+}
+
+.card-form__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.card-form__header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.card-form h3 {
+    margin: 20px 0 10px;
+    color: var(--purple-500);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.card-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.card-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.card-field > span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.card-field input:not([type="checkbox"]),
+.card-field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.card-field input:focus,
+.card-field select:focus {
+    outline: 2px solid var(--purple-300);
+    outline-offset: 1px;
+    border-color: var(--purple-500);
+}
+
+.card-field input::placeholder {
+    color: var(--text-muted-2);
+}
+
+/* checkbox "foil": alinhado com a base dos campos ao lado */
+.card-field--check {
+    flex-direction: row;
+    align-items: center;
+    align-self: end;
+    height: 42px;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.card-field--check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--purple-500);
+}
+
+.card-field--check > span {
+    font-weight: 400;
+}
+
+.card-form__errors {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: #fbe5e5;
+    border: 1px solid #efb9b9;
+    border-radius: var(--radius-sm);
+    color: #8a2424;
+    font-size: 13px;
+}
+
+.card-form__errors ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.card-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.card-form__cancel,
+.card-form__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.card-form__cancel {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.card-form__submit {
+    background: var(--purple-500);
+    color: var(--white);
+}
+
+.card-form__submit:hover {
+    background: var(--purple-light-800);
+}
+
+@media (min-width: 600px) {
+    .card-form__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .card-field--full {
+        grid-column: 1 / -1;
+    }
+}
+
+/* --- Catálogo de cartas no desktop ---------------------------------------
+   Mesma largura do estoque; busca e filtro por jogo lado a lado e as cartas
+   em grade de 4 — cada carta fica maior que um card de produto. */
+
+@media (min-width: 992px) {
+    .cartas-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .cartas-toolbar > * {
+        margin-bottom: 0;
+    }
+
+    .card-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .card-list > article {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .card-list > article h3 {
+        font-size: 17px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-list > article .trading-card {
+        flex: 1;
+    }
+
+    /* mensagem de "nenhuma carta" ocupa a linha toda */
+    .card-list > p {
+        grid-column: 1 / -1;
+    }
 }
 
 /* ==========================================================================
@@ -929,8 +1474,14 @@ img {
 
     .topbar__nav a.is-current {
         opacity: 1;
-        border-bottom-color: var(--pink-400);
+        border-bottom-color: var(--nav-accent, var(--pink-400));
     }
+
+    /* cor da linha da página atual: a mesma dos ícones da página inicial */
+    .topbar__link--estoque     { --nav-accent: var(--purple-500); }
+    .topbar__link--campeonatos { --nav-accent: var(--pink-300); }
+    .topbar__link--clientes    { --nav-accent: var(--blue-300); }
+    .topbar__link--vendas      { --nav-accent: var(--yellow-300); }
 
     /* Fora do grid de 3 colunas (posicionado sobre o .topbar, que já é
        fixed e por isso serve de referência), para não desalinhar a logo
@@ -951,6 +1502,12 @@ img {
     .topbar__settings:hover,
     .topbar__settings.is-current {
         opacity: 1;
+    }
+
+    /* a engrenagem não tem linha: na página de configurações ela fica com a
+       cor do ícone de configurações da página inicial */
+    .topbar__settings.is-current {
+        color: var(--purple-light-300);
     }
 
     .topbar__logo {
@@ -1157,6 +1714,171 @@ img {
     color: var(--text-muted);
     font-size: 12px;
     font-weight: 600;
+}
+
+/* --- Lista: cabeçalho da página ------------------------------------------ */
+
+/* título e "Em andamento" só existem no desktop; no mobile a lista
+   continua começando direto pelo botão "Criar campeonato" */
+.champ-page-header__text,
+.champ-section-title--desktop {
+    display: none;
+}
+
+/* --- Lista no desktop ------------------------------------------------------
+
+   Usa a mesma largura do estoque (.app-content--wide): cabeçalho com título
+   e botão compacto, ativos em destaque ocupando a largura toda (dois por vez
+   quando há mais de um) e "Outras competições" numa grade de 3 colunas. */
+
+@media (min-width: 992px) {
+    .champ-page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid var(--surface-border);
+    }
+
+    .champ-page-header__text {
+        display: block;
+    }
+
+    .champ-page-header__text h1 {
+        margin: 0 0 6px;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .champ-page-header__text p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 15px;
+    }
+
+    .champ-create {
+        flex-shrink: 0;
+        gap: 14px;
+        min-height: 52px;
+        padding: 0 10px 0 22px;
+        margin: 0;
+        font-size: 16px;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .champ-create img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .champ-create:hover {
+        background: var(--pink-300);
+        transform: translateY(-1px);
+    }
+
+    .champ-section-title,
+    .champ-section-title--desktop {
+        display: block;
+        margin: 0 0 16px;
+        font-size: 22px;
+    }
+
+    .champ-section-title {
+        margin-top: 48px;
+    }
+
+    .champ-section-title--desktop {
+        margin-top: 0;
+    }
+
+    .champ-carousel {
+        gap: 24px;
+    }
+
+    .champ-carousel--multi > .champ-active {
+        flex-basis: calc(50% - 12px);
+    }
+
+    .champ-active {
+        padding: 14px 18px 18px;
+    }
+
+    .champ-active__banner {
+        height: 380px;
+        margin-top: 10px;
+    }
+
+    .champ-carousel--multi .champ-active__banner {
+        height: 300px;
+    }
+
+    .champ-active__bottom {
+        margin-top: 14px;
+    }
+
+    .champ-active__access {
+        transition: background-color 0.15s ease;
+    }
+
+    .champ-active__access:hover {
+        background: var(--white);
+    }
+
+    .champ-other-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .champ-other {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+        padding: 12px 12px 14px;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .champ-other:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .champ-other__banner {
+        height: 180px;
+    }
+
+    .champ-other__header h3 {
+        font-size: 20px;
+    }
+
+    .champ-other p {
+        font-size: 14px;
+    }
+
+    .champ-other__prizes {
+        margin-top: 14px !important;
+        color: #555;
+    }
+
+    /* o rodapé (data + ações) fica sempre no fim do card, alinhando a grade */
+    .champ-other__footer {
+        margin-top: auto;
+        padding-top: 16px;
+    }
+
+    .champ-actions a,
+    .champ-actions button {
+        opacity: 0.8;
+        transition: opacity 0.15s ease;
+    }
+
+    .champ-actions a:hover,
+    .champ-actions button:hover {
+        opacity: 1;
+    }
 }
 
 /* --- Acessar campeonato (ativo / finalizado) ----------------------------- */

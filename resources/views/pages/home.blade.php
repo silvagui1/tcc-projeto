@@ -66,7 +66,7 @@
         </a>
 
         <a href="{{ route('vendas') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--blue-300);"><i class="bi bi-credit-card-fill"></i></span>
+            <span class="action-card__icon" style="background: var(--yellow-400);"><i class="bi bi-credit-card-fill"></i></span>
             <span class="action-card__text">
                 <strong>Vendas</strong>
                 <span>clique aqui para ver sobre as vendas.</span>
