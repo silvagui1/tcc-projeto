@@ -13,19 +13,57 @@ use App\Http\Middleware\LogAcessoMiddleware;
 |
 */
 
-Route::get('/', [App\Http\Controllers\Principal::class, 'principal']);
+Route::prefix('/campeonatos')->group(function () {
+
+    // Listar campeonatos
+    Route::get('/', [App\Http\Controllers\CampeonatoController::class, 'index'])
+        ->name('campeonatos.index');
+
+    // Formulário para criar campeonato
+    Route::get('/criar', [App\Http\Controllers\CampeonatoController::class, 'create'])
+        ->name('campeonatos.create');
+
+    // Salvar campeonato
+    Route::post('/', [App\Http\Controllers\CampeonatoController::class, 'store'])
+        ->name('campeonatos.store');
+
+    // Visualizar campeonato
+    Route::get('/{campeonato}', [App\Http\Controllers\CampeonatoController::class, 'show'])
+        ->name('campeonatos.show');
+
+    // Formulário para editar campeonato
+    Route::get('/{campeonato}/editar', [App\Http\Controllers\CampeonatoController::class, 'edit'])
+        ->name('campeonatos.edit');
+
+    // Atualizar campeonato
+    Route::put('/{campeonato}', [App\Http\Controllers\CampeonatoController::class, 'update'])
+        ->name('campeonatos.update');
+
+    // Excluir campeonato
+    Route::delete('/{campeonato}', [App\Http\Controllers\CampeonatoController::class, 'destroy'])
+        ->name('campeonatos.destroy');
 
 
 
 
-Route::prefix('/campeonato')->group(function(){
-    Route::get('/index', [App\Http\Controllers\CampController::class, 'index'])->name('campeonato.index');
-    Route::post('/add', [App\Http\Controllers\CampController::class, 'add'])->name('campeonato.add');
-    Route::post('/remove', [App\Http\Controllers\CampController::class, 'remove'])->name('campeonato.remove');
-    Route::post('/edit', [App\Http\Controllers\CampController::class, 'edit'])->name('campeonato.edit');
-    Route::get('/list', [App\Http\Controllers\CampController::class, 'list'])->name('campeonato.list');
-}); 
+    // Finalizar campeonato
+    Route::post('/{campeonato}/finalizar', [App\Http\Controllers\CampeonatoController::class, 'finalizar'])
+        ->name('campeonatos.finalizar');
 
-Route::prefix('/premiacao')->group(function(){
-    Route::get('/index', [App\Http\Controllers\PremioController::class, 'index'])->name('premiacao.index');    
+
+        
+    // Ver participantes
+    Route::get('/{campeonato}/participantes', [App\Http\Controllers\CampeonatoController::class, 'participantes'])
+        ->name('campeonatos.participantes');
+
+    // Adicionar User ao campeonato
+    Route::post('/{campeonato}/participantes', [App\Http\Controllers\CampeonatoController::class, 'adicionarParticipante'])
+        ->name('campeonatos.participantes.adicionar');
+
+    // Remover User do campeonato
+    Route::delete('/{campeonato}/participantes/{user}', [App\Http\Controllers\CampeonatoController::class, 'removerParticipante'])
+        ->name('campeonatos.participantes.remover');
+
 });
+
+
