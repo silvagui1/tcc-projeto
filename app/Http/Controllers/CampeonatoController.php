@@ -19,6 +19,7 @@ class CampeonatoController extends Controller
 
         // Lista "Outras competições"
         $finalizados = Campeonato::where('status', 'finalizado')
+            ->withCount('users')
             ->orderByDesc('data')
             ->get();
 
@@ -27,12 +28,15 @@ class CampeonatoController extends Controller
 
     public function create()
     {
-        return view('campeonato.create');
+        return view('campeonato.create', [
+            'usuarios' => User::orderBy('name')->get(),
+        ]);
     }
 
     public function store(StoreCampeonatoRequest $request)
     {
-        Campeonato::create($request->validated() + ['status' => 'ativo']);
+        $campeonato = Campeonato::create($request->safe()->except('participantes'));
+        $campeonato->users()->sync($request->input('participantes', []));
 
         return redirect()
             ->route('campeonatos.index')
@@ -46,13 +50,15 @@ class CampeonatoController extends Controller
         ]);
     }
 
+    // Finalizado abre só para leitura (a view desabilita o formulário)
     public function edit(Campeonato $campeonato)
     {
-        if ($campeonato->finalizado()) {
-            return $this->bloqueado();
-        }
+        $campeonato->load('users');
 
-        return view('campeonato.edit', compact('campeonato'));
+        return view('campeonato.edit', [
+            'campeonato' => $campeonato,
+            'usuarios' => $this->usuariosForaDo($campeonato),
+        ]);
     }
 
     public function update(UpdateCampeonatoRequest $request, Campeonato $campeonato)
@@ -61,7 +67,10 @@ class CampeonatoController extends Controller
             return $this->bloqueado();
         }
 
-        $campeonato->update($request->validated());
+        $campeonato->update($request->safe()->except('participantes'));
+
+        // Na edição, os marcados na busca são adicionados aos que já estavam
+        $campeonato->users()->syncWithoutDetaching($request->input('participantes', []));
 
         return redirect()
             ->route('campeonatos.show', $campeonato)
@@ -92,10 +101,7 @@ class CampeonatoController extends Controller
 
         return view('campeonato.participantes', [
             'campeonato' => $campeonato,
-            // Usuários que ainda podem ser adicionados
-            'usuarios' => User::whereNotIn('id', $campeonato->users->pluck('id'))
-                ->orderBy('name')
-                ->get(),
+            'usuarios' => $this->usuariosForaDo($campeonato),
         ]);
     }
 
@@ -113,10 +119,6 @@ class CampeonatoController extends Controller
             return $this->bloqueado();
         }
 
-        if ($campeonato->users()->count() >= $campeonato->participantes) {
-            return back()->withErrors(['user_id' => 'O campeonato já atingiu o limite de participantes.']);
-        }
-
         $campeonato->users()->syncWithoutDetaching([$request->user_id]);
 
         return back()->with('success', 'Participante adicionado!');
@@ -131,6 +133,14 @@ class CampeonatoController extends Controller
         $campeonato->users()->detach($user->id);
 
         return back()->with('success', 'Participante removido!');
+    }
+
+    // Usuários que ainda podem ser adicionados ao campeonato
+    private function usuariosForaDo(Campeonato $campeonato)
+    {
+        return User::whereNotIn('id', $campeonato->users->pluck('id'))
+            ->orderBy('name')
+            ->get();
     }
 
     private function bloqueado()
