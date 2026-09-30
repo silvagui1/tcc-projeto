@@ -63,18 +63,18 @@
                 href="#"
                 target="_blank"
                 rel="noopener"
-                class="botao botao--whatsapp botao--pill"
+                class="botao botao--whatsapp"
                 data-detalhes-whatsapp-botao
                 hidden
             >
                 <i class="bi bi-whatsapp" aria-hidden="true"></i>
                 WhatsApp
             </a>
-            <button type="button" class="botao botao--principal botao--pill" data-detalhes-editar>
+            <button type="button" class="botao botao--principal" data-detalhes-editar>
                 <i class="bi bi-pencil-fill" aria-hidden="true"></i>
                 Editar
             </button>
-            <button type="button" class="botao botao--perigo botao--pill" data-detalhes-excluir>
+            <button type="button" class="botao botao--perigo" data-detalhes-excluir>
                 <i class="bi bi-trash3-fill" aria-hidden="true"></i>
                 Excluir
             </button>

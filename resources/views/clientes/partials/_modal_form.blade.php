@@ -5,7 +5,15 @@
      entre os dois é o componente de foto (círculo vazio clicável na criação,
      vs. avatar + botão "Editar foto" na edição, já que só na edição existe
      uma foto/iniciais prévias pra mostrar) e alguns campos que só fazem
-     sentido pra quem já existe (status, link de WhatsApp, histórico). --}}
+     sentido pra quem já existe (status, link de WhatsApp, histórico).
+
+     Os campos de nome/nascimento/status, contato e observações dividem um
+     único card ("Dados do cliente"), com divisórias sutis entre os grupos
+     em vez de cada um ter sua própria caixa branca — mesma linguagem de
+     "menos cardização" já aplicada na tela principal (ver .cartao__grupo
+     no CSS). Só Foto e Créditos continuam em cards próprios, por serem
+     blocos com um comportamento visual genuinamente diferente (upload de
+     imagem; número + botões de ajuste). --}}
 @php
     $ehEdicao = $modo === 'editar';
     $tituloId = 'modal-'.$modo.'-titulo';
@@ -49,7 +57,7 @@
                                 <img data-preview-imagem hidden alt="Pré-visualização da foto">
                                 <span data-preview-iniciais>--</span>
                             </span>
-                            <button type="button" class="botao botao--principal botao--pill" data-selecionar-foto>
+                            <button type="button" class="botao botao--principal" data-selecionar-foto>
                                 Editar foto
                             </button>
                             <input
@@ -86,7 +94,7 @@
                 @endif
 
                 <section class="cartao">
-                    <h3 class="cartao__titulo">Informações cliente</h3>
+                    <h3 class="cartao__titulo">Dados do cliente</h3>
                     <div class="campo">
                         <label for="cliente-{{ $modo }}-nome">Nome</label>
                         <input type="text" id="cliente-{{ $modo }}-nome" name="nome" placeholder="Nome do cliente" required data-input-nome>
@@ -102,54 +110,53 @@
                              sempre começa ativo (default do banco), não faz
                              sentido pedir isso já na criação. --}}
                         <div class="campo">
-                            <label for="cliente-editar-status">Status</label>
-                            <select id="cliente-editar-status" name="status" data-input-status>
+                            <label for="cliente-{{ $modo }}-status">Status</label>
+                            <select id="cliente-{{ $modo }}-status" name="status" data-input-status>
                                 <option value="ativo">Ativo</option>
                                 <option value="inativo">Inativo</option>
                             </select>
                             <span class="campo__erro" data-erro-status hidden></span>
                         </div>
                     @endif
-                </section>
 
-                <section class="cartao">
-                    <h3 class="cartao__titulo">Contato</h3>
-                    <div class="campo">
-                        <label for="cliente-{{ $modo }}-whatsapp">WhatsApp</label>
-                        <div class="campo__com-icone">
-                            <i class="bi bi-whatsapp" aria-hidden="true"></i>
-                            <input
-                                type="tel"
-                                id="cliente-{{ $modo }}-whatsapp"
-                                name="whatsapp"
-                                placeholder="(11) 91234-5678"
-                                inputmode="numeric"
-                                maxlength="16"
-                                data-input-whatsapp
-                            >
+                    <div class="cartao__grupo">
+                        <div class="campo">
+                            <label for="cliente-{{ $modo }}-whatsapp">WhatsApp</label>
+                            <div class="campo__com-icone">
+                                <i class="bi bi-whatsapp" aria-hidden="true"></i>
+                                <input
+                                    type="tel"
+                                    id="cliente-{{ $modo }}-whatsapp"
+                                    name="whatsapp"
+                                    placeholder="(11) 91234-5678"
+                                    inputmode="numeric"
+                                    maxlength="16"
+                                    data-input-whatsapp
+                                >
+                            </div>
+                            <span class="campo__erro" data-erro-whatsapp hidden></span>
                         </div>
-                        <span class="campo__erro" data-erro-whatsapp hidden></span>
+                        @if ($ehEdicao)
+                            <a
+                                href="#"
+                                target="_blank"
+                                rel="noopener"
+                                class="botao botao--whatsapp botao--full"
+                                data-abrir-whatsapp
+                                hidden
+                            >
+                                <i class="bi bi-whatsapp" aria-hidden="true"></i>
+                                Chamar no WhatsApp
+                            </a>
+                        @endif
                     </div>
-                    @if ($ehEdicao)
-                        <a
-                            href="#"
-                            target="_blank"
-                            rel="noopener"
-                            class="botao botao--whatsapp botao--pill botao--full"
-                            data-abrir-whatsapp
-                            hidden
-                        >
-                            <i class="bi bi-whatsapp" aria-hidden="true"></i>
-                            Chamar no WhatsApp
-                        </a>
-                    @endif
-                </section>
 
-                <section class="cartao">
-                    <div class="campo campo--textarea">
-                        <label for="cliente-{{ $modo }}-observacoes">Observações</label>
-                        <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" data-input-observacoes></textarea>
-                        <span class="campo__erro" data-erro-observacoes hidden></span>
+                    <div class="cartao__grupo">
+                        <div class="campo campo--textarea">
+                            <label for="cliente-{{ $modo }}-observacoes">Observações</label>
+                            <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" data-input-observacoes></textarea>
+                            <span class="campo__erro" data-erro-observacoes hidden></span>
+                        </div>
                     </div>
                 </section>
 
@@ -173,18 +180,18 @@
                             >
                         </div>
                         <div class="creditos__acoes">
-                            <button type="button" class="botao botao--principal botao--pill" data-ajustar-creditos="adicionar">
+                            <button type="button" class="botao botao--principal" data-ajustar-creditos="adicionar">
                                 <i class="bi bi-plus-lg" aria-hidden="true"></i>
                                 Adicionar
                             </button>
-                            <button type="button" class="botao botao--perigo botao--pill" data-ajustar-creditos="descontar">
+                            <button type="button" class="botao botao--perigo" data-ajustar-creditos="descontar">
                                 <i class="bi bi-dash-lg" aria-hidden="true"></i>
                                 Descontar
                             </button>
                         </div>
                         {{-- Alternativa a somar/subtrair mentalmente: digita
                              o saldo final desejado e define direto. --}}
-                        <button type="button" class="botao botao--neutro botao--pill botao--full" data-ajustar-creditos="definir">
+                        <button type="button" class="botao botao--neutro botao--full" data-ajustar-creditos="definir">
                             <i class="bi bi-pencil-fill" aria-hidden="true"></i>
                             Definir como novo saldo
                         </button>

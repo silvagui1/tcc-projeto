@@ -10,10 +10,10 @@
         <h2 id="modal-confirmar-titulo" data-confirmar-titulo>Tem certeza?</h2>
         <p id="modal-confirmar-texto" data-confirmar-texto></p>
         <div class="modal-confirmar__acoes">
-            <button type="button" class="botao botao--neutro botao--pill botao--full" data-confirmar-cancelar>
+            <button type="button" class="botao botao--neutro botao--full" data-confirmar-cancelar>
                 Cancelar
             </button>
-            <button type="button" class="botao botao--perigo botao--pill botao--full" data-confirmar-ok>
+            <button type="button" class="botao botao--perigo botao--full" data-confirmar-ok>
                 Excluir
             </button>
         </div>

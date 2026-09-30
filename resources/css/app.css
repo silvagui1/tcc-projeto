@@ -421,6 +421,17 @@ img {
 /* Foco visível por teclado (Tab) — a página zera outline nos resets globais
    e usava inputs sem substituto nenhum, o que escondia onde o foco estava.
    Escopado só à tela de Clientes e seus modais (não mexe na navbar). */
+/* --text-muted (#999696, token global de mobilenav_atualizado) tem contraste
+   fraco contra fundos claros — problema que ficou mais visível aqui porque
+   a tela passou a usar esse tom em bem mais lugares (rótulos do resumo, dos
+   filtros, dado secundário da linha, crédito zerado...). Escurece só dentro
+   da tela de Clientes e seus modais, sem mexer no token compartilhado com
+   o resto do app (topbar/menu inferior, herdados de mobilenav_atualizado). */
+[data-clientes-page],
+.modal-overlay {
+    --text-muted: #7a7a7a;
+}
+
 [data-clientes-page] button:focus-visible,
 [data-clientes-page] a:focus-visible,
 [data-clientes-page] input:focus-visible,
@@ -552,6 +563,15 @@ img {
     flex: 1;
 }
 
+/* Em telas muito estreitas (ex.: iPhone SE, 375px, e Android de entrada),
+   os dois botões lado a lado ficavam espremidos contra o ícone/texto —
+   empilha em coluna só nesse caso extremo. */
+@media (max-width: 380px) {
+    .clientes-acoes {
+        flex-direction: column;
+    }
+}
+
 @media (min-width: 992px) {
     /* No mobile, .clientes-toolbar não tem estilo próprio (busca e ações
        ficam uma embaixo da outra, na ordem natural do HTML). No desktop
@@ -607,10 +627,13 @@ img {
     white-space: nowrap;
 }
 
+/* Peso/cor reduzidos (era 700/--text, igual ao título da página) — o
+   resumo é informação auxiliar e não deve competir com o título nem com o
+   nome do cliente na hierarquia da tela. */
 .resumo-item__valor {
     font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
+    font-weight: 600;
+    color: var(--text-muted);
 }
 
 .resumo-item--destaque .resumo-item__valor {
@@ -620,6 +643,28 @@ img {
 .resumo-item__rotulo {
     font-size: 12px;
     color: var(--text-muted);
+}
+
+/* No mobile, a tira em flex-wrap livre quebrava em 3-4 linhas com os
+   rótulos mais longos ("aniversariantes no mês", "novos nos últimos 7
+   dias"), voltando a ocupar bastante altura — o oposto do objetivo de ser
+   compacta. Um grid fixo de 2 colunas com o rótulo podendo quebrar dentro
+   da própria célula fica previsível em qualquer largura. */
+@media (max-width: 991.98px) {
+    .resumo-tira {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: var(--space-4);
+    }
+
+    .resumo-item {
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+
+    .resumo-item__rotulo {
+        white-space: normal;
+    }
 }
 
 /* Filtros da listagem — status, saldo e aniversariantes do mês, somados à
@@ -665,6 +710,19 @@ img {
     width: 15px;
     height: 15px;
     accent-color: var(--pink-400);
+}
+
+/* No mobile, os 3 filtros quebravam em linhas sem previsibilidade (cada um
+   só "caía" pra próxima linha conforme sobrava espaço). Um flex-basis
+   mínimo faz eles se organizarem em pares de forma mais consistente. */
+@media (max-width: 991.98px) {
+    .clientes-filtros {
+        row-gap: var(--space-3);
+    }
+
+    .filtro {
+        flex: 1 1 auto;
+    }
 }
 
 /* Lista de clientes — cada linha é seu próprio cartão, no padrão
@@ -748,6 +806,17 @@ img {
 
     .cabecalho-ordenar--fim {
         justify-content: flex-end;
+    }
+
+    /* Ao ativar "Selecionar", cada linha ganha um checkbox de 36px à
+       esquerda (20px do input + 16px de padding — ver .cliente-linha__checkbox),
+       inserido antes do botão da linha. Sem essa mesma reserva aqui, o
+       cabeçalho ficava alinhado como se o checkbox não existisse, e as
+       colunas de dados (avatar, nome, nascimento, créditos) desalinhavam
+       ~36px assim que o modo de seleção era ativado — mesmo problema que já
+       resolvemos pro ícone de WhatsApp, mas do lado esquerdo. */
+    [data-clientes-page].modo-selecao .clientes-lista-cabecalho {
+        padding-left: calc(var(--space-4) + 36px);
     }
 }
 
@@ -840,7 +909,7 @@ img {
 }
 
 .cliente-linha__nome {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -882,7 +951,7 @@ img {
     align-items: center;
     gap: 4px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -942,11 +1011,12 @@ a.cliente-linha__whatsapp:hover {
     display: none;
 }
 
-/* Em telas bem estreitas, essa coluna extra competia demais com o espaço do
-   nome (ver .cliente-linha__nome, que já trunca com reticências). O atalho
-   continua disponível pelo modal de detalhes — aqui ele só recua até a tela
-   ter espaço de sobra pra não prejudicar a leitura do nome. */
-@media (max-width: 399.98px) {
+/* Atalho de desktop only: no mobile essa coluna extra competia com o espaço
+   do nome (ver .cliente-linha__nome, que já trunca com reticências), e o
+   corte em 400px fazia o atalho aparecer/sumir de forma inconsistente entre
+   aparelhos parecidos (ex.: 390px vs 414/430px). O contato via WhatsApp
+   continua disponível pelo modal de detalhes em qualquer tamanho de tela. */
+@media (max-width: 991.98px) {
     .cliente-linha__whatsapp {
         display: none;
     }
@@ -1194,16 +1264,16 @@ a.cliente-linha__whatsapp:hover {
     transition: background-color .12s ease;
 }
 
-/* Antes deixava o botão em formato de cápsula (pill); hoje usa o mesmo raio
-   contido do resto dos botões — a classe continua existindo pra não exigir
-   trocar dezenas de elementos nos templates, só deixou de significar
-   "arredondado ao extremo". */
-.botao--pill {
-    border-radius: var(--radius-control);
-}
-
 .botao--full {
     width: 100%;
+}
+
+/* Estado desabilitado — antes controlado só via JS (element.style.opacity),
+   misturando apresentação com lógica. Agora qualquer <button disabled> fica
+   assim automaticamente, sem o JS precisar saber de estilo. */
+.botao:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }
 
 /* Ação principal — mesma cor rosa usada nas CTAs do resto do app
@@ -1361,6 +1431,16 @@ a.cliente-linha__whatsapp:hover {
     font-size: 14px;
     font-weight: 700;
     margin: 0 0 var(--space-3);
+}
+
+/* Divisória sutil entre subgrupos de campos dentro de um mesmo card (ex.:
+   dados básicos / contato / observações no card "Dados do cliente") — usada
+   pra não precisar de uma caixa própria pra cada grupo, mesma ideia da tira
+   de resumo (divisor em vez de cartão) aplicada aqui dentro do modal. */
+.cartao__grupo {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--surface-border);
 }
 
 .cartao__linha-foto {
@@ -1583,10 +1663,6 @@ a.cliente-linha__whatsapp:hover {
 
 .creditos__acoes .botao {
     flex: 1;
-}
-
-.creditos__acoes .botao:disabled {
-    cursor: not-allowed;
 }
 
 .creditos__mensagem {

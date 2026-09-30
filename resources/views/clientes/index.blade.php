@@ -109,11 +109,11 @@
         <span data-selecao-contagem>0 selecionados</span>
         <div class="barra-selecao__acoes">
             <button type="button" class="botao-texto" data-cancelar-selecao>Cancelar</button>
-            <button type="button" class="botao botao--neutro botao--pill" data-exportar-selecionados>
+            <button type="button" class="botao botao--neutro" data-exportar-selecionados>
                 <i class="bi bi-download" aria-hidden="true"></i>
                 Exportar
             </button>
-            <button type="button" class="botao botao--perigo botao--pill" data-confirmar-exclusao>Excluir selecionados</button>
+            <button type="button" class="botao botao--perigo" data-confirmar-exclusao>Excluir selecionados</button>
         </div>
     </div>
 </div>

@@ -46,7 +46,7 @@
                 <i class="bi bi-people clientes-vazio__icone" aria-hidden="true"></i>
                 <p class="clientes-vazio__titulo">Nenhum cliente cadastrado</p>
                 <p class="clientes-vazio__texto">Adicione o primeiro cliente para começar a controlar cadastros e créditos.</p>
-                <button type="button" class="botao botao--principal botao--pill" data-abrir-criar-vazio>
+                <button type="button" class="botao botao--principal" data-abrir-criar-vazio>
                     <i class="bi bi-person-plus-fill" aria-hidden="true"></i>
                     Adicionar cliente
                 </button>

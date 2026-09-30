@@ -470,10 +470,8 @@ function iniciarPaginaClientes() {
         const total = selecionados.size;
         selecaoContagem.textContent = total === 1 ? '1 selecionado' : total + ' selecionados';
         botaoConfirmarExclusao.disabled = total === 0;
-        botaoConfirmarExclusao.style.opacity = total === 0 ? '0.5' : '1';
         if (botaoExportarSelecionados) {
             botaoExportarSelecionados.disabled = total === 0;
-            botaoExportarSelecionados.style.opacity = total === 0 ? '0.5' : '1';
         }
     }
 
@@ -965,7 +963,6 @@ function iniciarPaginaClientes() {
             if (!botaoDescontar) return;
             const atual = parseFloat(inputCreditos.value) || 0;
             botaoDescontar.disabled = atual <= 0;
-            botaoDescontar.style.opacity = atual <= 0 ? '0.5' : '1';
         }
 
         function mostrarMensagemCreditos(texto) {
