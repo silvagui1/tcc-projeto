@@ -32,9 +32,9 @@
     @if (count($ativos))
         <h2 class="champ-section-title champ-section-title--desktop">Em andamento</h2>
 
-        <div class="champ-carousel {{ count($ativos) > 1 ? 'champ-carousel--multi' : '' }}">
+        <div class="champ-carousel {{ count($ativos) > 1 ? 'champ-carousel--multi' : '' }}" data-carousel>
             @foreach ($ativos as $ativo)
-                <div class="champ-active">
+                <div class="champ-active" data-carousel-item>
                     <div class="champ-active__top">
                         <span class="champ-status">
                             ativo
@@ -62,6 +62,18 @@
                 </div>
             @endforeach
         </div>
+
+        {{-- bolinhas do carrossel (só no mobile): mostram qual card está na
+             tela e levam até ele ao tocar. O app.js mantém a ativa em dia. --}}
+        @if (count($ativos) > 1)
+            <div class="champ-carousel-dots" data-carousel-dots>
+                @foreach ($ativos as $ativo)
+                    <button type="button" class="{{ $loop->first ? 'is-active' : '' }}"
+                            aria-label="Ver {{ $ativo['nome'] }}"
+                            @if ($loop->first) aria-current="true" @endif></button>
+                @endforeach
+            </div>
+        @endif
     @endif
 
     @if (count($outras))

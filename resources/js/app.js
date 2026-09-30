@@ -53,34 +53,149 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Estoque de cartas — pop-up "Adicionar carta". Qualquer botão com
-// data-card-dialog-open abre o <dialog>; se o form voltou com erros de
-// validação, o pop-up já abre sozinho (data-open-on-load).
+// Estoque — pop-ups "Adicionar carta" e "Adicionar produto". Cada <dialog
+// data-card-dialog="nome"> abre pelos botões com data-card-dialog-open="nome";
+// se o form voltou com erros de validação, o pop-up já abre sozinho
+// (data-open-on-load).
 document.addEventListener('DOMContentLoaded', () => {
-    const dialog = document.querySelector('[data-card-dialog]');
+    document.querySelectorAll('[data-card-dialog]').forEach((dialog) => {
+        document.querySelectorAll(`[data-card-dialog-open="${dialog.dataset.cardDialog}"]`).forEach((botao) => {
+            botao.addEventListener('click', () => dialog.showModal());
+        });
 
-    if (!dialog) {
+        dialog.querySelectorAll('[data-card-dialog-close]').forEach((botao) => {
+            botao.addEventListener('click', () => dialog.close());
+        });
+
+        // clicar no fundo escuro também fecha
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+
+        if (dialog.hasAttribute('data-open-on-load')) {
+            dialog.showModal();
+        }
+    });
+});
+
+// Campeonatos — carrossel dos ativos (mobile). Ao arrastar, a bolinha do card
+// mais próximo do centro fica marcada; tocar numa bolinha rola até o card.
+document.addEventListener('DOMContentLoaded', () => {
+    const carrossel = document.querySelector('[data-carousel]');
+    const bolinhas = [...(document.querySelectorAll('[data-carousel-dots] button'))];
+
+    if (!carrossel || !bolinhas.length) {
         return;
     }
 
-    document.querySelectorAll('[data-card-dialog-open]').forEach((botao) => {
-        botao.addEventListener('click', () => dialog.showModal());
-    });
+    const cards = [...carrossel.querySelectorAll('[data-carousel-item]')];
 
-    dialog.querySelectorAll('[data-card-dialog-close]').forEach((botao) => {
-        botao.addEventListener('click', () => dialog.close());
-    });
+    const marcar = (indice) => {
+        bolinhas.forEach((bolinha, i) => {
+            bolinha.classList.toggle('is-active', i === indice);
+            bolinha.toggleAttribute('aria-current', i === indice);
+        });
+    };
 
-    // clicar no fundo escuro também fecha
-    dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) {
-            dialog.close();
-        }
-    });
+    carrossel.addEventListener('scroll', () => {
+        const centro = carrossel.scrollLeft + carrossel.clientWidth / 2;
+        const distancias = cards.map((card) => Math.abs(card.offsetLeft - carrossel.offsetLeft + card.offsetWidth / 2 - centro));
+        marcar(distancias.indexOf(Math.min(...distancias)));
+    }, { passive: true });
 
-    if (dialog.hasAttribute('data-open-on-load')) {
-        dialog.showModal();
-    }
+    bolinhas.forEach((bolinha, i) => {
+        bolinha.addEventListener('click', () => {
+            cards[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        });
+    });
+});
+
+// Estoque — campo de imagem ([data-image-drop]): arrastar um arquivo para a
+// zona, colar (Ctrl+V) uma imagem copiada com o formulário aberto ou clicar
+// para escolher. O arquivo vai para o <input type="file"> e aparece a prévia.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-image-drop]').forEach((campo) => {
+        const zona = campo.querySelector('[data-image-drop-zona]');
+        const input = campo.querySelector('[data-image-drop-input]');
+        const previa = campo.querySelector('[data-image-drop-previa]');
+        const nome = campo.querySelector('[data-image-drop-nome]');
+        const remover = campo.querySelector('[data-image-drop-remover]');
+        const vazio = zona.querySelector('.image-drop__vazio');
+        const dialog = campo.closest('dialog');
+
+        const mostrar = () => {
+            const arquivo = input.files[0];
+            if (previa.src.startsWith('blob:')) {
+                URL.revokeObjectURL(previa.src);
+            }
+
+            vazio.hidden = !!arquivo;
+            previa.parentElement.hidden = !arquivo;
+            remover.hidden = !arquivo;
+
+            if (arquivo) {
+                previa.src = URL.createObjectURL(arquivo);
+                nome.textContent = arquivo.name;
+            } else {
+                previa.removeAttribute('src');
+            }
+        };
+
+        // coloca o arquivo no input (arrastar e colar não passam pelo seletor)
+        const usar = (arquivo) => {
+            if (!arquivo || !arquivo.type.startsWith('image/')) {
+                return false;
+            }
+            const lista = new DataTransfer();
+            lista.items.add(arquivo);
+            input.files = lista.files;
+            mostrar();
+            return true;
+        };
+
+        input.addEventListener('change', mostrar);
+
+        remover.addEventListener('click', () => {
+            input.value = '';
+            mostrar();
+        });
+
+        ['dragenter', 'dragover'].forEach((tipo) => zona.addEventListener(tipo, (event) => {
+            event.preventDefault();
+            zona.classList.add('is-arrastando');
+        }));
+
+        ['dragleave', 'drop'].forEach((tipo) => zona.addEventListener(tipo, () => {
+            zona.classList.remove('is-arrastando');
+        }));
+
+        zona.addEventListener('drop', (event) => {
+            event.preventDefault();
+            usar([...event.dataTransfer.files].find((arquivo) => arquivo.type.startsWith('image/')));
+        });
+
+        // colar: só com o pop-up aberto. Se a área de transferência também tem
+        // texto e o cursor está num campo de texto, deixa colar o texto normal.
+        document.addEventListener('paste', (event) => {
+            if (dialog && !dialog.open) {
+                return;
+            }
+
+            const imagem = [...event.clipboardData.files].find((arquivo) => arquivo.type.startsWith('image/'));
+            const emCampoDeTexto = event.target.matches?.('input:not([type="file"]), textarea');
+            if (!imagem || (emCampoDeTexto && event.clipboardData.getData('text/plain'))) {
+                return;
+            }
+
+            event.preventDefault();
+            usar(imagem);
+        });
+
+        // o "Cancelar" limpa o form: a prévia some junto
+        campo.closest('form')?.addEventListener('reset', () => setTimeout(mostrar));
+    });
 });
 
 // Campeonatos — busca de participantes (criar): esconde os clientes cujo

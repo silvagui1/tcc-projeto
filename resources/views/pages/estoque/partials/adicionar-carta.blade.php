@@ -1,5 +1,5 @@
 {{-- Pop-up "Adicionar carta" — usado na aba "estoque cartas" e na página de
-     cartas. Abre ao clicar em qualquer botão com data-card-dialog-open (ver
+     cartas. Abre ao clicar em qualquer botão com data-card-dialog-open="carta" (ver
      app.js). Se a validação falhar, a página volta com o pop-up já aberto
      (data-open-on-load) mostrando os erros e os valores digitados.
      $jogoPadrao: jogo que já vem selecionado no campo "jogo". --}}
@@ -10,9 +10,10 @@
     </p>
 @endif
 
-<dialog class="card-dialog" data-card-dialog @if ($errors->any()) data-open-on-load @endif
+<dialog class="card-dialog" data-card-dialog="carta" @if ($errors->any()) data-open-on-load @endif
         aria-labelledby="card-dialog-title">
-    <form method="POST" action="{{ route('estoque.cartas.adicionar') }}" class="card-form">
+    <form method="POST" action="{{ route('estoque.cartas.adicionar') }}" class="card-form"
+          enctype="multipart/form-data">
         @csrf
 
         <div class="card-form__header">
@@ -46,7 +47,7 @@
                 <span>Jogo *</span>
                 <select name="jogo" required>
                     @foreach ($jogosDisponiveis as $jogo)
-                        <option value="{{ $jogo }}" @selected(old('jogo', $jogoPadrao) === $jogo)>{{ ucfirst($jogo) }}</option>
+                        <option value="{{ $jogo }}" @selected(old('jogo', $jogoPadrao) === $jogo)>{{ nomeDoJogo($jogo) }}</option>
                     @endforeach
                 </select>
             </label>
@@ -114,11 +115,7 @@
 
         <h3>Imagem</h3>
 
-        <label class="card-field card-field--full">
-            <span>URL da imagem</span>
-            <input type="url" name="imagem" maxlength="500"
-                   placeholder="https://..." value="{{ old('imagem') }}">
-        </label>
+        @include('pages.estoque.partials.campo-imagem', ['erros' => $errors->getBag('default')])
 
         <div class="card-form__actions">
             <button type="button" class="card-form__cancel" data-card-dialog-close>Cancelar</button>

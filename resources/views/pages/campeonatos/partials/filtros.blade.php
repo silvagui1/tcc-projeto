@@ -4,7 +4,6 @@
      Escolher uma opção já aplica o filtro (data-auto-submit no app.js); a
      busca aplica com Enter ou no botão. --}}
 @php
-    $nomesJogos = ['pokemon' => 'Pokémon', 'magic' => 'Magic', 'onepiece' => 'One Piece'];
     $totalResultados = count($ativos) + count($outras);
 @endphp
 
@@ -37,7 +36,7 @@
                 @foreach ($jogosDisponiveis as $jogo)
                     <label class="chip chip--check">
                         <input type="radio" name="jogo" value="{{ $jogo }}" {{ $filtros['jogo'] === $jogo ? 'checked' : '' }}>
-                        {{ $nomesJogos[$jogo] ?? ucfirst($jogo) }}
+                        {{ nomeDoJogo($jogo) }}
                     </label>
                 @endforeach
             </div>

@@ -594,18 +594,6 @@ img {
         display: contents;
     }
 
-    .estoque-toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 16px;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-
-    .estoque-toolbar > * {
-        margin-bottom: 0;
-    }
-
     .estoque-layout {
         display: grid;
         grid-template-columns: 240px minmax(0, 1fr);
@@ -1101,14 +1089,28 @@ img {
     font-size: 14px;
 }
 
+.card-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    background: var(--field);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
 .card-field input:focus,
-.card-field select:focus {
+.card-field select:focus,
+.card-field textarea:focus {
     outline: 2px solid var(--purple-300);
     outline-offset: 1px;
     border-color: var(--purple-500);
 }
 
-.card-field input::placeholder {
+.card-field input::placeholder,
+.card-field textarea::placeholder {
     color: var(--text-muted-2);
 }
 
@@ -1178,6 +1180,123 @@ img {
 
 .card-form__submit:hover {
     background: var(--purple-light-800);
+}
+
+/* --- Campo de imagem: arrastar, colar ou escolher (partials/campo-imagem) --- */
+
+.image-drop__zona {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    padding: 16px;
+    border: 2px dashed var(--surface-border);
+    border-radius: var(--radius-md);
+    background: var(--field);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.image-drop__zona:hover,
+.image-drop__zona.is-arrastando {
+    border-color: var(--purple-500);
+    background: var(--purple-light-300);
+}
+
+.image-drop__zona:has(input:focus-visible) {
+    outline: 2px solid var(--purple-300);
+    outline-offset: 1px;
+}
+
+/* o input fica invisível: a zona inteira é o botão */
+.image-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.image-drop__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.image-drop__vazio i {
+    font-size: 28px;
+    color: var(--purple-500);
+}
+
+.image-drop__vazio strong {
+    color: var(--text);
+    font-size: 14px;
+}
+
+.image-drop__previa {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.image-drop__previa[hidden],
+.image-drop__vazio[hidden] {
+    display: none;
+}
+
+.image-drop__previa img {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: var(--radius-sm);
+    object-fit: contain;
+}
+
+.image-drop__nome {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-drop__remover {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--purple-500);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.image-drop__remover:hover {
+    background: var(--purple-light-300);
+}
+
+.image-drop__remover[hidden] {
+    display: none;
+}
+
+.image-drop__aviso {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.image-drop__url {
+    margin-top: 12px;
 }
 
 @media (min-width: 600px) {
@@ -1826,6 +1945,30 @@ img {
     flex-basis: 90%;
 }
 
+/* bolinhas embaixo do carrossel; a do card na tela fica alongada */
+.champ-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.champ-carousel-dots button {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: var(--surface-border);
+    cursor: pointer;
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.champ-carousel-dots button.is-active {
+    width: 22px;
+    background: var(--purple-500);
+}
+
 .champ-active {
     background: var(--pink-400);
     border-radius: var(--radius-lg);
@@ -2057,6 +2200,11 @@ img {
 
     .champ-carousel--multi > .champ-active {
         flex-basis: calc(50% - 12px);
+    }
+
+    /* no desktop os cards ficam lado a lado, então as bolinhas somem */
+    .champ-carousel-dots {
+        display: none;
     }
 
     .champ-active {
@@ -2875,6 +3023,15 @@ img {
     gap: 6px;
     padding: 5px 12px;
     font-size: 12.5px;
+}
+
+/* chips que são links (abas produtos / cartas do estoque) */
+a.chip {
+    transition: background-color 0.15s ease;
+}
+
+a.chip:not(.is-active):hover {
+    background: var(--purple-light-300);
 }
 
 /* bolinha de status (mesmas cores do selo ativo/finalizado dos cards) */

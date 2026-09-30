@@ -13,7 +13,7 @@
     <form method="GET" action="{{ route('estoque.cartas') }}" class="cartas-filtros__form">
         <input type="hidden" name="jogo" value="{{ $jogoAtual }}">
 
-        @foreach (['estado' => 'estado', 'raridade' => 'raridade', 'idioma' => 'idioma'] as $campo => $titulo)
+        @foreach (['estado' => 'Estado', 'raridade' => 'Raridade', 'idioma' => 'Idioma'] as $campo => $titulo)
             @if ($opcoes[$campo])
                 <fieldset class="cartas-filtros__grupo">
                     <legend>{{ $titulo }}</legend>
@@ -31,7 +31,7 @@
         @endforeach
 
         <fieldset class="cartas-filtros__grupo">
-            <legend>acabamento</legend>
+            <legend>Acabamento</legend>
             <div class="chip-row">
                 <label class="chip chip--check">
                     <input type="checkbox" name="foil" value="1" {{ $filtros['foil'] ? 'checked' : '' }}>
@@ -41,20 +41,20 @@
         </fieldset>
 
         <fieldset class="cartas-filtros__grupo">
-            <legend>preço (R$)</legend>
+            <legend>Preço (R$)</legend>
             <div class="cartas-filtros__preco">
-                <input type="number" name="preco_min" min="0" step="0.01" placeholder="mín."
+                <input type="number" name="preco_min" min="0" step="0.01" placeholder="Mín."
                        value="{{ $filtros['preco_min'] }}" aria-label="Preço mínimo">
                 <span>–</span>
-                <input type="number" name="preco_max" min="0" step="0.01" placeholder="máx."
+                <input type="number" name="preco_max" min="0" step="0.01" placeholder="Máx."
                        value="{{ $filtros['preco_max'] }}" aria-label="Preço máximo">
             </div>
         </fieldset>
 
         <fieldset class="cartas-filtros__grupo">
-            <legend>ordenar</legend>
+            <legend>Ordenar</legend>
             <select name="ordenar" class="cartas-filtros__select">
-                @foreach (['recentes' => 'mais recentes', 'menor_preco' => 'menor preço', 'maior_preco' => 'maior preço', 'nome' => 'nome (A–Z)'] as $valor => $rotulo)
+                @foreach (['recentes' => 'Mais recentes', 'menor_preco' => 'Menor preço', 'maior_preco' => 'Maior preço', 'nome' => 'Nome (A–Z)'] as $valor => $rotulo)
                     <option value="{{ $valor }}" {{ $filtros['ordenar'] === $valor ? 'selected' : '' }}>{{ $rotulo }}</option>
                 @endforeach
             </select>

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use App\Http\Middleware\LogAcessoMiddleware;
 use App\Http\Controllers\AlunoController;
 /*
@@ -71,7 +72,7 @@ Route::get('/estoque', function () {
         'valorCartasAvulsas' => $valorCartasAvulsas,
     ];
 
-    $categorias = ['comida', 'cartas', 'bebida', 'Acessórios'];
+    $categorias = categoriasDeProdutos();
 
     $produtos = [
         [
@@ -118,6 +119,9 @@ Route::get('/estoque', function () {
         ],
     ];
 
+    // produtos adicionados pelo formulário (sessão, mais novos primeiro)
+    $produtos = array_merge(array_reverse(session('produtosAdicionados', [])), $produtos);
+
     // produto sem foto usa a imagem genérica da categoria
     foreach ($produtos as &$produto) {
         $produto['imagemPadrao'] = imagemPadraoProduto($produto['categoria']);
@@ -125,14 +129,68 @@ Route::get('/estoque', function () {
     }
     unset($produto);
 
+    // busca pelo nome (?busca=...): filtra os produtos ou, na aba de cartas,
+    // procura em todos os jogos em vez de só mostrar a prévia de Pokémon
+    $busca = trim((string) request('busca', ''));
+    $bate = fn ($item) => $busca === '' || mb_stripos($item['nome'], $busca) !== false;
+
+    $produtos = array_values(array_filter($produtos, $bate));
+
     // prévia da aba "estoque cartas": as primeiras cartas de Pokémon (as
     // adicionadas pelo formulário aparecem primeiro), antes do "ver todas"
-    $cartasDestaque = array_slice(cartasDoJogo('pokemon'), 0, 4);
+    if ($busca === '') {
+        $cartasDestaque = array_slice(cartasDoJogo('pokemon'), 0, 4);
+    } else {
+        $cartasDestaque = [];
+        foreach (jogosDeCartas() as $jogo) {
+            $cartasDestaque = array_merge($cartasDestaque, array_filter(cartasDoJogo($jogo), $bate));
+        }
+    }
 
     $jogosDisponiveis = jogosDeCartas();
 
-    return view('pages.estoque.index', compact('tab', 'resumo', 'categorias', 'produtos', 'cartasDestaque', 'jogosDisponiveis'));
+    return view('pages.estoque.index', compact('tab', 'busca', 'resumo', 'categorias', 'produtos', 'cartasDestaque', 'jogosDisponiveis'));
 })->name('estoque.index');
+
+// Formulário "Adicionar produto" (aba estoque produtos). Como as cartas, o
+// produto fica guardado na sessão enquanto o projeto não tem banco de dados.
+// Os erros vão para o grupo "produto" ($errors->produto na view).
+Route::post('/estoque/produtos', function () {
+    $dados = request()->validateWithBag('produto', [
+        'nome' => ['required', 'string', 'max:120'],
+        'categoria' => ['required', 'in:' . implode(',', categoriasDeProdutos())],
+        'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
+        'descricao' => ['nullable', 'string', 'max:300'],
+        'imagem' => ['nullable', 'url', 'max:500'],
+        'imagem_arquivo' => ['nullable', 'image', 'max:5120'],
+    ], [
+        'required' => 'O campo :attribute é obrigatório.',
+        'in' => 'Escolha uma opção válida em :attribute.',
+        'string' => 'O campo :attribute deve ser um texto.',
+        'max' => 'O campo :attribute passou do limite (máx. :max).',
+        'min' => 'O campo :attribute deve ser no mínimo :min.',
+        'numeric' => 'O campo :attribute deve ser um número.',
+        'url' => 'O campo :attribute deve ser um link válido (https://...).',
+        'image' => 'O arquivo de :attribute precisa ser uma imagem (jpg, png, webp...).',
+        'imagem_arquivo.max' => 'A imagem passou do limite de 5 MB.',
+        'uploaded' => 'Não foi possível enviar a imagem (talvez ela seja grande demais).',
+    ], [
+        'preco' => 'preço',
+        'descricao' => 'descrição',
+        'imagem' => 'url da imagem',
+        'imagem_arquivo' => 'imagem',
+    ]);
+
+    unset($dados['imagem_arquivo']);
+    $dados['imagem'] = salvarImagemEnviada('produtos') ?? ($dados['imagem'] ?? null);
+    $dados['preco'] = (float) $dados['preco'];
+    $dados['descricao'] = $dados['descricao'] ?? '';
+
+    session()->push('produtosAdicionados', $dados);
+
+    return redirect()->route('estoque.index', ['tab' => 'produtos'])
+        ->with('produtoAdicionado', $dados['nome']);
+})->name('estoque.produtos.adicionar');
 
 // --- Estoque de cartas: dados compartilhados --------------------------------
 // (function_exists evita erro de "função redeclarada" no route:cache)
@@ -142,6 +200,40 @@ if (! function_exists('jogosDeCartas')) {
 function jogosDeCartas()
 {
     return ['pokemon', 'magic', 'onepiece'];
+}
+}
+
+// nome de cada jogo como aparece na tela (filtros, abas, títulos)
+if (! function_exists('nomeDoJogo')) {
+function nomeDoJogo($jogo)
+{
+    return ['pokemon' => 'Pokémon', 'magic' => 'Magic', 'onepiece' => 'One Piece'][$jogo] ?? ucfirst($jogo);
+}
+}
+
+// categorias de produto (filtro da aba e campo do formulário)
+if (! function_exists('categoriasDeProdutos')) {
+function categoriasDeProdutos()
+{
+    return ['comida', 'cartas', 'bebida', 'Acessórios'];
+}
+}
+
+// imagem arrastada/colada/escolhida nos pop-ups do estoque (campo
+// "imagem_arquivo"): vai para public/uploads/<pasta> e devolve o link dela.
+// Sem arquivo, devolve null (aí vale o link digitado, se houver).
+if (! function_exists('salvarImagemEnviada')) {
+function salvarImagemEnviada($pasta)
+{
+    if (! request()->hasFile('imagem_arquivo')) {
+        return null;
+    }
+
+    $arquivo = request()->file('imagem_arquivo');
+    $nomeArquivo = Str::uuid() . '.' . ($arquivo->guessExtension() ?: 'png');
+    $arquivo->move(public_path("uploads/{$pasta}"), $nomeArquivo);
+
+    return asset("uploads/{$pasta}/{$nomeArquivo}");
 }
 }
 
@@ -438,6 +530,7 @@ Route::post('/estoque/cartas', function () {
         'quantidade' => ['required', 'integer', 'min:1', 'max:9999'],
         'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
         'imagem' => ['nullable', 'url', 'max:500'],
+        'imagem_arquivo' => ['nullable', 'image', 'max:5120'],
         'foil' => ['nullable', 'boolean'],
     ], [
         // mensagens em português (o projeto ainda não tem lang/pt_BR)
@@ -450,11 +543,18 @@ Route::post('/estoque/cartas', function () {
         'numeric' => 'O campo :attribute deve ser um número.',
         'url' => 'O campo :attribute deve ser um link válido (https://...).',
         'boolean' => 'O campo :attribute é inválido.',
+        'image' => 'O arquivo de :attribute precisa ser uma imagem (jpg, png, webp...).',
+        'imagem_arquivo.max' => 'A imagem passou do limite de 5 MB.',
+        'uploaded' => 'Não foi possível enviar a imagem (talvez ela seja grande demais).',
     ], [
         'colecao' => 'coleção',
         'preco' => 'preço',
         'imagem' => 'url da imagem',
+        'imagem_arquivo' => 'imagem',
     ]);
+
+    unset($dados['imagem_arquivo']);
+    $dados['imagem'] = salvarImagemEnviada('cartas') ?? ($dados['imagem'] ?? null);
 
     $dados['foil'] = request()->boolean('foil');
     $dados['colecao'] = $dados['colecao'] ?? '—';

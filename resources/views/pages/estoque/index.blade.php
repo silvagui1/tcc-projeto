@@ -34,19 +34,56 @@
 
     <hr class="divider">
 
-    {{-- abas + busca: empilhadas no mobile, lado a lado no desktop --}}
-    <div class="estoque-toolbar">
-        {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
-        <div class="tabs">
-            <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="{{ $tab === 'produtos' ? 'is-active' : '' }}">estoque produtos</a>
-            <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="{{ $tab === 'cartas' ? 'is-active' : '' }}">estoque cartas</a>
+    {{-- busca + abas, no mesmo painel da lista de campeonatos (.champ-filtros):
+         em cima a busca; embaixo a troca entre estoque produtos / cartas --}}
+    @php
+        $totalResultados = $tab === 'produtos' ? count($produtos) : count($cartasDestaque);
+    @endphp
+
+    <form method="GET" action="{{ route('estoque.index') }}" class="champ-filtros">
+        <input type="hidden" name="tab" value="{{ $tab }}">
+
+        <div class="champ-filtros__topo">
+            <div class="champ-filtros__busca">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <input type="search" name="busca" value="{{ $busca }}"
+                       placeholder="{{ $tab === 'produtos' ? 'Buscar produto' : 'Buscar carta' }}"
+                       aria-label="{{ $tab === 'produtos' ? 'Buscar produto pelo nome' : 'Buscar carta pelo nome' }}">
+                <button type="submit">Buscar</button>
+            </div>
         </div>
 
-        <div class="search-bar">
-            <span>{{ $tab === 'produtos' ? 'buscar produto' : 'buscar carta' }}</span>
-            <i class="bi bi-search"></i>
+        <div class="champ-filtros__base">
+            {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
+            <div class="champ-filtros__grupo" role="group" aria-labelledby="filtro-estoque">
+                <span class="champ-filtros__rotulo" id="filtro-estoque">Estoque</span>
+                <div class="chip-row">
+                    <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="chip {{ $tab === 'produtos' ? 'is-active' : '' }}">
+                        <i class="bi bi-box-seam" aria-hidden="true"></i> Produtos
+                    </a>
+                    <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="chip {{ $tab === 'cartas' ? 'is-active' : '' }}">
+                        <i class="bi bi-collection" aria-hidden="true"></i> Cartas
+                    </a>
+                </div>
+            </div>
+
+            <div class="champ-filtros__resumo">
+                <span>
+                    {{ $totalResultados }}
+                    @if ($tab === 'produtos')
+                        {{ $totalResultados === 1 ? 'produto' : 'produtos' }}
+                    @else
+                        {{ $totalResultados === 1 ? 'carta' : 'cartas' }}
+                    @endif
+                </span>
+                @if ($busca !== '')
+                    <a href="{{ route('estoque.index', ['tab' => $tab]) }}" class="champ-filtros__limpar">
+                        <i class="bi bi-x-lg"></i> Limpar busca
+                    </a>
+                @endif
+            </div>
         </div>
-    </div>
+    </form>
 
     @if ($tab === 'produtos')
 
@@ -55,17 +92,17 @@
             <aside class="filters">
                 <h3>Filtros</h3>
 
-                <span class="filters__group-label">categorias</span>
+                <span class="filters__group-label">Categorias</span>
                 <div class="chip-row">
                     @foreach ($categorias as $categoria)
-                        <span class="chip {{ $loop->first ? 'is-active' : '' }}">{{ $categoria }}</span>
+                        <span class="chip {{ $loop->first ? 'is-active' : '' }}">{{ Str::ucfirst($categoria) }}</span>
                     @endforeach
                 </div>
 
-                <span class="filters__group-label">ordenar</span>
+                <span class="filters__group-label">Ordenar</span>
                 <div class="chip-row">
-                    <span class="chip is-active">primeiros adicionados</span>
-                    <span class="chip">ultimos adicionados</span>
+                    <span class="chip is-active">Primeiros adicionados</span>
+                    <span class="chip">Últimos adicionados</span>
                 </div>
             </aside>
 
@@ -73,6 +110,8 @@
 
             <section class="estoque-layout__produtos">
                 <h2 style="font-size: 20px;">Produtos</h2>
+
+                @include('pages.estoque.partials.adicionar-produto')
 
                 <div class="product-grid">
                     @foreach ($produtos as $produto)
@@ -91,7 +130,7 @@
                         </div>
                     @endforeach
 
-                    <button type="button" class="add-product-card">
+                    <button type="button" class="add-product-card" data-card-dialog-open="produto">
                         <span class="plus-circle"><i class="bi bi-plus-lg"></i></span>
                         Adicionar produto
                     </button>

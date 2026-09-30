@@ -24,14 +24,14 @@
         <div class="tabs tabs--pill">
             @foreach ($jogosDisponiveis as $jogo)
                 <a href="{{ route('estoque.cartas', ['jogo' => $jogo]) }}" class="{{ $jogoAtual === $jogo ? 'is-active' : '' }}">
-                    {{ ucfirst($jogo) }}
+                    {{ nomeDoJogo($jogo) }}
                 </a>
             @endforeach
         </div>
     </div>
 
     <div class="cartas-header" style="margin-top: 24px;">
-        <h2>{{ count($cartas) }} {{ count($cartas) === 1 ? 'carta' : 'cartas' }} de {{ ucfirst($jogoAtual) }}</h2>
+        <h2>{{ count($cartas) }} {{ count($cartas) === 1 ? 'carta' : 'cartas' }} de {{ nomeDoJogo($jogoAtual) }}</h2>
         @include('pages.estoque.partials.adicionar-carta-botao')
     </div>
 
