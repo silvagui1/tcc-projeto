@@ -11,16 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('campeonato', function (Blueprint $table) {
+        Schema::create('campeonatos', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+
             $table->string('nome');
             $table->string('deck');
-            $table->datetime('horário');
-            $table->bobobobo('valor');
-            $table->string('participantes');
-            $table->string('descricao');
-            
+            $table->datetime('data');
+            $table->decimal('valor_inscricao', 10, 2)->default(0); 
+            $table->string('imagem')->nullable();
+            $table->string('descricao', 350)->nullable();
+            $table->enum('status', ['ativo', 'finalizado'])->default('ativo');
 
         });
     }
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('campeonato');
+        Schema::dropIfExists('campeonatos');
     }
 };

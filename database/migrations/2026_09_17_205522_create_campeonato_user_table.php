@@ -11,17 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('campeonato', function (Blueprint $table) {
+        Schema::create('campeonato_user', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('nome');
-            $table->string('deck');
-            $table->datetime('horário');
-            $table->bobobobo('valor');
-            $table->string('participantes');
-            $table->string('descricao');
             
+            $table->foreignId('campeonato_id')
+                ->constrained('campeonatos')
+                ->cascadeOnDelete();
 
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->decimal('valor_pago', 10, 2)->default(0);
+            $table->unsignedInteger('colocacao')->nullable();
+
+            $table->unique(['campeonato-id', 'user_id']);
         });
     }
 
@@ -30,6 +35,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('campeonato');
+        Schema::dropIfExists('campeonato_user');
     }
 };
+
+
+//o que deve existir nessa página? e qual o nome dado a tabela dela?
