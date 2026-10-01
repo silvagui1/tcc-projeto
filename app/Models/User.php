@@ -3,15 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Model
+class User extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    protected $table = 'user';
     protected $fillable = [
-        'nome',
+        'name',
+        'email',
+        'password',
     ];
-}
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // Campeonatos em que o usuário está inscrito
+    public function campeonatos()
+    {
+        return $this->belongsToMany(Campeonato::class, 'campeonato_user')->withTimestamps();
+    }
+}

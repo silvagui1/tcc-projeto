@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCampeonatoRequest;
+use App\Http\Requests\UpdateCampeonatoRequest;
+use App\Models\Campeonato;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class CampeonatoController extends Controller
 {
@@ -14,6 +17,7 @@ class CampeonatoController extends Controller
 
         return view('campeonatos.index', compact('ativos', 'finalizados'));
 
+        return back()->with('success', 'Participante removido!');
     }
  
     public function create(){

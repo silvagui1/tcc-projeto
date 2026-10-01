@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('campeonato_user', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             
             $table->foreignId('campeonato_id')
                 ->constrained('campeonatos')

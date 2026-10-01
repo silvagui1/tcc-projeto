@@ -1,0 +1,2489 @@
+/* ==========================================================================
+   TCC Projeto - Estilos globais do frontend
+   Paleta e componentes extraídos do protótipo "Protótipo TCC" (Figma).
+   ========================================================================== */
+
+:root {
+    /* cores base */
+    --bg: #dfdede;
+    --surface: #ededed;
+    --surface-border: #d5d5d5;
+    --white: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #999696;
+    --text-muted-2: #aaaaaa;
+
+    /* cartões escuros (estoque / resumo) */
+    --navy-900: #2e3045;
+    --navy-glow: #4c4f72;
+    --blue-900: #2e4762;
+    --blue-glow: #395573;
+
+    /* azul (ações / destaques) */
+    --blue-200: #bcd7f5;
+    --blue-300: #9ec5f0;
+    --blue-400: #8bbaed;
+
+    /* roxo (categorias / navegação) */
+    --purple-300: #8c8ea8;
+    --purple-500: #53577d;
+    --purple-light-800: #6c6588;
+    --purple-light-300: #d7cffa;
+
+    /* rosa (campeonatos / premiações) */
+    --pink-200: #d4aec1;
+    --pink-300: #c088a5;
+    --pink-400: #b47194;
+    --pink-500: #a14e79;
+    --pink-700: #723756;
+    --pink-900: #442133;
+
+    /* amarelo (vendas) — base (300) tirada do fundo da logo ArtPlay */
+    --yellow-200: #ffe9c2;
+    --yellow-300: #ffdc9b;
+    --yellow-400: #f5c874;
+    --yellow-500: #e3ad4c;
+    --yellow-700: #a8772a;
+    --yellow-900: #5e4217;
+
+    /* layout */
+    --topbar-height: 76px;
+    --bottom-nav-height: 16px;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 10px;
+
+    /* breakpoint "desktop" combinado com a media query abaixo (992px) */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+/* esconde a barra de rolagem lateral da página; a rolagem continua
+   funcionando normalmente (roda do mouse, touch, teclado) */
+html {
+    scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ==========================================================================
+   Estrutura da página (layouts/app.blade.php)
+   ========================================================================== */
+
+.app-shell {
+    min-height: 100vh;
+}
+
+.app-content {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 20px calc(var(--bottom-nav-height) + 24px);
+    position: relative;
+}
+
+/* No desktop existe a navbar de largura total fixa no topo, então o conteúdo
+   ganha um respiro extra (var(--topbar-height)) para não ficar embaixo dela. */
+@media (min-width: 992px) {
+    .app-content {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: calc(var(--topbar-height) + 40px) 24px 60px;
+    }
+}
+
+/* ==========================================================================
+   Cabeçalho de página simples (título + voltar/fechar)
+   ========================================================================== */
+
+.page-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 20px;
+}
+
+.page-topbar__title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: var(--text);
+    font-size: 20px;
+}
+
+/* ==========================================================================
+   Cartões de estatística (estoque, resumo home)
+   ========================================================================== */
+
+.stat-card {
+    background: linear-gradient(145deg, var(--navy-glow), var(--navy-900));
+    color: var(--bg);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 8px 8px 10px rgba(0, 0, 0, 0.04);
+}
+
+.stat-card--blue {
+    background: linear-gradient(145deg, var(--blue-glow), var(--blue-900));
+}
+
+.stat-card__label {
+    font-size: 12px;
+    color: #c6c6c6;
+    margin: 0 0 6px;
+}
+
+.stat-card__value {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.stat-card__value--lg {
+    font-size: 32px;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat-grid .stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 16px;
+}
+
+.stat-card--split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-card--split > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-card--split > div + div {
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    padding-left: 16px;
+}
+
+/* ==========================================================================
+   Lista de ações / cards de navegação (home)
+   ========================================================================== */
+
+.action-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+/* resumo do dia (home): empilhado no mobile, lado a lado no desktop */
+.home-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+@media (min-width: 992px) {
+    .home-resumo {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* no desktop as ações viram uma grade de 3 colunas */
+    .action-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+}
+
+.action-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+}
+
+.action-card__icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    color: var(--white);
+}
+
+.action-card__text {
+    flex: 1;
+}
+
+.action-card__text strong {
+    display: block;
+    font-size: 16px;
+}
+
+.action-card__text span {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted-2);
+}
+
+.action-card__arrow {
+    font-size: 20px;
+    color: var(--text-muted-2);
+    border-left: 1px solid #d5d5d5;
+    padding-left: 12px;
+}
+
+/* ==========================================================================
+   Abas (tabs) - estoque produtos / estoque cartas, jogos etc.
+   ========================================================================== */
+
+.tabs {
+    display: flex;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid #bebebe;
+    margin-bottom: 20px;
+}
+
+.tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.tabs a.is-active {
+    background: var(--purple-500);
+    color: var(--bg);
+}
+
+.tabs--pill a {
+    border-radius: 10px;
+    flex: none;
+    padding: 8px 18px;
+}
+
+.tabs--pill {
+    border: none;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tabs--pill a:not(.is-active) {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+.tabs--pill a.is-active {
+    background: var(--purple-light-800);
+    color: var(--white);
+}
+
+/* ==========================================================================
+   Busca
+   ========================================================================== */
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    color: var(--text-muted-2);
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Filtros (chips)
+   ========================================================================== */
+
+.filters {
+    margin-bottom: 16px;
+}
+
+.filters h3 {
+    font-size: 16px;
+    margin: 0 0 8px;
+}
+
+.filters .filters__group-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    display: block;
+    margin: 10px 0 6px;
+}
+
+.chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    border: 1px solid var(--purple-light-800);
+    color: var(--text);
+    background: transparent;
+}
+
+.chip.is-active {
+    background: var(--purple-light-800);
+    color: var(--white);
+    border-color: var(--purple-light-800);
+}
+
+.divider {
+    height: 1px;
+    background: #c8c8c8;
+    border: none;
+    margin: 16px 0;
+}
+
+/* ==========================================================================
+   Grade de produtos
+   ========================================================================== */
+
+.product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--surface-border);
+}
+
+.product-card__image {
+    height: 110px;
+    background-color: #d9d9d9; /* aparece quando o produto não tem imagem */
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.product-card__tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: var(--purple-light-800);
+    color: var(--white);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.product-card__delete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    color: var(--white);
+    width: 22px;
+    height: 22px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.product-card__body {
+    padding: 10px 12px 14px;
+}
+
+.product-card__body .name-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.product-card__body strong {
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.product-card__body .price {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.product-card__body p {
+    font-size: 10px;
+    color: #888686;
+    margin: 4px 0 0;
+}
+
+.add-product-card {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 0;
+    color: var(--text);
+    background: transparent;
+    border: 2px dashed var(--surface-border);
+    border-radius: 20px;
+}
+
+.add-product-card .plus-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--purple-light-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: var(--purple-light-800);
+}
+
+/* ==========================================================================
+   Página de estoque (pages/estoque/index.blade.php)
+
+   No mobile tudo continua empilhado. No desktop a página usa uma área mais
+   larga (.app-content--wide) para economizar espaço vertical: resumo numa
+   fileira só, abas + busca lado a lado, filtros numa coluna à esquerda e
+   4 produtos por fileira.
+   ========================================================================== */
+
+.estoque-resumo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.estoque-resumo .stat-grid {
+    margin-bottom: 0;
+}
+
+@media (min-width: 992px) {
+    .app-content--wide {
+        max-width: 1200px;
+    }
+
+    .estoque-resumo {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* os dois cartões do .stat-grid entram direto na fileira do resumo */
+    .estoque-resumo .stat-grid {
+        display: contents;
+    }
+
+    .estoque-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .estoque-toolbar > * {
+        margin-bottom: 0;
+    }
+
+    .estoque-layout {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+    }
+
+    /* filtros viram um painel fixo à esquerda enquanto a lista rola */
+    .estoque-layout .filters {
+        position: sticky;
+        top: calc(var(--topbar-height) + 24px);
+        margin: 0;
+        padding: 16px 18px;
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: var(--radius-md);
+    }
+
+    .estoque-layout__divider {
+        display: none;
+    }
+
+    .estoque-layout__produtos h2 {
+        margin-top: 0;
+    }
+
+    .estoque-layout .product-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .estoque-layout .product-card__image {
+        height: 140px;
+    }
+
+    /* no desktop o "adicionar" ocupa só uma célula, como um produto */
+    .estoque-layout .add-product-card {
+        grid-column: auto;
+        justify-content: center;
+        padding: 24px 0;
+    }
+
+    /* prévia de cartas: fileira de 4 na largura toda — cada carta fica
+       maior que um card de produto (que divide o espaço com os filtros) */
+    .estoque-cartas-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .estoque-cartas-preview__all {
+        width: fit-content;
+        gap: 16px;
+        margin-left: auto;
+    }
+}
+
+/* no mobile a prévia vira um carrossel lateral (arrasta para o lado),
+   com a próxima carta "espiando" pela direita */
+@media (max-width: 991.98px) {
+    .estoque-cartas-grid {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .estoque-cartas-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .estoque-cartas-grid > .trading-card {
+        flex: 0 0 85%;
+        scroll-snap-align: start;
+    }
+}
+
+/* ==========================================================================
+   Cartas colecionáveis (estoque/cartas)
+   ========================================================================== */
+
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.trading-card {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+}
+
+.trading-card__image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #d9d9d9;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.trading-card__title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+}
+
+.trading-card__title-row strong {
+    font-size: 18px;
+}
+
+.trading-card__title-row {
+    gap: 12px;
+}
+
+.trading-card__title-row .price {
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+}
+
+.trading-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.trading-card__meta span {
+    border: 1px solid #bdbdbd;
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* --- Carta clicável + botões de editar / apagar -------------------------- */
+
+/* um link invisível cobre a carta toda (abre os detalhes); os botões de
+   ação ficam por cima dele para continuarem clicáveis */
+.trading-card--link {
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.trading-card--link:hover {
+    transform: translateY(-2px);
+}
+
+.trading-card.trading-card--link:hover,
+.trading-card--link:hover .trading-card {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.trading-card__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: var(--radius-md);
+}
+
+.trading-card__link:focus-visible {
+    outline: 2px solid var(--purple-500);
+    outline-offset: 2px;
+}
+
+.card-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+}
+
+.card-actions__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--purple-500);
+    font-size: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.card-actions__btn:hover {
+    background: var(--purple-500);
+    color: var(--white);
+}
+
+.card-actions__btn--danger:hover {
+    background: #d9534f;
+}
+
+/* --- Detalhes de uma carta (estoque/cartas/{jogo}/{id}) ------------------ */
+
+.card-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card-detail__image {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    background: #d9d9d9;
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--radius-md);
+}
+
+.card-detail__foil {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: var(--yellow-300);
+    border-radius: 20px;
+    color: var(--yellow-900);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.card-detail__game {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--purple-light-300);
+    border-radius: 20px;
+    color: var(--purple-500);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.card-detail__info h1 {
+    margin: 12px 0 6px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.card-detail__price {
+    margin: 0 0 16px;
+    color: var(--blue-900);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.card-detail__price span {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card-detail__specs {
+    margin: 20px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.card-detail__specs > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--surface-border);
+    font-size: 15px;
+}
+
+.card-detail__specs > div:last-child {
+    border-bottom: none;
+}
+
+.card-detail__specs dt {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.card-detail__specs dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+}
+
+.card-detail__total {
+    background: var(--white);
+}
+
+.card-detail__total dd {
+    color: var(--blue-900);
+}
+
+.card-detail__actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.card-detail__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 12px;
+    background: var(--purple-500);
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    transition: background-color 0.15s ease;
+}
+
+.card-detail__btn:hover {
+    background: var(--purple-light-800);
+}
+
+.card-detail__btn--danger {
+    background: transparent;
+    border: 1px solid #d9534f;
+    color: #c0392b;
+}
+
+.card-detail__btn--danger:hover {
+    background: #d9534f;
+    color: var(--white);
+}
+
+@media (max-width: 991.98px) {
+    .card-detail__btn {
+        flex: 1;
+    }
+}
+
+@media (min-width: 992px) {
+    .card-detail {
+        display: grid;
+        grid-template-columns: 420px minmax(0, 1fr);
+        gap: 48px;
+        align-items: start;
+    }
+
+    .card-detail__info h1 {
+        font-size: 32px;
+    }
+}
+
+/* --- Adicionar carta (botão, aviso e pop-up com o formulário) ------------ */
+
+/* título da lista + botão "Adicionar carta", logo acima das cartas */
+.cartas-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.cartas-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.add-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 18px 0 8px;
+    background: var(--purple-500);
+    border-radius: 12px;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 3px 8px rgba(83, 87, 125, 0.35);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.add-card-btn:hover {
+    background: var(--purple-light-800);
+    transform: translateY(-1px);
+}
+
+.add-card-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--purple-light-300);
+    color: var(--purple-500);
+    font-size: 16px;
+}
+
+.card-added-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    background: #e3f4e6;
+    border: 1px solid #b7dfbf;
+    border-radius: var(--radius-sm);
+    color: #25623a;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card-dialog {
+    width: 640px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100vh - 40px);
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.card-dialog::backdrop {
+    background: rgba(20, 21, 32, 0.6);
+}
+
+.card-form {
+    padding: 22px 24px 24px;
+}
+
+.card-form__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.card-form__header h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.card-form h3 {
+    margin: 20px 0 10px;
+    color: var(--purple-500);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.card-form__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.card-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.card-field > span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.card-field input:not([type="checkbox"]),
+.card-field select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    background: var(--white);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.card-field input:focus,
+.card-field select:focus {
+    outline: 2px solid var(--purple-300);
+    outline-offset: 1px;
+    border-color: var(--purple-500);
+}
+
+.card-field input::placeholder {
+    color: var(--text-muted-2);
+}
+
+/* checkbox "foil": alinhado com a base dos campos ao lado */
+.card-field--check {
+    flex-direction: row;
+    align-items: center;
+    align-self: end;
+    height: 42px;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.card-field--check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--purple-500);
+}
+
+.card-field--check > span {
+    font-weight: 400;
+}
+
+.card-form__errors {
+    margin: 12px 0 0;
+    padding: 12px 14px;
+    background: #fbe5e5;
+    border: 1px solid #efb9b9;
+    border-radius: var(--radius-sm);
+    color: #8a2424;
+    font-size: 13px;
+}
+
+.card-form__errors ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+}
+
+.card-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.card-form__cancel,
+.card-form__submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.card-form__cancel {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.card-form__submit {
+    background: var(--purple-500);
+    color: var(--white);
+}
+
+.card-form__submit:hover {
+    background: var(--purple-light-800);
+}
+
+@media (min-width: 600px) {
+    .card-form__grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .card-field--full {
+        grid-column: 1 / -1;
+    }
+}
+
+/* --- Catálogo de cartas no desktop ---------------------------------------
+   Mesma largura do estoque; busca e filtro por jogo lado a lado e as cartas
+   em grade de 4 — cada carta fica maior que um card de produto. */
+
+@media (min-width: 992px) {
+    .cartas-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .cartas-toolbar > * {
+        margin-bottom: 0;
+    }
+
+    .card-list {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .card-list > article {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .card-list > article h3 {
+        font-size: 17px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-list > article .trading-card {
+        flex: 1;
+    }
+
+    /* mensagem de "nenhuma carta" ocupa a linha toda */
+    .card-list > p {
+        grid-column: 1 / -1;
+    }
+}
+
+/* ==========================================================================
+   Campeonatos
+   ========================================================================== */
+
+.hero-band {
+    background: var(--pink-300);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    margin: -20px -20px 20px;
+    padding: 20px;
+    min-height: 94px;
+}
+
+@media (min-width: 992px) {
+    .hero-band {
+        margin: -40px -24px 24px;
+        border-radius: var(--radius-lg);
+    }
+}
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 16px 20px;
+    color: var(--pink-700);
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   Configurações
+   ========================================================================== */
+
+.settings-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 4px 16px;
+    margin-bottom: 24px;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.settings-row__label .icon {
+    width: 31px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--purple-500);
+    font-size: 18px;
+}
+
+.settings-row__label div span {
+    display: block;
+    font-size: 10px;
+    color: #aeaeae;
+}
+
+.settings-row__label div strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* ==========================================================================
+   Estado vazio (páginas ainda não desenhadas no protótipo: clientes, vendas)
+   ========================================================================== */
+
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted-2);
+}
+
+.empty-state .icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--purple-300);
+}
+
+.empty-state h2 {
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   Menu inferior fixo (mobile) — botão flutuante + menu em arco
+   ========================================================================== */
+
+.bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--bottom-nav-height);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 40;
+    pointer-events: none;
+}
+
+.bottom-nav__toggle {
+    pointer-events: auto;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--blue-400);
+    color: var(--navy-900);
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(139, 186, 237, 0.6);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 2;
+}
+
+/* círculo que "sai" de dentro do botão e cresce até ficar atrás de todos
+   os ícones do arco — fica abaixo deles (z-index 0), sem cobri-los */
+.bottom-nav::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 44px; /* mesmo centro do botão de alternância */
+    width: 310px;
+    height: 310px;
+    border-radius: 50%;
+    /* azul-marinho um pouco mais escuro que os botões (--blue-900),
+       clareando levemente da esquerda para a direita */
+    background: linear-gradient(90deg, #212333, var(--navy-900) 55%, #3b3e5a);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+    transform: translate(-50%, 50%) scale(0);
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 0;
+}
+
+.bottom-nav.is-open::before {
+    transform: translate(-50%, 50%) scale(1);
+}
+
+.bottom-nav__arc {
+    /* ponto único (0x0), alinhado exatamente ao centro do botão de
+       alternância (16px de margem + metade dos 56px do botão) — é em
+       torno desse ponto que os ícones giram para formar o arco */
+    position: absolute;
+    left: 50%;
+    bottom: 44px;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 1;
+}
+
+.bottom-nav.is-open .bottom-nav__arc {
+    opacity: 1;
+    pointer-events: auto;
+    /* os ícones aparecem logo depois do círculo começar a crescer */
+    transition-delay: 0.12s;
+}
+
+.bottom-nav__arc a {
+    --angle: 0deg;
+    --radius: 108px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 52px;
+    height: 52px;
+    margin: -26px 0 0 -26px;
+    border-radius: 15px;
+    background: var(--blue-900);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    /* gira até o ângulo do item, anda o raio "para cima" e gira de volta
+       — assim os 6 quadrados ficam à mesma distância do centro, formando
+       um arco de circunferência de verdade em vez de posições "no olho" */
+    transform: rotate(var(--angle)) translateY(calc(-1 * var(--radius))) rotate(calc(-1 * var(--angle)));
+}
+
+/* ângulos igualmente espaçados (36° entre cada item) em torno do centro;
+   os das pontas (±90°) ficam na altura do botão, deixando o arco mais baixo */
+.bottom-nav__arc a:nth-child(1) { --angle: -90deg; }
+.bottom-nav__arc a:nth-child(2) { --angle: -54deg; }
+.bottom-nav__arc a:nth-child(3) { --angle: -18deg; }
+.bottom-nav__arc a:nth-child(4) { --angle: 18deg; }
+.bottom-nav__arc a:nth-child(5) { --angle: 54deg; }
+.bottom-nav__arc a:nth-child(6) { --angle: 90deg; }
+
+.bottom-nav__arc a.is-current {
+    background: var(--pink-400);
+    z-index: 1;
+}
+
+@media (min-width: 992px) {
+    .bottom-nav {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Navbar superior (desktop)
+
+   Ocupa 100% da largura da tela (fixa no topo), com a logo centralizada e
+   as páginas divididas nos dois lados — ver partials/topbar.blade.php.
+   ========================================================================== */
+
+.topbar {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    .topbar {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 24px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: var(--topbar-height);
+        padding: 0 40px;
+        background: var(--navy-900);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        z-index: 45;
+    }
+
+    .topbar__nav {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+    }
+
+    .topbar__nav--left {
+        justify-content: flex-end;
+    }
+
+    .topbar__nav--right {
+        justify-content: flex-start;
+    }
+
+    .topbar__nav a {
+        color: var(--white);
+        font-weight: 600;
+        font-size: 15px;
+        padding: 4px 2px;
+        opacity: 0.75;
+        border-bottom: 2px solid transparent;
+    }
+
+    .topbar__nav a:hover {
+        opacity: 1;
+    }
+
+    .topbar__nav a.is-current {
+        opacity: 1;
+        border-bottom-color: var(--nav-accent, var(--pink-400));
+    }
+
+    /* cor da linha da página atual: a mesma dos ícones da página inicial */
+    .topbar__link--estoque     { --nav-accent: var(--purple-500); }
+    .topbar__link--campeonatos { --nav-accent: var(--pink-300); }
+    .topbar__link--clientes    { --nav-accent: var(--blue-300); }
+    .topbar__link--vendas      { --nav-accent: var(--yellow-300); }
+
+    /* Fora do grid de 3 colunas (posicionado sobre o .topbar, que já é
+       fixed e por isso serve de referência), para não desalinhar a logo
+       do centro da navbar. */
+    .topbar__settings {
+        position: absolute;
+        top: 50%;
+        right: 40px;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 20px;
+        opacity: 0.75;
+    }
+
+    .topbar__settings:hover,
+    .topbar__settings.is-current {
+        opacity: 1;
+    }
+
+    /* a engrenagem não tem linha: na página de configurações ela fica com a
+       cor do ícone de configurações da página inicial */
+    .topbar__settings.is-current {
+        color: var(--purple-light-300);
+    }
+
+    .topbar__logo {
+        justify-self: center;
+        display: flex;
+        align-items: center;
+    }
+
+    .topbar__logo img {
+        height: 56px;
+        width: auto;
+    }
+}
+
+/* ==========================================================================
+   Campeonatos (Figma: "seção de campeonato")
+   Telas: campeonatos (lista), acessar_camp_ativo / acessar_camp_finalizado,
+   criar_campeonato, editar_campeonato, premiações e pop up apagar.
+   Ícones e imagens ficam em public/images/campeonatos/.
+   ========================================================================== */
+
+/* --- Lista: botão "Criar campeonato" ------------------------------------- */
+
+.champ-create {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 74px;
+    padding: 0 22px 0 24px;
+    margin-bottom: 26px;
+    background: var(--pink-400);
+    border-radius: var(--radius-md);
+    color: var(--pink-900);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* --- Lista: card do campeonato ativo (+ carrossel) ----------------------- */
+
+.champ-carousel {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+}
+
+.champ-carousel::-webkit-scrollbar {
+    display: none;
+}
+
+.champ-carousel > .champ-active {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+}
+
+/* com mais de um ativo, o próximo card "espia" pela direita */
+.champ-carousel--multi > .champ-active {
+    flex-basis: 90%;
+}
+
+.champ-active {
+    background: var(--pink-400);
+    border-radius: var(--radius-lg);
+    padding: 9px 12px 12px;
+}
+
+.champ-active__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.champ-active__date {
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.champ-active__banner {
+    width: 100%;
+    height: 259px;
+    margin-top: 6px;
+    object-fit: cover;
+    background: #504c4c;
+    border: 1px solid var(--pink-700);
+    border-radius: var(--radius-sm);
+}
+
+.champ-active__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+}
+
+.champ-active__access {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 14px;
+    background: var(--bg);
+    border-radius: var(--radius-md);
+    color: var(--pink-700);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* chip de status ("ativo" / "Finalizado") com a bolinha depois do texto */
+.champ-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    height: 19px;
+    padding: 0 3px 0 9px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.champ-status--sm {
+    height: 17px;
+    padding: 0 3px 0 6px;
+    gap: 6px;
+}
+
+/* lápis + lixeira */
+.champ-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.champ-actions--lg {
+    gap: 4px;
+}
+
+.champ-actions a,
+.champ-actions button {
+    display: inline-flex;
+    padding: 0;
+}
+
+/* --- Lista: "Outras competições" ----------------------------------------- */
+
+.champ-section-title {
+    margin: 24px 0 10px 6px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.champ-other {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    padding: 14px 12px 13px 11px;
+    margin-bottom: 29px;
+}
+
+.champ-other__banner {
+    display: block;
+    height: 170px;
+    background: #504c4c;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.champ-other__banner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champ-other__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 12px;
+}
+
+.champ-other__header h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.champ-other p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.champ-other__prizes {
+    margin-top: 20px !important;
+}
+
+.champ-other__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* --- Lista: cabeçalho da página ------------------------------------------ */
+
+/* título e "Em andamento" só existem no desktop; no mobile a lista
+   continua começando direto pelo botão "Criar campeonato" */
+.champ-page-header__text,
+.champ-section-title--desktop {
+    display: none;
+}
+
+/* --- Lista no desktop ------------------------------------------------------
+
+   Usa a mesma largura do estoque (.app-content--wide): cabeçalho com título
+   e botão compacto, ativos em destaque ocupando a largura toda (dois por vez
+   quando há mais de um) e "Outras competições" numa grade de 3 colunas. */
+
+@media (min-width: 992px) {
+    .champ-page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+        border-bottom: 1px solid var(--surface-border);
+    }
+
+    .champ-page-header__text {
+        display: block;
+    }
+
+    .champ-page-header__text h1 {
+        margin: 0 0 6px;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .champ-page-header__text p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 15px;
+    }
+
+    .champ-create {
+        flex-shrink: 0;
+        gap: 14px;
+        min-height: 52px;
+        padding: 0 10px 0 22px;
+        margin: 0;
+        font-size: 16px;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .champ-create img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .champ-create:hover {
+        background: var(--pink-300);
+        transform: translateY(-1px);
+    }
+
+    .champ-section-title,
+    .champ-section-title--desktop {
+        display: block;
+        margin: 0 0 16px;
+        font-size: 22px;
+    }
+
+    .champ-section-title {
+        margin-top: 48px;
+    }
+
+    .champ-section-title--desktop {
+        margin-top: 0;
+    }
+
+    .champ-carousel {
+        gap: 24px;
+    }
+
+    .champ-carousel--multi > .champ-active {
+        flex-basis: calc(50% - 12px);
+    }
+
+    .champ-active {
+        padding: 14px 18px 18px;
+    }
+
+    .champ-active__banner {
+        height: 380px;
+        margin-top: 10px;
+    }
+
+    .champ-carousel--multi .champ-active__banner {
+        height: 300px;
+    }
+
+    .champ-active__bottom {
+        margin-top: 14px;
+    }
+
+    .champ-active__access {
+        transition: background-color 0.15s ease;
+    }
+
+    .champ-active__access:hover {
+        background: var(--white);
+    }
+
+    .champ-other-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .champ-other {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
+        padding: 12px 12px 14px;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .champ-other:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .champ-other__banner {
+        height: 180px;
+    }
+
+    .champ-other__header h3 {
+        font-size: 20px;
+    }
+
+    .champ-other p {
+        font-size: 14px;
+    }
+
+    .champ-other__prizes {
+        margin-top: 14px !important;
+        color: #555;
+    }
+
+    /* o rodapé (data + ações) fica sempre no fim do card, alinhando a grade */
+    .champ-other__footer {
+        margin-top: auto;
+        padding-top: 16px;
+    }
+
+    .champ-actions a,
+    .champ-actions button {
+        opacity: 0.8;
+        transition: opacity 0.15s ease;
+    }
+
+    .champ-actions a:hover,
+    .champ-actions button:hover {
+        opacity: 1;
+    }
+}
+
+/* --- Acessar campeonato (ativo / finalizado) ----------------------------- */
+
+.champ-detail {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+}
+
+/* bolinha de status "saindo" do canto superior esquerdo do card. O SVG do
+   Figma tem 256.5px de largura (sobra do frame), por isso o recorte 30×30. */
+.champ-detail__status {
+    position: absolute;
+    top: -7px;
+    left: -11px;
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.champ-detail__status img {
+    max-width: none;
+}
+
+.champ-detail__banner {
+    width: 100%;
+    height: 268.6px;
+    object-fit: cover;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: #504c4c;
+}
+
+.champ-detail__body {
+    padding: 14px 13px 0;
+}
+
+.champ-detail__body h2 {
+    margin: 0 0 15px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.champ-detail__info {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 12px;
+    font-size: clamp(16px, 5.4vw, 20px);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.champ-detail__info span:nth-child(even) {
+    text-align: right;
+}
+
+.champ-detail__desc {
+    margin: 21px 13px 17px;
+    padding-top: 15px;
+    border-top: 0.5px solid var(--text);
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* seções que abrem/fecham: "participantes cadastrados" e "vencedores" */
+.champ-accordion {
+    margin: 0 -1px;
+}
+
+.champ-accordion summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    padding: 0 12px 0 13px;
+    background: #d9d9d9;
+    border: 0.5px solid var(--text-muted-2);
+    font-size: 16px;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+}
+
+.champ-accordion summary::-webkit-details-marker {
+    display: none;
+}
+
+/* a seta do Figma aponta para a direita; girada fica para baixo */
+.champ-accordion summary img {
+    transform: rotate(90deg);
+    transition: transform .2s;
+}
+
+.champ-accordion[open] summary img {
+    transform: rotate(-90deg);
+}
+
+.champ-accordion__content {
+    padding: 8px 13px;
+}
+
+.champ-detail__prize {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 270px;
+    max-width: calc(100% - 26px);
+    height: 47px;
+    margin: 16px auto 24px;
+    background: var(--pink-300);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* --- Criar / editar campeonato ------------------------------------------- */
+
+.champ-form {
+    margin: 0;
+    min-width: 0;
+    border: 0;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 15px 14px 20px;
+}
+
+.champ-form h3 {
+    margin: 15px 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.champ-form h3:first-child {
+    margin: 0 0 11px;
+}
+
+.champ-form__row {
+    display: flex;
+    gap: 16px;
+}
+
+.champ-form__row > * {
+    flex: 1;
+    min-width: 0;
+}
+
+.champ-input,
+.champ-input--icon input {
+    width: 100%;
+    height: 35px;
+    padding: 0 7px;
+    border: none;
+    border-radius: 5px;
+    background: #d9d9d9;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.champ-form > .champ-input,
+.champ-form__row {
+    margin-bottom: 13px;
+}
+
+.champ-input::placeholder,
+.champ-input--icon input::placeholder,
+.champ-search__field input::placeholder,
+.prize-block__desc::placeholder,
+.prize-amount__input input::placeholder {
+    color: var(--text-muted);
+    font-weight: 600;
+    opacity: 1;
+}
+
+.champ-input--area {
+    height: 76px;
+    padding: 8px 7px;
+    resize: vertical;
+}
+
+/* campo com ícone (data / horário): o ícone do Figma fica por cima do
+   seletor nativo, que continua clicável mas invisível */
+.champ-input--icon {
+    position: relative;
+    display: block;
+    padding: 0;
+}
+
+.champ-input--icon input {
+    padding-right: 34px;
+}
+
+.champ-input--icon img {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.champ-input--icon input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0;
+    width: 34px;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Status: radios escondidos, o <label> é o chip */
+.champ-status-chips {
+    display: flex;
+    gap: 16px;
+}
+
+.champ-status-chips input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.champ-status-chips label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 29px;
+    padding: 0 12px 0 7px;
+    background: #d9d9d9;
+    border: 0.5px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.champ-status-chips input:checked + label {
+    background: var(--text-muted-2);
+    border-color: #888;
+}
+
+.champ-status-chips input:focus-visible + label {
+    outline: 2px solid var(--pink-500);
+    outline-offset: 2px;
+}
+
+/* busca de participantes */
+.champ-search__field {
+    position: relative;
+}
+
+.champ-search__field input {
+    width: 100%;
+    height: 40px;
+    padding: 0 36px 0 12px;
+    border: none;
+    border-radius: 5px;
+    background: #d9d9d9;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.champ-search__field img {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* resultados da busca (criar): painel que "sai" de baixo do campo */
+.champ-search__results {
+    position: relative;
+    margin-top: -6px;
+    padding: 13px 16px 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 5px;
+}
+
+.champ-search__results:empty,
+.champ-search__results:not(:has(.participant-row:not([hidden]))) {
+    display: none;
+}
+
+.champ-form__count {
+    margin: 16px 0 4px;
+    color: #4a4242;
+    font-size: 12px;
+}
+
+/* linha de participante (avatar + nome + nascimento) */
+.participant-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 0;
+}
+
+.champ-participants .participant-row + .participant-row,
+.champ-accordion .participant-row + .participant-row {
+    border-top: 0.5px solid #bebebe;
+}
+
+.participant-row__avatar {
+    width: 32.5px;
+    height: 32.5px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ff2828;
+    flex-shrink: 0;
+}
+
+.participant-row__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.participant-row__info strong {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.participant-row__info span {
+    color: #414141;
+    font-size: 12px;
+}
+
+.participant-row__remove {
+    display: inline-flex;
+    padding: 0;
+    margin-right: 20px;
+}
+
+.participant-row[hidden] {
+    display: none;
+}
+
+/* resultado da busca com "+": o checkbox fica escondido e o "+" gira em x
+   quando o cliente já foi adicionado */
+.participant-row--pick {
+    padding: 4px 0;
+    cursor: pointer;
+}
+
+.participant-row--pick + .participant-row--pick {
+    margin-top: 11px;
+}
+
+.participant-row--pick input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.participant-row__add {
+    transition: transform .2s;
+}
+
+.participant-row--pick input:checked + .participant-row__add {
+    transform: rotate(45deg);
+}
+
+.participant-row--pick input:focus-visible + .participant-row__add {
+    outline: 2px solid var(--pink-500);
+    border-radius: 50%;
+}
+
+/* vencedores */
+.winner-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 50px;
+    padding-left: 3px;
+    margin-bottom: 7px;
+    background: #d9d9d9;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.winner-row__avatar {
+    width: 32.5px;
+    height: 32.5px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #ff2828;
+    flex-shrink: 0;
+}
+
+.winner-row__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding-left: 2px;
+}
+
+.winner-row__info strong {
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.winner-row__info span {
+    color: #414141;
+    font-size: 12px;
+}
+
+.winner-row__value {
+    align-self: flex-start;
+    margin: 6px auto 0 8px;
+    padding: 4px;
+    background: #6bac68;
+    border-radius: 12px;
+    color: #344d33;
+    font-size: 8px;
+    white-space: nowrap;
+}
+
+.winner-row__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 100%;
+    margin-left: auto;
+    background: var(--pink-200);
+    flex-shrink: 0;
+}
+
+.champ-empty {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.champ-locked {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: var(--pink-200);
+    border-radius: 5px;
+    color: var(--pink-900);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* botão principal de rodapé (Criar / Salvar alterações / Finalizar) */
+.champ-submit {
+    display: block;
+    width: 100%;
+    height: 46px;
+    margin-top: 24px;
+    background: var(--pink-300);
+    border-radius: var(--radius-md);
+    color: var(--surface);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.champ-submit--bottom {
+    margin-top: 110px;
+}
+
+/* --- Premiações (um bloco por colocação) --------------------------------- */
+
+.prize-block {
+    margin-bottom: 21px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.prize-block__header {
+    height: 38px;
+    line-height: 38px;
+    margin: -1px -1px 0;
+    background: var(--pink-200);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.prize-block--2 .prize-block__header { background: var(--pink-300); }
+.prize-block--3 .prize-block__header { background: var(--pink-400); }
+
+.prize-block__body {
+    padding: 14px 14px 12px;
+}
+
+.prize-block__search input,
+.prize-block__desc,
+.prize-amount__input {
+    height: 35px;
+    background: var(--bg);
+    border: 0.5px solid #d9d9d9;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.prize-block__search input {
+    padding: 0 36px 0 8px;
+}
+
+.prize-block__desc {
+    width: 100%;
+    padding: 0 8px;
+    color: var(--text);
+}
+
+.prize-amount {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+}
+
+.prize-amount__input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 123px;
+    padding: 0 8px;
+}
+
+.prize-amount__input input {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: var(--text);
+}
+
+/* o SVG do Figma tem 49px porque inclui a sombra; o botão tem 29px */
+.prize-amount__step {
+    position: relative;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+}
+
+.prize-amount__step img {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    max-width: none;
+}
+
+/* --- Pop-up "apagar campeonato" ------------------------------------------ */
+
+.confirm-popup {
+    width: 298px;
+    max-width: calc(100% - 32px);
+    padding: 16px 16px 15px;
+    background: var(--bg);
+    border: 1px solid #6d6c6c;
+    border-radius: 20px;
+    box-shadow: 8px 8px 10px rgba(0, 0, 0, .04),
+                inset -33px -33px 46px #ccc7c7,
+                inset 28px 28px 54px rgba(0, 0, 0, .16);
+    color: var(--text);
+}
+
+.confirm-popup::backdrop {
+    background: rgba(0, 0, 0, .7);
+}
+
+.confirm-popup__title {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.confirm-popup__actions {
+    display: flex;
+    gap: 26px;
+}
+
+.confirm-popup__actions button {
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: var(--text);
+    font-size: 16px;
+}
+
+.confirm-popup__yes { background: #e96e70; }
+.confirm-popup__no { background: #c4b7f7; }
+
+.confirm-popup__hint {
+    margin: 9px 0 0;
+    color: #686868;
+    font-size: 12px;
+}
