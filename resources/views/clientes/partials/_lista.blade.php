@@ -1,5 +1,8 @@
 @php
-    $filtros ??= ['sort' => 'nome', 'dir' => 'asc'];
+    $filtros ??= ['sort' => 'nome', 'dir' => 'asc', 'status' => 'todos', 'saldo' => 'todos', 'aniversariantes' => false];
+    $filtrosAtivos = ($filtros['status'] ?? 'todos') !== 'todos'
+        || ($filtros['saldo'] ?? 'todos') !== 'todos'
+        || ($filtros['aniversariantes'] ?? false);
 @endphp
 
 {{-- Cabeçalho de colunas: só aparece no desktop (ver .clientes-lista-cabecalho
@@ -42,6 +45,14 @@
                 <i class="bi bi-search clientes-vazio__icone" aria-hidden="true"></i>
                 <p class="clientes-vazio__titulo">Nenhum cliente encontrado</p>
                 <p class="clientes-vazio__texto">Não encontramos ninguém para "{{ $termo }}". Tente buscar por outro nome.</p>
+            @elseif ($filtrosAtivos)
+                {{-- Antes essa combinação caía no "else" de baixo — mostrava
+                     "nenhum cliente cadastrado" com botão de criar, mesmo
+                     quando só os FILTROS (não a busca) zeraram o resultado
+                     de uma base que já tem clientes. --}}
+                <i class="bi bi-funnel clientes-vazio__icone" aria-hidden="true"></i>
+                <p class="clientes-vazio__titulo">Nenhum cliente encontrado</p>
+                <p class="clientes-vazio__texto">Nenhum cliente corresponde aos filtros selecionados. Tente ajustar ou limpar os filtros.</p>
             @else
                 <i class="bi bi-people clientes-vazio__icone" aria-hidden="true"></i>
                 <p class="clientes-vazio__titulo">Nenhum cliente cadastrado</p>

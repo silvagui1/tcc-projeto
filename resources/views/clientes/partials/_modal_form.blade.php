@@ -154,8 +154,12 @@
                     <div class="cartao__grupo">
                         <div class="campo campo--textarea">
                             <label for="cliente-{{ $modo }}-observacoes">Observações</label>
-                            <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" data-input-observacoes></textarea>
+                            <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" maxlength="1000" data-input-observacoes></textarea>
                             <span class="campo__erro" data-erro-observacoes hidden></span>
+                            {{-- Mesmo limite de 1000 caracteres validado no
+                                 back-end (UpdateClienteRequest/StoreClienteRequest)
+                                 — antes só se descobria ao tentar salvar. --}}
+                            <span class="campo__contador" data-contador-observacoes>0/1000</span>
                         </div>
                     </div>
                 </section>

@@ -184,9 +184,11 @@ function iniciarPaginaClientes() {
     const botaoCancelarSelecao = pagina.querySelector('[data-cancelar-selecao]');
     const botaoConfirmarExclusao = pagina.querySelector('[data-confirmar-exclusao]');
     const botaoExportarSelecionados = pagina.querySelector('[data-exportar-selecionados]');
+    const botaoSelecionarTodos = pagina.querySelector('[data-selecionar-todos]');
     const filtroStatusSelect = pagina.querySelector('[data-filtro-status]');
     const filtroSaldoSelect = pagina.querySelector('[data-filtro-saldo]');
     const filtroAniversariantesCheckbox = pagina.querySelector('[data-filtro-aniversariantes]');
+    const botaoLimparFiltros = pagina.querySelector('[data-limpar-filtros]');
     const mensagemEl = document.querySelector('[data-mensagem]');
     const modalConfirmar = document.querySelector('[data-modal-confirmar]');
 
@@ -339,6 +341,7 @@ function iniciarPaginaClientes() {
             sairDoModoSelecao();
             atualizarContador();
             sincronizarCabecalhoOrdenacao();
+            atualizarBotaoLimparFiltros();
         } finally {
             listaWrapper.classList.remove('esta-carregando');
             if (buscaSpinner) buscaSpinner.hidden = true;
@@ -417,6 +420,59 @@ function iniciarPaginaClientes() {
         });
     }
 
+    // "Limpar filtros" só aparece quando algum filtro não está no padrão —
+    // chamado depois de toda mudança de filtro (ver carregarLista()).
+    function atualizarBotaoLimparFiltros() {
+        if (!botaoLimparFiltros) return;
+        const algumAtivo = filtroStatus !== 'todos' || filtroSaldo !== 'todos' || filtroAniversariantes;
+        botaoLimparFiltros.hidden = !algumAtivo;
+    }
+
+    // Compartilhada entre o botão "Limpar filtros" e o item "clientes
+    // cadastrados" do resumo (data-resumo-filtro="limpar") — mesma ação,
+    // dois pontos de entrada.
+    function limparFiltros() {
+        filtroStatus = 'todos';
+        filtroSaldo = 'todos';
+        filtroAniversariantes = false;
+        if (filtroStatusSelect) filtroStatusSelect.value = 'todos';
+        if (filtroSaldoSelect) filtroSaldoSelect.value = 'todos';
+        if (filtroAniversariantesCheckbox) filtroAniversariantesCheckbox.checked = false;
+    }
+
+    if (botaoLimparFiltros) {
+        botaoLimparFiltros.addEventListener('click', () => {
+            limparFiltros();
+            paginaAtual = 1;
+            carregarLista();
+        });
+    }
+
+    // Resumo clicável: só os itens com um filtro de verdade pra aplicar
+    // viraram <button data-resumo-filtro> (ver index.blade.php) — "novos na
+    // semana" continua só leitura, não existe filtro/ordenação por data de
+    // cadastro hoje.
+    pagina.querySelectorAll('[data-resumo-filtro]').forEach((botao) => {
+        botao.addEventListener('click', () => {
+            const acao = botao.getAttribute('data-resumo-filtro');
+
+            if (acao === 'limpar') {
+                limparFiltros();
+            } else if (acao === 'saldo-com') {
+                filtroSaldo = 'com';
+                if (filtroSaldoSelect) filtroSaldoSelect.value = 'com';
+            } else if (acao === 'aniversariantes') {
+                filtroAniversariantes = true;
+                if (filtroAniversariantesCheckbox) filtroAniversariantesCheckbox.checked = true;
+            }
+
+            buscaCampo.value = '';
+            termoAtual = '';
+            paginaAtual = 1;
+            carregarLista();
+        });
+    });
+
     // ---- Paginação e ordenação (delegados no wrapper, já que o conteúdo é
     // trocado inteiro a cada carregarLista()) ---------------------------------
 
@@ -466,12 +522,24 @@ function iniciarPaginaClientes() {
 
     // ---- Modo de seleção (selecionar/excluir/exportar clientes) ------------
 
+    // Ids de cliente realmente na tela agora (exclui a <li> de estado vazio,
+    // que não tem data-cliente-linha) — usado por "Selecionar todos".
+    function idsVisiveis() {
+        return Array.from(listaWrapper.querySelectorAll('[data-cliente-linha]'))
+            .map((linha) => linha.getAttribute('data-id'));
+    }
+
     function atualizarBarraSelecao() {
         const total = selecionados.size;
         selecaoContagem.textContent = total === 1 ? '1 selecionado' : total + ' selecionados';
         botaoConfirmarExclusao.disabled = total === 0;
         if (botaoExportarSelecionados) {
             botaoExportarSelecionados.disabled = total === 0;
+        }
+        if (botaoSelecionarTodos) {
+            const visiveis = idsVisiveis();
+            const todosSelecionados = visiveis.length > 0 && visiveis.every((id) => selecionados.has(id));
+            botaoSelecionarTodos.textContent = todosSelecionados ? 'Desmarcar todos' : 'Selecionar todos';
         }
     }
 
@@ -516,6 +584,32 @@ function iniciarPaginaClientes() {
     });
 
     botaoCancelarSelecao.addEventListener('click', sairDoModoSelecao);
+
+    // Marca/desmarca todos os clientes CARREGADOS na página atual (não o
+    // cadastro inteiro — paginação continua em 20 por vez).
+    if (botaoSelecionarTodos) {
+        botaoSelecionarTodos.addEventListener('click', () => {
+            const visiveis = idsVisiveis();
+            const todosSelecionados = visiveis.length > 0 && visiveis.every((id) => selecionados.has(id));
+
+            listaWrapper.querySelectorAll('[data-cliente-linha]').forEach((linha) => {
+                const id = linha.getAttribute('data-id');
+                const checkbox = linha.querySelector('[data-linha-checkbox-input]');
+
+                if (todosSelecionados) {
+                    selecionados.delete(id);
+                    linha.classList.remove('cliente-linha--selecionado');
+                    if (checkbox) checkbox.checked = false;
+                } else {
+                    selecionados.add(id);
+                    linha.classList.add('cliente-linha--selecionado');
+                    if (checkbox) checkbox.checked = true;
+                }
+            });
+
+            atualizarBarraSelecao();
+        });
+    }
 
     listaWrapper.addEventListener('click', (evento) => {
         const linha = evento.target.closest('[data-cliente-linha]');
@@ -816,6 +910,8 @@ function iniciarPaginaClientes() {
         const previewIniciais = form.querySelector('[data-preview-iniciais]');
         const iconeVazio = form.querySelector('[data-preview-icone-vazio]');
         const creditosExibicao = form.querySelector('[data-creditos-exibicao]');
+        const inputObservacoes = form.querySelector('[data-input-observacoes]');
+        const contadorObservacoes = form.querySelector('[data-contador-observacoes]');
 
         let elementoAnteriorFoco = null;
 
@@ -842,6 +938,7 @@ function iniciarPaginaClientes() {
                 creditosMensagem.hidden = true;
                 creditosMensagem.textContent = '';
             }
+            atualizarContadorObservacoes();
             if (elementoAnteriorFoco && elementoAnteriorFoco.focus) elementoAnteriorFoco.focus();
         }
 
@@ -951,6 +1048,18 @@ function iniciarPaginaClientes() {
             inputWhatsapp.addEventListener('input', () => {
                 inputWhatsapp.value = formatarWhatsapp(inputWhatsapp.value);
             });
+        }
+
+        // Observações: contador de caracteres (limite de 1000, igual ao
+        // back-end) — antes só se descobria que passou do limite ao tentar
+        // salvar e receber o erro de volta.
+        function atualizarContadorObservacoes() {
+            if (!contadorObservacoes || !inputObservacoes) return;
+            contadorObservacoes.textContent = `${inputObservacoes.value.length}/1000`;
+        }
+
+        if (inputObservacoes) {
+            inputObservacoes.addEventListener('input', atualizarContadorObservacoes);
         }
 
         // Ajuste de créditos (adicionar / descontar / definir) — sem prompt()
@@ -1090,6 +1199,7 @@ function iniciarPaginaClientes() {
             iconeVazio,
             botaoSelecionarFoto,
             atualizarEstadoBotaoDescontar,
+            atualizarContadorObservacoes,
         };
     }
 
@@ -1131,6 +1241,7 @@ function iniciarPaginaClientes() {
             form.querySelector('[data-input-nome]').value = cliente.nome;
             form.querySelector('[data-input-nascimento]').value = cliente.data_nascimento;
             form.querySelector('[data-input-observacoes]').value = cliente.observacoes || '';
+            modalEditar.atualizarContadorObservacoes();
             if (inputStatus) inputStatus.value = cliente.status || 'ativo';
             inputCreditos.value = cliente.creditos;
             creditosExibicao.textContent = formatarMoeda(cliente.creditos);

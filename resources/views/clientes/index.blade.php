@@ -19,29 +19,39 @@
          Uma tira de números, não quatro cartões: são métricas auxiliares da
          tela, não o conteúdo principal, então não competem em peso visual
          com a listagem. O número de aniversariantes só ganha cor quando há
-         algum (>0) — destaque com função, não decoração fixa. --}}
+         algum (>0) — destaque com função, não decoração fixa.
+
+         3 dos 4 itens são clicáveis (viram <button>, não <div>) porque têm
+         um filtro correspondente de verdade pra aplicar — ver
+         data-resumo-filtro em clientes.js. "Novos nos últimos 7 dias" fica
+         só leitura: não existe filtro/ordenação por data de cadastro hoje,
+         então não haveria o que aplicar ao clicar. --}}
     <div class="resumo-tira">
-        <div class="resumo-item">
+        <button type="button" class="resumo-item resumo-item--interativo" data-resumo-filtro="limpar">
             <span class="resumo-item__valor">{{ $resumo['total'] }}</span>
             <span class="resumo-item__rotulo">clientes cadastrados</span>
-        </div>
-        <div class="resumo-item">
+        </button>
+        <button type="button" class="resumo-item resumo-item--interativo" data-resumo-filtro="saldo-com">
             <span class="resumo-item__valor">R$ {{ number_format($resumo['creditosEmCarteira'], 2, ',', '.') }}</span>
             <span class="resumo-item__rotulo">em carteira</span>
-        </div>
-        <div class="resumo-item {{ $resumo['aniversariantesNoMes'] > 0 ? 'resumo-item--destaque' : '' }}">
+        </button>
+        <button
+            type="button"
+            class="resumo-item resumo-item--interativo {{ $resumo['aniversariantesNoMes'] > 0 ? 'resumo-item--destaque' : '' }}"
+            data-resumo-filtro="aniversariantes"
+        >
             <span class="resumo-item__valor">{{ $resumo['aniversariantesNoMes'] }}</span>
             <span class="resumo-item__rotulo">aniversariantes no mês</span>
-        </div>
+        </button>
         <div class="resumo-item">
             <span class="resumo-item__valor">{{ $resumo['cadastrosNaSemana'] }}</span>
             <span class="resumo-item__rotulo">novos nos últimos 7 dias</span>
         </div>
     </div>
 
-    {{-- No mobile, busca e ações ficam empilhadas (uma embaixo da outra). No
-         desktop (.clientes-toolbar a partir de 992px) ficam lado a lado numa
-         barra só, como a busca+abas de estoque em mobilenav_atualizado. --}}
+    {{-- No telefone, busca e ações ficam empilhadas (uma embaixo da outra).
+         A partir do tablet (.clientes-toolbar em 768px) ficam lado a lado
+         numa barra só, como a busca+abas de estoque em mobilenav_atualizado. --}}
     <div class="clientes-toolbar">
         <form class="busca" data-busca-form role="search">
             <i class="bi bi-search busca__icone" aria-hidden="true"></i>
@@ -97,6 +107,11 @@
             <input type="checkbox" data-filtro-aniversariantes>
             <span>Aniversariantes do mês</span>
         </label>
+
+        {{-- Só aparece quando algum filtro não está no padrão (ver
+             clientes.js, atualizarBotaoLimparFiltros) — poupa resetar cada
+             campo um por um. --}}
+        <button type="button" class="botao-texto" data-limpar-filtros hidden>Limpar filtros</button>
     </div>
 
     <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
@@ -106,7 +121,12 @@
     </div>
 
     <div class="barra-selecao" data-barra-selecao hidden>
-        <span data-selecao-contagem>0 selecionados</span>
+        <div class="barra-selecao__info">
+            <span data-selecao-contagem>0 selecionados</span>
+            {{-- Marca/desmarca todos os clientes carregados na página atual
+                 — sem isso, selecionar em lote exigia tocar um por um. --}}
+            <button type="button" class="botao-texto" data-selecionar-todos>Selecionar todos</button>
+        </div>
         <div class="barra-selecao__acoes">
             <button type="button" class="botao-texto" data-cancelar-selecao>Cancelar</button>
             <button type="button" class="botao botao--neutro" data-exportar-selecionados>

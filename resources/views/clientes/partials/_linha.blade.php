@@ -23,13 +23,27 @@
         </span>
 
         <span class="cliente-linha__info">
-            <span class="cliente-linha__nome">
-                {{ $cliente->nome }}
+            {{-- O selo "Inativo" fica FORA do span que trunca (nome-linha
+                 é quem tem min-width:0; o nome em si que encolhe e corta
+                 com reticências) — antes o selo ficava dentro do mesmo
+                 span com overflow:hidden do nome, então em nomes mais
+                 longos o corte podia acontecer no meio do próprio selo. --}}
+            <span class="cliente-linha__nome-linha">
+                <span class="cliente-linha__nome">{{ $cliente->nome }}</span>
                 @if ($cliente->status === 'inativo')
                     <span class="status-badge status-badge--inativo">Inativo</span>
                 @endif
             </span>
-            <span class="cliente-linha__data">{{ $cliente->data_nascimento->format('d/m/Y') }}</span>
+            <span class="cliente-linha__data">
+                {{ $cliente->data_nascimento->format('d/m/Y') }}
+                @if ($cliente->data_nascimento->month === now()->month)
+                    {{-- Conecta o número "aniversariantes no mês" do resumo a
+                         QUAL cliente é — antes só dava pra saber abrindo um
+                         por um. Mesma cor funcional do resumo (pink-700). --}}
+                    <i class="bi bi-cake2 cliente-linha__aniversario" aria-hidden="true"></i>
+                    <span class="sr-only">(aniversariante este mês)</span>
+                @endif
+            </span>
         </span>
 
         {{-- Texto colorido, não badge/pill: a cor já indica saldo
