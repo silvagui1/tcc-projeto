@@ -2,7 +2,8 @@
      (Ctrl+V) uma imagem copiada ou clicar para escolher. Também aceita um
      link, como antes. O app.js ([data-image-drop]) cuida do arrastar/colar e
      da prévia. O form que usa este campo precisa de enctype="multipart/form-data".
-     $erros: os erros de validação desse formulário (cada pop-up tem os seus). --}}
+     $erros: os erros de validação desse formulário (cada pop-up tem os seus).
+     $valorImagem (opcional): link já preenchido; sem ele, vale o old("imagem"). --}}
 <div class="image-drop" data-image-drop>
     <label class="image-drop__zona" data-image-drop-zona>
         <input type="file" name="imagem_arquivo" accept="image/*" class="image-drop__input" data-image-drop-input>
@@ -31,5 +32,5 @@
 <label class="card-field card-field--full image-drop__url">
     <span>Ou cole o link da imagem</span>
     <input type="url" name="imagem" maxlength="500"
-           placeholder="https://..." value="{{ old('imagem') }}">
+           placeholder="https://..." value="{{ $valorImagem ?? old('imagem') }}">
 </label>

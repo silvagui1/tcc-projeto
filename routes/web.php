@@ -66,7 +66,9 @@ Route::get('/estoque', function () {
     }
 
     $resumo = [
-        'valorEstoque' => 0,
+        // soma dos preços de todos os produtos (sem busca/filtros; os
+        // produtos ainda não têm quantidade, então cada um conta uma vez)
+        'valorEstoque' => array_sum(array_column(produtosDoEstoque(), 'preco')),
         'quantidadeProdutos' => 25,
         'cartasAvulsas' => $cartasAvulsas,
         'valorCartasAvulsas' => $valorCartasAvulsas,
@@ -74,57 +76,14 @@ Route::get('/estoque', function () {
 
     $categorias = categoriasDeProdutos();
 
-    $produtos = [
-        [
-            'nome' => 'Produto #1',
-            'preco' => 0.00,
-            'descricao' => 'breve descrição....',
-            'categoria' => 'comida',
-            'imagem' => null,
-        ],
-        [
-            'nome' => 'Booster Pokémon',
-            'preco' => 12.00,
-            'descricao' => 'booster pokemon evolving skies',
-            'categoria' => 'cartas',
-            'imagem' => null,
-        ],
-        [
-            'nome' => 'Chaveiro Gengar',
-            'preco' => 10.00,
-            'descricao' => 'Chaveiro gengar 10cm',
-            'categoria' => 'Acessório',
-            'imagem' => null,
-        ],
-        [
-            'nome' => 'Coca-Cola',
-            'preco' => 8.00,
-            'descricao' => 'lata de coca-cola 350ml.',
-            'categoria' => 'bebida',
-            'imagem' => null,
-        ],
-        [
-            'nome' => 'Produto #2',
-            'preco' => 0.00,
-            'descricao' => 'breve descrição....',
-            'categoria' => 'comida',
-            'imagem' => '',
-        ],
-        [
-            'nome' => 'Produto #3',
-            'preco' => 0.00,
-            'descricao' => 'breve descrição....',
-            'categoria' => 'Acessório',
-            'imagem' => '',
-        ],
-    ];
+    // produtos de exemplo + adicionados, já com as edições aplicadas
+    $produtos = produtosDoEstoque();
 
-    // produtos adicionados pelo formulário (sessão, mais novos primeiro)
-    $produtos = array_merge(array_reverse(session('produtosAdicionados', [])), $produtos);
-
-    // produto sem foto usa a imagem genérica da categoria
+    // produto sem foto usa a imagem genérica da categoria. 'imagemSalva' é o
+    // link guardado de verdade (vazio se não tiver), usado no pop-up de editar.
     foreach ($produtos as &$produto) {
         $produto['imagemPadrao'] = imagemPadraoProduto($produto['categoria']);
+        $produto['imagemSalva'] = $produto['imagem'] ?? '';
         $produto['imagem'] = $produto['imagem'] ?: $produto['imagemPadrao'];
     }
     unset($produto);
@@ -135,6 +94,19 @@ Route::get('/estoque', function () {
     $bate = fn ($item) => $busca === '' || mb_stripos($item['nome'], $busca) !== false;
 
     $produtos = array_values(array_filter($produtos, $bate));
+
+    // filtro de categoria (?categoria=...); vazio = todas
+    $categoriaAtual = (string) request('categoria', '');
+    if ($categoriaAtual !== '') {
+        $produtos = array_values(array_filter($produtos,
+            fn ($produto) => mb_strtolower($produto['categoria']) === mb_strtolower($categoriaAtual)));
+    }
+
+    // ordenação (?ordem=primeiros|ultimos); padrão: últimos adicionados no topo
+    $ordemAtual = request('ordem') === 'primeiros' ? 'primeiros' : 'ultimos';
+    if ($ordemAtual === 'ultimos') {
+        $produtos = array_reverse($produtos);
+    }
 
     // prévia da aba "estoque cartas": as primeiras cartas de Pokémon (as
     // adicionadas pelo formulário aparecem primeiro), antes do "ver todas"
@@ -149,14 +121,119 @@ Route::get('/estoque', function () {
 
     $jogosDisponiveis = jogosDeCartas();
 
-    return view('pages.estoque.index', compact('tab', 'busca', 'resumo', 'categorias', 'produtos', 'cartasDestaque', 'jogosDisponiveis'));
+    return view('pages.estoque.index', compact('tab', 'busca', 'resumo', 'categorias', 'categoriaAtual', 'ordemAtual', 'produtos', 'cartasDestaque', 'jogosDisponiveis'));
 })->name('estoque.index');
 
 // Formulário "Adicionar produto" (aba estoque produtos). Como as cartas, o
 // produto fica guardado na sessão enquanto o projeto não tem banco de dados.
 // Os erros vão para o grupo "produto" ($errors->produto na view).
 Route::post('/estoque/produtos', function () {
-    $dados = request()->validateWithBag('produto', [
+    $dados = validarProduto('produto');
+
+    session()->push('produtosAdicionados', $dados);
+
+    return redirect()->route('estoque.index', ['tab' => 'produtos'])
+        ->with('produtoAdicionado', $dados['nome']);
+})->name('estoque.produtos.adicionar');
+
+// Formulário "Editar produto" (lápis no card do produto). As alterações ficam
+// na sessão ("produtosEditados", por id) e são aplicadas por cima dos dados
+// originais em produtosDoEstoque(). Os erros vão para o grupo "produtoEditar";
+// o campo produto_id diz qual pop-up reabrir quando a validação falha.
+Route::put('/estoque/produtos/{id}', function ($id) {
+    abort_unless(collect(produtosDoEstoque())->contains('id', (int) $id), 404);
+
+    $dados = validarProduto('produtoEditar');
+
+    session()->put("produtosEditados.{$id}", $dados);
+
+    // volta para a mesma página, mantendo busca e filtros
+    return redirect()->back()->with('produtoEditado', $dados['nome']);
+})->whereNumber('id')->name('estoque.produtos.editar');
+
+// --- Estoque de produtos: dados compartilhados ------------------------------
+
+// todos os produtos do estoque, na ordem em que foram adicionados: os de
+// exemplo, depois os do formulário (sessão), com as edições já aplicadas.
+// Cada produto tem um id (os adicionados continuam a contagem dos de exemplo).
+if (! function_exists('produtosDoEstoque')) {
+function produtosDoEstoque()
+{
+    $produtos = [
+        [
+            'id' => 1,
+            'nome' => 'Produto #1',
+            'preco' => 0.00,
+            'descricao' => 'breve descrição....',
+            'categoria' => 'comida',
+            'imagem' => null,
+        ],
+        [
+            'id' => 2,
+            'nome' => 'Booster Pokémon',
+            'preco' => 12.00,
+            'descricao' => 'booster pokemon evolving skies',
+            'categoria' => 'cartas',
+            'imagem' => null,
+        ],
+        [
+            'id' => 3,
+            'nome' => 'Chaveiro Gengar',
+            'preco' => 10.00,
+            'descricao' => 'Chaveiro gengar 10cm',
+            'categoria' => 'Acessórios',
+            'imagem' => null,
+        ],
+        [
+            'id' => 4,
+            'nome' => 'Coca-Cola',
+            'preco' => 8.00,
+            'descricao' => 'lata de coca-cola 350ml.',
+            'categoria' => 'bebida',
+            'imagem' => null,
+        ],
+        [
+            'id' => 5,
+            'nome' => 'Produto #2',
+            'preco' => 0.00,
+            'descricao' => 'breve descrição....',
+            'categoria' => 'comida',
+            'imagem' => '',
+        ],
+        [
+            'id' => 6,
+            'nome' => 'Produto #3',
+            'preco' => 0.00,
+            'descricao' => 'breve descrição....',
+            'categoria' => 'Acessórios',
+            'imagem' => '',
+        ],
+    ];
+
+    $proximoId = count($produtos) + 1;
+    foreach (session('produtosAdicionados', []) as $i => $produto) {
+        $produtos[] = ['id' => $proximoId + $i] + $produto;
+    }
+
+    $editados = session('produtosEditados', []);
+    foreach ($produtos as &$produto) {
+        if (isset($editados[$produto['id']])) {
+            $produto = array_merge($produto, $editados[$produto['id']]);
+        }
+    }
+    unset($produto);
+
+    return $produtos;
+}
+}
+
+// validação dos pop-ups de adicionar e editar produto ($grupo = grupo de
+// erros de cada um). Devolve os dados prontos para guardar, com a imagem
+// enviada (arquivo) ou o link digitado.
+if (! function_exists('validarProduto')) {
+function validarProduto($grupo)
+{
+    $dados = request()->validateWithBag($grupo, [
         'nome' => ['required', 'string', 'max:120'],
         'categoria' => ['required', 'in:' . implode(',', categoriasDeProdutos())],
         'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
@@ -186,11 +263,9 @@ Route::post('/estoque/produtos', function () {
     $dados['preco'] = (float) $dados['preco'];
     $dados['descricao'] = $dados['descricao'] ?? '';
 
-    session()->push('produtosAdicionados', $dados);
-
-    return redirect()->route('estoque.index', ['tab' => 'produtos'])
-        ->with('produtoAdicionado', $dados['nome']);
-})->name('estoque.produtos.adicionar');
+    return $dados;
+}
+}
 
 // --- Estoque de cartas: dados compartilhados --------------------------------
 // (function_exists evita erro de "função redeclarada" no route:cache)

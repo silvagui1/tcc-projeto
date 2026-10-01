@@ -361,3 +361,38 @@ document.addEventListener('DOMContentLoaded', () => {
         aplicarTema(tema);
     });
 });
+
+// Formulários de criar/editar (data-envio-unico): ao enviar, o botão final
+// fica desabilitado, mais escuro e com um ícone de carregando até a próxima
+// página abrir — assim um clique duplo não cria a mesma coisa duas vezes.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[data-envio-unico]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (form.dataset.enviando) {
+                event.preventDefault();
+                return;
+            }
+            form.dataset.enviando = 'sim';
+
+            form.querySelectorAll('button[type="submit"]').forEach((botao) => {
+                botao.disabled = true;
+                botao.classList.add('is-enviando');
+                botao.setAttribute('aria-busy', 'true');
+                botao.insertAdjacentHTML('afterbegin', '<span class="botao-carregando" aria-hidden="true"></span>');
+            });
+        });
+    });
+
+    // ao voltar com o botão "voltar" do navegador, o botão volta ao normal
+    window.addEventListener('pageshow', () => {
+        document.querySelectorAll('form[data-envio-unico]').forEach((form) => {
+            delete form.dataset.enviando;
+            form.querySelectorAll('button.is-enviando').forEach((botao) => {
+                botao.disabled = false;
+                botao.classList.remove('is-enviando');
+                botao.removeAttribute('aria-busy');
+                botao.querySelector('.botao-carregando')?.remove();
+            });
+        });
+    });
+});

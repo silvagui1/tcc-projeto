@@ -13,7 +13,7 @@
     </div>
 
     {{-- somente frontend: o form ainda não salva nada, é só a estrutura da tela --}}
-    <form method="POST" action="{{ route('campeonatos.index') }}">
+    <form method="POST" action="{{ route('campeonatos.index') }}" data-envio-unico>
         @csrf
 
         <div class="champ-form">

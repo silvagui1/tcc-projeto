@@ -42,6 +42,13 @@
 
     <form method="GET" action="{{ route('estoque.index') }}" class="champ-filtros">
         <input type="hidden" name="tab" value="{{ $tab }}">
+        {{-- a busca mantém a categoria e a ordem escolhidas --}}
+        @if ($tab === 'produtos')
+            @if ($categoriaAtual !== '')
+                <input type="hidden" name="categoria" value="{{ $categoriaAtual }}">
+            @endif
+            <input type="hidden" name="ordem" value="{{ $ordemAtual }}">
+        @endif
 
         <div class="champ-filtros__topo">
             <div class="champ-filtros__busca">
@@ -92,17 +99,29 @@
             <aside class="filters">
                 <h3>Filtros</h3>
 
+                {{-- os chips são links: trocam um filtro e mantêm a busca e o outro filtro --}}
+                @php
+                    $filtroUrl = fn ($mudancas) => route('estoque.index', array_filter(array_merge([
+                        'tab' => 'produtos',
+                        'busca' => $busca,
+                        'categoria' => $categoriaAtual,
+                        'ordem' => $ordemAtual,
+                    ], $mudancas), fn ($valor) => $valor !== ''));
+                @endphp
+
                 <span class="filters__group-label">Categorias</span>
                 <div class="chip-row">
+                    <a href="{{ $filtroUrl(['categoria' => '']) }}" class="chip {{ $categoriaAtual === '' ? 'is-active' : '' }}">Todas</a>
                     @foreach ($categorias as $categoria)
-                        <span class="chip {{ $loop->first ? 'is-active' : '' }}">{{ Str::ucfirst($categoria) }}</span>
+                        <a href="{{ $filtroUrl(['categoria' => $categoria]) }}"
+                           class="chip {{ mb_strtolower($categoriaAtual) === mb_strtolower($categoria) ? 'is-active' : '' }}">{{ Str::ucfirst($categoria) }}</a>
                     @endforeach
                 </div>
 
                 <span class="filters__group-label">Ordenar</span>
                 <div class="chip-row">
-                    <span class="chip is-active">Primeiros adicionados</span>
-                    <span class="chip">Últimos adicionados</span>
+                    <a href="{{ $filtroUrl(['ordem' => 'primeiros']) }}" class="chip {{ $ordemAtual === 'primeiros' ? 'is-active' : '' }}">Primeiros adicionados</a>
+                    <a href="{{ $filtroUrl(['ordem' => 'ultimos']) }}" class="chip {{ $ordemAtual === 'ultimos' ? 'is-active' : '' }}">Últimos adicionados</a>
                 </div>
             </aside>
 
@@ -112,13 +131,22 @@
                 <h2 style="font-size: 20px;">Produtos</h2>
 
                 @include('pages.estoque.partials.adicionar-produto')
+                @include('pages.estoque.partials.editar-produto')
 
                 <div class="product-grid">
                     @foreach ($produtos as $produto)
                         <div class="product-card">
                             <div class="product-card__image" style="background-image: url('{{ $produto['imagem'] }}'), url('{{ $produto['imagemPadrao'] }}');">
                                 <span class="product-card__tag">{{ $produto['categoria'] }}</span>
-                                <button type="button" class="product-card__delete"><i class="bi bi-trash"></i></button>
+                                <span class="product-card__acoes">
+                                    <button type="button" class="product-card__acao" data-card-dialog-open="produto-editar-{{ $produto['id'] }}"
+                                            aria-label="Editar {{ $produto['nome'] }}" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="product-card__acao" aria-label="Apagar {{ $produto['nome'] }}" title="Apagar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </span>
                             </div>
                             <div class="product-card__body">
                                 <div class="name-price">

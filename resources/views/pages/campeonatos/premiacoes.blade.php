@@ -13,7 +13,7 @@
     {{-- Um bloco por colocação: pesquisa quem ficou no lugar (sugestões vêm
          dos participantes do campeonato), quanto de crédito recebe e uma
          descrição. Somente frontend por enquanto. --}}
-    <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}">
+    <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}" data-envio-unico>
         @csrf
 
         <datalist id="participantes-campeonato">

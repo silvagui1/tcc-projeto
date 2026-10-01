@@ -490,19 +490,30 @@ img {
     border-radius: 12px;
 }
 
-.product-card__delete {
+/* botões de editar / apagar no canto da imagem do produto */
+.product-card__acoes {
     position: absolute;
     top: 8px;
     right: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.product-card__acao {
     background: rgba(0, 0, 0, 0.35);
     color: var(--white);
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
+    transition: background-color 0.15s ease;
+}
+
+.product-card__acao:hover {
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .product-card__body {
@@ -3226,4 +3237,48 @@ body,
     background: #3a1f24;
     border-color: #6b2f37;
     color: #f2b8bd;
+}
+
+/* --- Botão de envio travado (forms com data-envio-unico) -----------------
+   Depois do clique o botão fica mais escuro, sem hover e com uma rodinha
+   girando até a próxima página abrir. */
+
+.is-enviando,
+.is-enviando:hover {
+    filter: brightness(0.7);
+    cursor: progress;
+}
+
+.champ-submit.is-enviando {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* o ícone do botão (ex.: "+") dá lugar à rodinha */
+.is-enviando .bi {
+    display: none;
+}
+
+.botao-carregando {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: botao-girar 0.7s linear infinite;
+}
+
+@keyframes botao-girar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .botao-carregando {
+        animation-duration: 2s;
+    }
 }

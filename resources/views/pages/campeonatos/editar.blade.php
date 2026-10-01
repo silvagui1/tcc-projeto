@@ -21,7 +21,7 @@
         <p class="champ-locked">Este campeonato já foi finalizado e não pode mais ser alterado.</p>
     @endif
 
-    <form method="POST" action="{{ route('campeonatos.editar', $campeonato['id']) }}">
+    <form method="POST" action="{{ route('campeonatos.editar', $campeonato['id']) }}" data-envio-unico>
         @csrf
         @method('PUT')
 

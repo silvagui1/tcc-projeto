@@ -13,7 +13,7 @@
 <dialog class="card-dialog" data-card-dialog="carta" @if ($errors->any()) data-open-on-load @endif
         aria-labelledby="card-dialog-title">
     <form method="POST" action="{{ route('estoque.cartas.adicionar') }}" class="card-form"
-          enctype="multipart/form-data">
+          enctype="multipart/form-data" data-envio-unico>
         @csrf
 
         <div class="card-form__header">
