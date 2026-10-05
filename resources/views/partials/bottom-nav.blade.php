@@ -1,10 +1,5 @@
-{{-- Menu inferior fixo, portado de mobilenav_atualizado — aparece em todas
-     as páginas no mobile (ver .bottom-nav no app.css). No desktop ele é
-     escondido e a navbar superior (partials/topbar.blade.php) assume o lugar
-     dele.
-
-     Único ajuste em relação ao original: route('clientes') -> route('clientes.index')
-     (ver comentário em partials/topbar.blade.php). --}}
+{{-- Menu inferior fixo — aparece em todas as páginas no mobile (ver .bottom-nav
+     no app.css). No desktop ele é escondido e o menu lateral assume o lugar dele. --}}
 <nav class="bottom-nav" data-bottom-nav>
     <div class="bottom-nav__arc">
         <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-current' : '' }}" title="Página inicial">

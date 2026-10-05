@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400">
+  <defs>
+    <linearGradient id="arte" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8c8ea8"/>
+      <stop offset="1" stop-color="#2e3045"/>
+    </linearGradient>
+    <linearGradient id="brilho" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".35"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="400" rx="18" fill="#442133"/>
+  <rect x="12" y="12" width="276" height="376" rx="12" fill="#8c8ea8" opacity=".55"/>
+  <rect x="24" y="24" width="252" height="30" rx="8" fill="#fff" opacity=".85"/>
+  <rect x="36" y="35" width="120" height="8" rx="4" fill="#2e3045" opacity=".7"/>
+  <circle cx="258" cy="39" r="9" fill="#2e3045" opacity=".7"/>
+  <rect x="24" y="64" width="252" height="176" rx="8" fill="url(#arte)"/>
+  <g transform="translate(150 152)" fill="#fff" opacity=".9"><path d="M0-56 40-14 0 56-40-14z"/><path d="M0-56 12-14 0 56-12-14z" fill="#d7cffa"/><path d="M-40-14h80" stroke="#d7cffa" stroke-width="3"/></g>
+  <rect x="24" y="250" width="252" height="118" rx="8" fill="#fff" opacity=".85"/>
+  <rect x="38" y="266" width="170" height="8" rx="4" fill="#2e3045" opacity=".55"/>
+  <rect x="38" y="284" width="210" height="6" rx="3" fill="#2e3045" opacity=".3"/>
+  <rect x="38" y="298" width="190" height="6" rx="3" fill="#2e3045" opacity=".3"/>
+  <rect x="38" y="318" width="150" height="8" rx="4" fill="#2e3045" opacity=".55"/>
+  <rect x="38" y="336" width="200" height="6" rx="3" fill="#2e3045" opacity=".3"/>
+  <rect x="38" y="350" width="120" height="6" rx="3" fill="#2e3045" opacity=".3"/>
+  <rect width="300" height="400" rx="18" fill="url(#brilho)"/>
+</svg>

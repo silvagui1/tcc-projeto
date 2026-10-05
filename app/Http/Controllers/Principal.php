@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\RedirectResponse;
-
+/**
+ * Controller da página inicial.
+ *
+ * A rota "/" em routes/web.php aponta para cá. O arquivo tinha sumido
+ * da branch main (as rotas foram commitadas, os controllers não), e é
+ * por isso que aparecia o erro:
+ *
+ *     Target class [App\Http\Controllers\Principal] does not exist.
+ *
+ * O nome do arquivo (Principal.php), o namespace (App\Http\Controllers)
+ * e o nome da classe (Principal) precisam bater exatamente com o que
+ * a rota pede — é assim que o autoload PSR-4 encontra a classe.
+ */
 class Principal extends Controller
 {
-    /**
-     * Página inicial do sistema.
-     *
-     * A rota "/" já existia em routes/web.php apontando para este
-     * controller, mas a classe nunca havia sido criada (quebrava
-     * qualquer requisição à raiz e comandos como `route:list`).
-     * Como ainda não existe uma home própria, redireciona para a
-     * única tela funcional do sistema até que uma exista.
-     */
-    public function principal(): RedirectResponse
+    public function principal()
     {
-        return redirect()->route('clientes.index');
+        // welcome é a única view que existe hoje na main.
+        // Quando as telas do TCC forem integradas aqui, troque por
+        // view('pages.home') ou redirecione para a rota home.
+        return view('welcome');
     }
 }

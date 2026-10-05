@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+  <!-- conteúdo concentrado no meio: o banner é recortado (object-fit: cover)
+       em proporções diferentes no carrossel, na grade e no celular -->
+  <defs>
+    <linearGradient id="fundo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b47194"/>
+      <stop offset="1" stop-color="#442133"/>
+    </linearGradient>
+    <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2e4762"/>
+      <stop offset="1" stop-color="#2e3045"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="500" fill="url(#fundo)"/>
+  <circle cx="1050" cy="80" r="220" fill="#fff" opacity=".06"/>
+  <circle cx="140" cy="440" r="180" fill="#fff" opacity=".05"/>
+  <g transform="translate(600 215)" opacity=".22">
+    <circle r="190" fill="none" stroke="#ffdc9b" stroke-width="14"/>
+    <path d="M0-170 34-34 0 0-34-34z" fill="#ffdc9b"/>
+    <path d="M0 170-34 34 0 0 34 34z" fill="#ffdc9b"/>
+    <path d="M-170 0-34 34 0 0-34-34zM170 0 34-34 0 0 34 34z" fill="#ffdc9b"/>
+  </g>
+  <path d="M0 400q150-40 300 0t300 0 300 0 300 0v100H0z" fill="url(#mar)"/>
+  <path d="M0 428q150-40 300 0t300 0 300 0 300 0" fill="none" stroke="#bcd7f5" stroke-width="4" opacity=".35"/>
+  <text x="600" y="170" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="600" fill="#ffe9c2" letter-spacing="10">LIGA</text>
+  <text x="600" y="262" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="92" font-weight="800" fill="#fff">ONE PIECE</text>
+  <rect x="520" y="292" width="160" height="10" rx="5" fill="#ffdc9b"/>
+</svg>
