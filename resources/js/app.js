@@ -32,14 +32,21 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('[data-delete-dialog]');
     const form = dialog?.querySelector('[data-delete-form]');
+    const titulo = dialog?.querySelector('[data-delete-title]');
 
     if (!dialog || !form) {
         return;
     }
 
     document.querySelectorAll('[data-delete-open]').forEach((botao) => {
-        botao.addEventListener('click', () => {
+        botao.addEventListener('click', (event) => {
+            // no estoque os botões ficam por cima do link que cobre a carta
+            event.preventDefault();
+            event.stopPropagation();
             form.action = botao.dataset.deleteOpen;
+            if (titulo && botao.dataset.deleteTitle) {
+                titulo.textContent = botao.dataset.deleteTitle;
+            }
             dialog.showModal();
         });
     });
@@ -54,34 +61,178 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Estoque de cartas — pop-up "Adicionar carta". Qualquer botão com
-// data-card-dialog-open abre o <dialog>; se o form voltou com erros de
-// validação, o pop-up já abre sozinho (data-open-on-load).
-document.addEventListener('DOMContentLoaded', () => {
-    const dialog = document.querySelector('[data-card-dialog]');
+// Estoque — campo de imagem dos pop-ups (partials/imagem-campo). A imagem
+// pode vir de um arquivo do aparelho, de Ctrl+V (print, imagem copiada do
+// navegador...), de arrastar e soltar ou de um link. Colar/arrastar coloca o
+// arquivo dentro do próprio <input type="file">, então o envio é o mesmo de
+// "Escolher imagem". Expõe campo.imagemDoEstoque.reiniciar(url) para o
+// pop-up limpar/preencher o campo ao abrir.
+const iniciarCampoDeImagem = (campo) => {
+    const dialog = campo.closest('dialog');
+    const area = campo.querySelector('[data-imagem-area]');
+    const preview = campo.querySelector('[data-imagem-preview]');
+    const vazio = campo.querySelector('[data-imagem-vazio]');
+    const arquivo = campo.querySelector('[data-imagem-arquivo]');
+    const url = campo.querySelector('[data-imagem-url]');
+    const remover = campo.querySelector('[data-imagem-remover]');
+    const removerInput = campo.querySelector('[data-imagem-remover-input]');
+    let urlTemporaria = null;
 
-    if (!dialog) {
-        return;
-    }
+    const mostrar = (src) => {
+        if (urlTemporaria && src !== urlTemporaria) {
+            URL.revokeObjectURL(urlTemporaria);
+            urlTemporaria = null;
+        }
+        preview.hidden = !src;
+        vazio.hidden = Boolean(src);
+        remover.hidden = !src;
+        if (src) {
+            preview.src = src;
+        } else {
+            preview.removeAttribute('src');
+        }
+    };
 
-    document.querySelectorAll('[data-card-dialog-open]').forEach((botao) => {
-        botao.addEventListener('click', () => dialog.showModal());
+    const usarArquivo = (file) => {
+        if (!file || !file.type.startsWith('image/')) {
+            return;
+        }
+        const transferencia = new DataTransfer();
+        transferencia.items.add(file);
+        arquivo.files = transferencia.files;
+        url.value = '';
+        removerInput.value = '0';
+        mostrar(urlTemporaria = URL.createObjectURL(file));
+    };
+
+    arquivo.addEventListener('change', () => usarArquivo(arquivo.files[0]));
+
+    url.addEventListener('input', () => {
+        arquivo.value = '';
+        removerInput.value = url.value.trim() ? '0' : removerInput.value;
+        mostrar(url.value.trim());
     });
 
-    dialog.querySelectorAll('[data-card-dialog-close]').forEach((botao) => {
-        botao.addEventListener('click', () => dialog.close());
+    // link quebrado: volta para o quadro vazio em vez de mostrar ícone quebrado
+    preview.addEventListener('error', () => mostrar(''));
+
+    remover.addEventListener('click', () => {
+        arquivo.value = '';
+        url.value = '';
+        removerInput.value = '1';
+        mostrar('');
     });
 
-    // clicar no fundo escuro também fecha
-    dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) {
-            dialog.close();
+    // Ctrl+V em qualquer lugar do pop-up (se o que foi copiado for imagem;
+    // texto colado num campo continua funcionando normalmente)
+    dialog.addEventListener('paste', (event) => {
+        const imagem = [...(event.clipboardData?.files ?? [])].find((file) => file.type.startsWith('image/'));
+        if (imagem) {
+            event.preventDefault();
+            usarArquivo(imagem);
         }
     });
 
-    if (dialog.hasAttribute('data-open-on-load')) {
-        dialog.showModal();
-    }
+    ['dragenter', 'dragover'].forEach((tipo) => area.addEventListener(tipo, (event) => {
+        event.preventDefault();
+        area.classList.add('is-arrastando');
+    }));
+    ['dragleave', 'drop'].forEach((tipo) => area.addEventListener(tipo, () => area.classList.remove('is-arrastando')));
+    area.addEventListener('drop', (event) => {
+        event.preventDefault();
+        usarArquivo(event.dataTransfer.files[0]);
+    });
+    area.addEventListener('click', () => arquivo.click());
+
+    campo.imagemDoEstoque = {
+        reiniciar: (src) => {
+            arquivo.value = '';
+            removerInput.value = '0';
+            mostrar(src || '');
+        },
+    };
+
+    // estado inicial (ex.: pop-up reaberto por erro de validação)
+    mostrar(url.value.trim() || campo.dataset.imagemInicial || '');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-imagem-campo]').forEach(iniciarCampoDeImagem);
+});
+
+// Estoque — pop-ups de carta e de produto (adicionar / editar). Cada
+// <dialog data-form-dialog="nome"> abre com os botões data-form-open="nome":
+// sem data-form-dados o form vem vazio (valores de data-form-padrao) e
+// cadastra; com data-form-dados (json do item) vem preenchido e envia um PUT
+// para a url de edição. Se o form voltou com erros de validação, o pop-up já
+// abre sozinho (data-open-on-load), no modo em que estava.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-form-dialog]').forEach((dialog) => {
+        const form = dialog.querySelector('form');
+        const metodo = form.querySelector('[data-form-metodo]');
+        const editar = form.querySelector('[name="_editar"]');
+        const titulo = form.querySelector('[data-form-titulo]');
+
+        const preencher = (dados) => {
+            Object.entries(dados).forEach(([campo, valor]) => {
+                const input = form.elements.namedItem(campo);
+                if (!input) {
+                    return;
+                }
+                if (input.type === 'checkbox') {
+                    input.checked = Boolean(valor);
+                } else {
+                    input.value = valor ?? '';
+                }
+            });
+        };
+
+        const abrir = (dados) => {
+            const editando = Boolean(dados);
+
+            preencher(JSON.parse(dialog.dataset.formPadrao));
+            if (editando) {
+                preencher(dados);
+            }
+
+            form.action = editando
+                ? dialog.dataset.actionEditar.replace('__ID__', dados.id)
+                : dialog.dataset.actionCriar;
+            metodo.disabled = !editando;
+            editar.value = editando ? dados.id : '';
+            titulo.textContent = editando ? titulo.dataset.tituloEditar : titulo.dataset.tituloCriar;
+            form.querySelector('[data-imagem-campo]')?.imagemDoEstoque?.reiniciar(editando ? dados.imagem_preview : '');
+
+            // erros de uma tentativa anterior não valem para o novo item
+            form.querySelector('[data-form-erros]')?.remove();
+
+            dialog.showModal();
+        };
+
+        document.querySelectorAll(`[data-form-open="${dialog.dataset.formDialog}"]`).forEach((botao) => {
+            botao.addEventListener('click', (event) => {
+                // os botões ficam por cima do link que cobre a carta
+                event.preventDefault();
+                event.stopPropagation();
+                abrir(botao.dataset.formDados ? JSON.parse(botao.dataset.formDados) : null);
+            });
+        });
+
+        dialog.querySelectorAll('[data-form-close]').forEach((botao) => {
+            botao.addEventListener('click', () => dialog.close());
+        });
+
+        // clicar no fundo escuro também fecha
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+
+        if (dialog.hasAttribute('data-open-on-load')) {
+            dialog.showModal();
+        }
+    });
 });
 
 // Campeonatos — busca de participantes (criar): esconde os clientes cujo

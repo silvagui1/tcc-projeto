@@ -16,5 +16,6 @@ class DatabaseSeeder extends Seeder
         // no projeto — resíduo de outra atividade, quebrava `db:seed` por
         // completo com "class not found". Removidos.
         $this->call(ClienteSeeder::class);
+        $this->call(EstoqueSeeder::class);
     }
 }
