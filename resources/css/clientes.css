@@ -1,3 +1,11 @@
+/* Atributo hidden precisa vencer qualquer display definido por classe. Esta
+   regra existia no CSS original desta tela e se perdeu no merge com a base da
+   mobilenav_atualizado; sem ela a barra de seleção e outros elementos ocultos
+   apareciam o tempo todo. */
+[hidden] {
+    display: none !important;
+}
+
 /* ==========================================================================
    Estilos próprios da tela de Clientes (criar, editar, visualizar, listar).
    Carregado como entrada separada depois do app.css (ver layouts/app.blade.php),
@@ -9,6 +17,17 @@
    Raios contidos (cards 12px, controles 8px), espaçamento em grid de 4pt,
    sombras discretas e os tons de vermelho/verde de saldo e ações destrutivas. */
 :root {
+    /* Cor da página de Clientes = a do card "Clientes" na home e o destaque da
+       topbar (--blue-300). Nas ações e no texto de destaque usa-se o tom escuro
+       --blue-glow: branco sobre ele dá 7,7:1 e ele lê bem sobre fundo claro. */
+    --clientes-acento: var(--blue-glow);
+    --clientes-acento-forte: var(--blue-900);
+    /* Texto de destaque (aniversariantes, foco): azul escuro no claro e azul
+       claro no escuro, para manter contraste nos dois temas. */
+    --destaque-texto: var(--blue-glow);
+    /* Altura comum da busca e dos botões de ação, para ficarem alinhados lado
+       a lado no desktop (a borda do botão secundário não muda a altura). */
+    --controle-altura: 44px;
     --radius-xl: 24px;
     --radius-full: 999px;
     --radius-modal: 14px;
@@ -43,10 +62,19 @@
 /* Layout: a página de Clientes usa uma coluna um pouco mais larga no tablet
    (768–991px) que a base. Escopado a esta página (:has), para não mudar a
    largura das outras telas. */
+/* Abaixo de 992px o botão flutuante da navegação inferior fica por cima do
+   fim da página (16px de margem + 56px do botão). O espaço extra embaixo
+   garante que a paginação e o último cliente fiquem acima dele. */
+@media (max-width: 991.98px) {
+    main.app-content:has([data-clientes-page]) {
+        padding-bottom: calc(var(--bottom-nav-height) + 104px);
+    }
+}
+
 @media (min-width: 768px) and (max-width: 991.98px) {
     main.app-content:has([data-clientes-page]) {
         max-width: 680px;
-        padding: 20px 24px calc(var(--bottom-nav-height) + 24px);
+        padding: 20px 24px calc(var(--bottom-nav-height) + 104px);
     }
 
     main.app-content--wide:has([data-clientes-page]) {
@@ -60,6 +88,7 @@
     font-size: 20px;
 }
 
+/* ==========================================================================
    Tela de clientes
    ========================================================================== */
 
@@ -109,7 +138,8 @@
     background: var(--surface);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-control);
-    padding: var(--space-1) var(--space-2);
+    height: var(--controle-altura);
+    padding: 0 var(--space-2);
     transition: box-shadow .12s ease;
 }
 
@@ -200,21 +230,34 @@
    uma ação explícita e deliberada. */
 .clientes-acoes {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-3);
     margin: 0 0 var(--space-5);
 }
 
+/* Os dois botões ficam lado a lado quando cabem; se não cabem, quebram para
+   linhas separadas e cada um ocupa a largura toda. A altura continua a mesma
+   nos dois casos (não depende de flex-basis vertical). */
 .clientes-acoes .botao {
-    flex: 1;
+    flex: 1 1 auto;
+    height: var(--controle-altura);
+    padding: 0 var(--space-3);
+    border: 1px solid transparent;
+    white-space: nowrap;
 }
 
-/* Em telas muito estreitas (ex.: iPhone SE, 375px, e Android de entrada),
-   os dois botões lado a lado ficavam espremidos contra o ícone/texto —
-   empilha em coluna só nesse caso extremo. */
-@media (max-width: 380px) {
-    .clientes-acoes {
-        flex-direction: column;
-    }
+/* Mesma borda (1px) que o botão preenchido, para as duas alturas baterem. */
+.clientes-acoes .botao--fantasma {
+    border-color: var(--surface-border);
+}
+
+
+/* No telefone, busca e botões empilhados com um respiro de 16px entre eles
+   (antes a busca e o botão "Adicionar" ficavam quase encostados). */
+.clientes-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
 /* A partir do tablet (768px) a busca e os botões já cabem numa barra só —
@@ -304,7 +347,7 @@
 }
 
 .resumo-item--destaque .resumo-item__valor {
-    color: var(--pink-700);
+    color: var(--destaque-texto);
 }
 
 .resumo-item__rotulo {
@@ -329,8 +372,13 @@
         column-gap: var(--space-4);
     }
 
+    /* Valor sempre em cima e rótulo embaixo, em todas as células: antes cada
+       célula quebrava de um jeito (um "7" sozinho e o rótulo descendo, ao
+       lado de "55" com o rótulo na mesma linha), o que deixava a grade torta. */
     .resumo-item {
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
         white-space: normal;
     }
 
@@ -394,7 +442,7 @@
 .filtro--checkbox input {
     width: 15px;
     height: 15px;
-    accent-color: var(--pink-400);
+    accent-color: var(--clientes-acento);
 }
 
 /* Lista de clientes — cada linha é seu próprio cartão, no padrão
@@ -525,33 +573,26 @@
     font-size: 10px;
 }
 
-/* Animado por largura (não display:none/flex) pra ativar "Selecionar" não
-   empurrar nome/data/crédito de toda a lista de uma vez só, sem transição —
-   width:0 + overflow:hidden deixa o efeito visual idêntico ao display:none
-   (invisível, sem ocupar espaço) mas permite o slide suave até os 36px
-   (20px do input + 16px de padding) quando o modo é ativado. */
+/* Sem animação de largura nem overflow:hidden: a animação recortava o quadrado
+   enquanto a coluna crescia, e o nome do cliente ficava por cima dele. Agora o
+   checkbox só existe no modo de seleção e ocupa um espaço fixo de 36px (16px
+   de padding + 20px do input), que o cabeçalho também reserva. */
 .cliente-linha__checkbox {
-    flex-shrink: 0;
-    display: flex;
+    flex: 0 0 36px;
+    display: none;
     align-items: center;
-    width: 0;
-    padding-left: 0;
-    overflow: hidden;
-    transition: width .15s ease, padding-left .15s ease;
-}
-
-[data-clientes-page].modo-selecao .cliente-linha__checkbox {
-    /* 36px = os 16px de padding-left abaixo + 20px do input — com
-       box-sizing: border-box (reset global), a largura já inclui o
-       padding, por isso não é só 20px aqui. */
-    width: 36px;
     padding-left: var(--space-4);
 }
 
+[data-clientes-page].modo-selecao .cliente-linha__checkbox {
+    display: flex;
+}
+
 .cliente-linha__checkbox input {
-    flex-shrink: 0;
+    flex: 0 0 20px;
     width: 20px;
     height: 20px;
+    margin: 0;
     accent-color: var(--blue-400);
 }
 
@@ -573,6 +614,9 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
+    /* Anel de contorno: os tons azul-marinho dos avatares somem contra o fundo
+       escuro (1,4:1); o anel deixa a forma do círculo visível nos dois temas. */
+    box-shadow: 0 0 0 1px var(--line);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -644,9 +688,9 @@
 }
 
 /* Conecta o "aniversariantes no mês" do resumo à linha específica — mesma
-   cor funcional (pink-700) do resumo-item--destaque, não é decoração nova. */
+   cor funcional (--destaque-texto) do resumo-item--destaque, não é decoração nova. */
 .cliente-linha__aniversario {
-    color: var(--pink-700);
+    color: var(--destaque-texto);
     font-size: 12px;
     margin-left: 2px;
 }
@@ -891,13 +935,16 @@ a.cliente-linha__whatsapp:hover {
     position: fixed;
     left: var(--space-4);
     right: var(--space-4);
-    bottom: 88px;
+    /* Acima do botão flutuante da navegação inferior (16px de margem + 56px do
+       botão) com uma folga de 24px — antes ficava colada nele. */
+    bottom: calc(var(--bottom-nav-height) + 16px + 56px + 24px);
     background: var(--field);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-md);
     padding: var(--space-3) var(--space-4);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
@@ -906,9 +953,20 @@ a.cliente-linha__whatsapp:hover {
     font-weight: 600;
 }
 
+/* Rótulos não quebram no meio ("0 / selecionados") e, se a barra não couber,
+   as ações descem para uma segunda linha em vez de estourar a borda da tela. */
+.barra-selecao__info span,
+.barra-selecao__info .botao-texto,
+.barra-selecao__acoes .botao,
+.barra-selecao__acoes .botao-texto {
+    white-space: nowrap;
+}
+
 .barra-selecao__acoes {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: var(--space-3);
 }
 
@@ -924,6 +982,12 @@ a.cliente-linha__whatsapp:hover {
     font-size: 12px;
 }
 
+/* No telefone, com a barra de seleção aberta, o fim da lista precisa de espaço
+   extra para não ficar escondido atrás dela. */
+.modo-selecao.clientes-page {
+    padding-bottom: 180px;
+}
+
 /* A partir do tablet já há espaço de sobra pra barra flutuar ancorada no
    canto em vez de ocupar a largura inteira do rodapé. */
 @media (min-width: 768px) {
@@ -931,7 +995,7 @@ a.cliente-linha__whatsapp:hover {
         left: auto;
         right: var(--space-8);
         bottom: var(--space-8);
-        max-width: 360px;
+        max-width: 480px;
     }
 }
 
@@ -956,6 +1020,13 @@ a.cliente-linha__whatsapp:hover {
     box-shadow: var(--shadow-md);
     max-width: calc(100vw - var(--space-8));
     text-align: left;
+}
+
+/* Um toast sem texto (nenhuma mensagem de fato) não deve aparecer como pílula
+   vazia no topo da tela. Origem do elemento vazio observado no mobile ainda não
+   confirmada; esta regra só impede que ele seja desenhado sem conteúdo. */
+.mensagem-flutuante:not(:has(span)) {
+    display: none;
 }
 
 .mensagem-flutuante i {
@@ -993,7 +1064,8 @@ a.cliente-linha__whatsapp:hover {
 .botao {
     font: inherit;
     font-size: 14px;
-    font-weight: 700;
+    /* 600 (e não 700) para não pesar mais que os chips e abas do resto do app */
+    font-weight: 600;
     cursor: pointer;
     border-radius: var(--radius-control);
     padding: var(--space-3) var(--space-5);
@@ -1016,15 +1088,16 @@ a.cliente-linha__whatsapp:hover {
     cursor: not-allowed;
 }
 
-/* Ação principal — mesma cor rosa usada nas CTAs do resto do app
-   (.btn-pink / .championship-detail__cta em mobilenav_atualizado) */
+/* Ação principal na cor da página (azul, como o card Clientes da home).
+   --blue-glow com texto branco dá 7,7:1 e o hover (--blue-900) 9,6:1, nos
+   dois temas. */
 .botao--principal {
-    background: var(--pink-400);
+    background: var(--clientes-acento);
     color: var(--white);
 }
 
 .botao--principal:hover {
-    background: var(--pink-500);
+    background: var(--clientes-acento-forte);
 }
 
 /* Ação destrutiva */
@@ -1037,7 +1110,7 @@ a.cliente-linha__whatsapp:hover {
     background: var(--red-600);
 }
 
-/* Ação neutra — nem "principal" (rosa) nem destrutiva (vermelho): usada em
+/* Ação neutra — nem "principal" (azul) nem destrutiva (vermelho): usada em
    "Exportar", "Definir como novo saldo" e "Cancelar" do modal de
    confirmação, onde a cor forte dos outros dois botões sugeriria uma ênfase
    que essas ações não têm. */
@@ -1073,7 +1146,7 @@ a.cliente-linha__whatsapp:hover {
 }
 
 .botao-texto {
-    color: var(--text-muted);
+    color: var(--text-soft);
     font-weight: 700;
     font-size: 14px;
 }
@@ -1168,89 +1241,41 @@ a.cliente-linha__whatsapp:hover {
     padding-left: var(--space-4);
 }
 
-.cartao {
-    background: var(--field);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-card);
-    padding: var(--space-4);
-    margin-bottom: var(--space-5);
-}
-
-.cartao__titulo {
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0 0 var(--space-3);
-}
-
-/* Divisória sutil entre subgrupos de campos dentro de um mesmo card (ex.:
-   dados básicos / contato / observações no card "Dados do cliente") — usada
-   pra não precisar de uma caixa própria pra cada grupo, mesma ideia da tira
-   de resumo (divisor em vez de cartão) aplicada aqui dentro do modal. */
-.cartao__grupo {
-    margin-top: var(--space-4);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--surface-border);
-}
-
-.cartao__linha-foto {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-}
-
-.avatar--grande {
-    width: 56px;
-    height: 56px;
-    font-size: 18px;
-}
-
-/* Campo de foto do modal de CRIAÇÃO — círculo vazio clicável, estilo comum
-   de foto de perfil em redes sociais. Some com a foto real (via preview
-   local em base64) assim que o usuário escolhe um arquivo; o back-end só
-   recebe o upload de verdade no submit do formulário. */
-.cartao--foto-upload {
-    text-align: center;
-}
-
-.avatar-upload {
+/* Foto no topo do formulário (criar e editar) — mesmo círculo grande e
+   centralizado do perfil, com selo de câmera para indicar que é clicável. O
+   botão tem exatamente o tamanho do círculo, então o selo fica no canto dele. */
+.perfil__avatar-botao {
     position: relative;
-    display: inline-flex;
-    width: 96px;
-    height: 96px;
-}
-
-.avatar-upload__preview {
-    width: 100%;
-    height: 100%;
+    width: 112px;
+    height: 112px;
+    padding: 0;
+    border: none;
     border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--surface);
-    border: 2px dashed var(--surface-border);
-    color: var(--text-muted-2);
-    font-size: 28px;
+    background: none;
+    cursor: pointer;
 }
 
-.avatar-upload.tem-foto .avatar-upload__preview {
-    border-style: solid;
+.perfil__avatar-botao .perfil__avatar {
+    margin-bottom: 0;
 }
 
-.avatar-upload__preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.perfil__avatar-botao:hover .perfil__avatar {
+    filter: brightness(.92);
 }
 
-.avatar-upload__badge {
+.perfil__avatar-botao:focus-visible {
+    outline: 2px solid var(--destaque-texto);
+    outline-offset: 4px;
+}
+
+.perfil__selo-camera {
     position: absolute;
-    right: -2px;
-    bottom: -2px;
+    right: 0;
+    bottom: 0;
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--pink-400);
+    background: var(--clientes-acento);
     color: var(--white);
     display: flex;
     align-items: center;
@@ -1259,8 +1284,7 @@ a.cliente-linha__whatsapp:hover {
     border: 2px solid var(--surface);
 }
 
-.avatar-upload__legenda {
-    margin: var(--space-2) 0 0;
+.perfil__legenda-foto {
     font-size: 12px;
     color: var(--text-muted);
 }
@@ -1301,6 +1325,26 @@ a.cliente-linha__whatsapp:hover {
 
 .campo--textarea textarea {
     min-height: 64px;
+}
+
+/* Select de status com o selo do perfil ao lado (só aparece se inativo). */
+.campo__linha {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.campo__linha select {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Dica discreta abaixo do campo (idade calculada a partir da data de
+   nascimento) — mesma hierarquia visual do contador de observações. */
+.campo__dica {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
 }
 
 /* Campo com erro de validação (preenchido pelo servidor, ver clientes.js
@@ -1346,22 +1390,6 @@ a.cliente-linha__whatsapp:hover {
     padding-left: 36px;
 }
 
-.cartao--creditos {
-    text-align: center;
-}
-
-.creditos__rotulo {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin: 0 0 var(--space-1);
-}
-
-.creditos__valor {
-    font-size: 34px;
-    font-weight: 800;
-    margin: 0 0 var(--space-4);
-}
-
 /* Ajuste de créditos: campo de valor + botões, no lugar do antigo
    window.prompt() nativo. O input tem min="0" (ver blade) e o JS clampa
    qualquer resultado negativo em zero — créditos nunca ficam abaixo de
@@ -1375,7 +1403,7 @@ a.cliente-linha__whatsapp:hover {
 .creditos__campo-valor {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--space-1);
     background: var(--placeholder);
     border-radius: var(--radius-control);
@@ -1390,14 +1418,15 @@ a.cliente-linha__whatsapp:hover {
 
 .creditos__input-valor {
     flex: 1;
-    max-width: 140px;
+    min-width: 0;
     border: none;
     background: transparent;
     font: inherit;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
     color: var(--text);
-    text-align: center;
+    text-align: left;
     outline: none;
 }
 
@@ -1414,13 +1443,111 @@ a.cliente-linha__whatsapp:hover {
     appearance: textfield;
 }
 
-.creditos__acoes {
-    display: flex;
-    gap: var(--space-3);
+/* Seletor Adicionar | Descontar: dois segmentos dentro de uma faixa, com o
+   input de rádio escondido (continua focável e lido por leitores de tela). */
+.creditos__operacao {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    background: var(--placeholder);
+    border-radius: var(--radius-control);
 }
 
-.creditos__acoes .botao {
-    flex: 1;
+.creditos__opcao {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.creditos__opcao input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.creditos__opcao span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: var(--radius-chip);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.creditos__opcao input:checked + span {
+    background: var(--clientes-acento);
+    color: var(--white);
+}
+
+.creditos__opcao--descontar input:checked + span {
+    background: var(--red-700);
+}
+
+.creditos__opcao input:focus-visible + span {
+    outline: 2px solid var(--destaque-texto);
+    outline-offset: 2px;
+}
+
+.creditos__aviso-definir {
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    background: var(--placeholder);
+    border-radius: var(--radius-control);
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+/* Atalhos de valor comum (R$ 10, 20, 50, 100) — preenchem o campo, não
+   confirmam nada sozinhos. */
+.creditos__rapidos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.creditos__rapido {
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    background: none;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-chip);
+    cursor: pointer;
+}
+
+.creditos__rapido:hover {
+    background: var(--placeholder);
+}
+
+/* Prévia "Saldo: R$ 120,00 → R$ 150,00" — fica logo acima do botão, para a
+   pessoa ver o resultado antes de confirmar. */
+.creditos__previa {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Dica do botão: diz o que falta (ou o que impede) em vez de deixar o botão
+   desabilitado sem explicação. */
+.creditos__dica {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.creditos__dica--erro {
+    color: var(--red-600);
+    font-weight: 600;
 }
 
 .creditos__mensagem {
@@ -1430,8 +1557,26 @@ a.cliente-linha__whatsapp:hover {
     color: var(--red-600);
 }
 
+.creditos__mensagem--sucesso {
+    color: var(--green-700);
+}
+
+.creditos__mensagem--erro {
+    color: var(--red-600);
+}
+
+.campo__opcional {
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.creditos__historico-motivo {
+    color: var(--text-soft);
+}
+
+/* #2a7343 (antes green-700 #338f53, 4,0:1 com texto branco; agora 5,8:1). */
 .botao--whatsapp {
-    background: var(--green-700);
+    background: #2a7343;
     color: var(--white);
     margin-top: var(--space-3);
 }
@@ -1440,8 +1585,29 @@ a.cliente-linha__whatsapp:hover {
     background: #2a7343;
 }
 
-.modal-cliente__rodape {
-    padding-top: var(--space-2);
+/* Rodapé do formulário: "Salvar alterações" em largura total e "Cancelar" como
+   texto, igual às ações do perfil. */
+.perfil__acoes-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--surface-border);
+}
+
+.perfil__cancelar {
+    padding: var(--space-2);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: none;
+    cursor: pointer;
+}
+
+.perfil__cancelar:hover {
+    text-decoration: underline;
 }
 
 /* ==========================================================================
@@ -1487,94 +1653,194 @@ a.cliente-linha__whatsapp:hover {
 }
 
 /* ==========================================================================
-   Modal de detalhes (somente leitura) — aberto ao clicar numa linha da
-   lista; "Editar" leva pro modal de edição de verdade (ver clientes.js).
+   Modal de perfil (somente leitura), estilo de perfil aberto: foto circular
+   grande e centralizada no topo, nome e ações logo abaixo; informações e
+   créditos em seções com divisórias, sem cards. Cabeçalho centralizado,
+   seções alinhadas à esquerda.
    ========================================================================== */
-.modal-detalhes__cabecalho {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-5);
-}
-
-.modal-detalhes__identificacao {
-    min-width: 0;
-}
-
-.modal-detalhes__nome {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 0 0 var(--space-1);
-    overflow-wrap: break-word;
-}
-
-.modal-detalhes__lista {
+.perfil__cabecalho {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: var(--space-2);
-    margin: 0;
+    padding: var(--space-2) 0 var(--space-5);
 }
 
-.modal-detalhes__lista > div {
+.perfil__avatar {
+    position: relative;
+    flex-shrink: 0;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    overflow: hidden;
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-3);
-    font-size: 13px;
-}
-
-.modal-detalhes__lista dt {
-    color: var(--text-muted);
-}
-
-.modal-detalhes__lista dd {
-    margin: 0;
-    font-weight: 600;
-    text-align: right;
-}
-
-.modal-detalhes__observacoes {
-    margin: var(--space-3) 0 0;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--surface-border);
-    font-size: 13px;
-    color: var(--text-muted);
-    white-space: pre-wrap;
-}
-
-.modal-detalhes__historico-titulo {
-    font-size: 12px;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
     font-weight: 700;
-    color: var(--text-muted);
-    margin: var(--space-4) 0 var(--space-2);
-    text-align: left;
+    color: var(--white);
+    background: var(--line);
+    box-shadow: 0 0 0 4px var(--surface), 0 0 0 5px var(--line);
+    margin-bottom: var(--space-2);
 }
 
-.modal-detalhes__sem-historico {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-align: left;
+.perfil__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.perfil__nome {
     margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
 }
 
-.modal-detalhes__acoes {
+.perfil__acoes {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-2);
+    margin-top: var(--space-3);
 }
 
-/* flex: 0 1 auto (não cresce) em vez de flex: 1 — com 3 botões (WhatsApp +
-   Editar + Excluir) e pouca largura, "flex: 1" fazia o botão que quebrava
-   sozinho pra segunda linha esticar e ocupar a linha inteira, bem maior que
-   os outros dois. Sem crescer, os três ficam do mesmo tamanho onde quer que
-   caiam. */
-.modal-detalhes__acoes .botao {
-    flex: 0 1 auto;
-    min-width: 110px;
+.perfil__acoes .botao {
+    min-width: 128px;
 }
 
-/* Extrato de créditos — mesma lista usada no modal de detalhes (ver acima). */
+.perfil__secao {
+    padding: var(--space-5) 0;
+    border-top: 1px solid var(--surface-border);
+    text-align: left;
+}
+
+.perfil__titulo {
+    margin: 0 0 var(--space-3);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.perfil__cabecalho-secao {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.perfil__cabecalho-secao .perfil__titulo {
+    margin: 0;
+}
+
+.perfil__lista {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.perfil__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.perfil__item dt {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.perfil__item dd {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.perfil__item dd.perfil__vazio {
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+.perfil__acao-link {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--destaque-texto);
+    background: none;
+    cursor: pointer;
+}
+
+.perfil__acao-link:hover {
+    text-decoration: underline;
+}
+
+.perfil__observacoes {
+    margin: var(--space-3) 0 0;
+    font-size: 13px;
+    color: var(--text-soft);
+    white-space: pre-wrap;
+}
+
+.perfil__rotulo {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.perfil__saldo {
+    margin: 2px 0 var(--space-4);
+    font-size: 28px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.perfil__subtitulo {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.perfil__vazio {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.perfil__rodape {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-4) 0 var(--space-2);
+    border-top: 1px solid var(--surface-border);
+}
+
+.perfil__excluir {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--red-700);
+    background: none;
+    cursor: pointer;
+}
+
+.perfil__excluir:hover {
+    text-decoration: underline;
+}
+
+:root[data-theme="dark"] .perfil__excluir {
+    color: #f0899a;
+}
+
 .creditos__historico-lista {
     list-style: none;
     margin: 0;
@@ -1614,6 +1880,7 @@ a.cliente-linha__whatsapp:hover {
 :root[data-theme="dark"] {
     --red-50: #3a2328;
     --green-100: #1f3328;
+    --destaque-texto: var(--blue-300);
 }
 
 :root[data-theme="dark"] .cliente-linha--selecionado {

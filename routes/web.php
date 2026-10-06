@@ -754,6 +754,7 @@ Route::prefix('clientes')->name('clientes.')->group(function () {
     Route::delete('/', [ClienteController::class, 'destroyMultiple'])->name('destroyMultiple');
     Route::get('/{cliente}', [ClienteController::class, 'show'])->name('show');
     Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
+    Route::post('/{cliente}/creditos', [ClienteController::class, 'ajustarCreditos'])->name('creditos');
     Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
 });
 

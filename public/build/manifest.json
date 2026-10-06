@@ -285,12 +285,12 @@
     "src": "resources/css/app.css"
   },
   "resources/css/clientes.css": {
-    "file": "assets/clientes-d40b40bb.css",
+    "file": "assets/clientes-cc9eec0c.css",
     "isEntry": true,
     "src": "resources/css/clientes.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-3c024bd8.js",
+    "file": "assets/app-752fa34d.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

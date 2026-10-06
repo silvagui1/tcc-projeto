@@ -54,6 +54,62 @@ function formatarMoeda(valor) {
     });
 }
 
+const ROTULOS_TIPO_CREDITO = { adicionar: 'Adicionado', descontar: 'Descontado', definir: 'Saldo definido' };
+
+/**
+ * Preenche a lista de movimentações de crédito (somente leitura) — usada no
+ * perfil e, em modo leitura, na edição. Monta os nós com textContent: os
+ * dados vêm do banco e não passam por innerHTML.
+ */
+function renderizarHistorico(lista, vazioEl, historico) {
+    if (!lista || !vazioEl) return;
+    lista.innerHTML = '';
+
+    if (!historico || historico.length === 0) {
+        vazioEl.hidden = false;
+        return;
+    }
+
+    vazioEl.hidden = true;
+    historico.forEach((item) => {
+        const li = document.createElement('li');
+        li.className = 'creditos__historico-item';
+
+        const tipo = document.createElement('span');
+        tipo.className = 'creditos__historico-tipo';
+        tipo.textContent = `${ROTULOS_TIPO_CREDITO[item.tipo] || item.tipo} · ${formatarMoeda(item.valor)}`;
+
+        const data = document.createElement('span');
+        data.className = 'creditos__historico-data';
+        data.textContent = `${item.data} — saldo: ${formatarMoeda(item.saldo_novo)}`;
+
+        li.append(tipo);
+        if (item.motivo) {
+            const motivo = document.createElement('span');
+            motivo.className = 'creditos__historico-motivo';
+            motivo.textContent = item.motivo;
+            li.appendChild(motivo);
+        }
+        li.appendChild(data);
+        lista.appendChild(li);
+    });
+}
+
+/** Idade em anos completos a partir de 'AAAA-MM-DD', ou null se não der. */
+function calcularIdade(dataIso) {
+    if (!dataIso) return null;
+    const nascimento = new Date(dataIso + 'T00:00:00');
+    if (isNaN(nascimento)) return null;
+
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+    const aindaNaoFezAniversario = hoje.getMonth() < nascimento.getMonth()
+        || (hoje.getMonth() === nascimento.getMonth() && hoje.getDate() < nascimento.getDate());
+    if (aindaNaoFezAniversario) idade--;
+
+    return idade >= 0 ? idade : null;
+}
+
 /**
  * Formata um WhatsApp enquanto o usuário digita: mantém só dígitos (até 11 —
  * DDD + número) e aplica a máscara "(11) 91234-5678" / "(11) 1234-5678"
@@ -761,7 +817,8 @@ function iniciarPaginaClientes() {
             historicoLista: modalDetalhes.querySelector('[data-detalhes-historico]'),
             semHistorico: modalDetalhes.querySelector('[data-detalhes-sem-historico]'),
             whatsappBotao: modalDetalhes.querySelector('[data-detalhes-whatsapp-botao]'),
-            editar: modalDetalhes.querySelector('[data-detalhes-editar]'),
+            whatsappAdicionar: modalDetalhes.querySelector('[data-detalhes-whatsapp-adicionar]'),
+            editares: modalDetalhes.querySelectorAll('[data-detalhes-editar]'),
             excluir: modalDetalhes.querySelector('[data-detalhes-excluir]'),
         };
 
@@ -781,10 +838,12 @@ function iniciarPaginaClientes() {
             if (evento.key === 'Escape' && !modalDetalhes.hidden) fecharDetalhes();
         });
 
-        dRefs.editar.addEventListener('click', () => {
-            if (!clienteDetalhesAtual) return;
-            fecharDetalhes();
-            abrirModalEdicao(clienteDetalhesAtual.id);
+        dRefs.editares.forEach((botao) => {
+            botao.addEventListener('click', () => {
+                if (!clienteDetalhesAtual) return;
+                fecharDetalhes();
+                abrirModalEdicao(clienteDetalhesAtual.id, 'perfil');
+            });
         });
 
         dRefs.excluir.addEventListener('click', async () => {
@@ -836,6 +895,8 @@ function iniciarPaginaClientes() {
                 const nascimento = new Date(cliente.data_nascimento + 'T00:00:00');
                 dRefs.nascimento.textContent = `${nascimento.toLocaleDateString('pt-BR')} (${cliente.idade} anos)`;
                 dRefs.whatsapp.textContent = cliente.whatsapp ? formatarWhatsapp(cliente.whatsapp) : 'Não informado';
+                dRefs.whatsapp.classList.toggle('perfil__vazio', !cliente.whatsapp);
+                dRefs.whatsappAdicionar.hidden = Boolean(cliente.whatsapp);
                 dRefs.criado.textContent = cliente.criado_em;
 
                 if (cliente.observacoes) {
@@ -847,23 +908,7 @@ function iniciarPaginaClientes() {
 
                 dRefs.saldo.textContent = formatarMoeda(cliente.creditos);
 
-                const rotulosTipo = { adicionar: 'Adicionado', descontar: 'Descontado', definir: 'Saldo definido' };
-                dRefs.historicoLista.innerHTML = '';
-                if (cliente.historico && cliente.historico.length > 0) {
-                    dRefs.semHistorico.hidden = true;
-                    cliente.historico.forEach((item) => {
-                        const li = document.createElement('li');
-                        li.className = 'creditos__historico-item';
-                        const rotulo = rotulosTipo[item.tipo] || item.tipo;
-                        li.innerHTML = `
-                            <span class="creditos__historico-tipo">${rotulo} · ${formatarMoeda(item.valor)}</span>
-                            <span class="creditos__historico-data">${item.data} — saldo: ${formatarMoeda(item.saldo_novo)}</span>
-                        `;
-                        dRefs.historicoLista.appendChild(li);
-                    });
-                } else {
-                    dRefs.semHistorico.hidden = false;
-                }
+                renderizarHistorico(dRefs.historicoLista, dRefs.semHistorico, cliente.historico);
 
                 if (cliente.whatsapp_url) {
                     dRefs.whatsappBotao.href = cliente.whatsapp_url;
@@ -876,6 +921,9 @@ function iniciarPaginaClientes() {
                 modalDetalhes.hidden = false;
                 document.body.style.overflow = 'hidden';
                 ativarFocusTrap(modalDetalhes.querySelector('.modal-cliente'));
+                // Foco vai para o fechar: quando o perfil reabre depois de uma
+                // edição, o foco não fica perdido no corpo da página.
+                modalDetalhes.querySelector('[data-fechar-modal]').focus();
             } catch (erro) {
                 mostrarMensagem('Erro de conexão ao carregar cliente.', 'erro');
             }
@@ -893,7 +941,10 @@ function iniciarPaginaClientes() {
     // créditos, envio) — cada modal tem seu próprio formulário/overlay, então
     // isso é configurado uma vez para cada um, sem misturar estado entre eles.
 
-    function configurarModal(raiz) {
+    // aoFechar (opcional) roda ao sair do modal por qualquer caminho — salvar,
+    // cancelar, X, Esc ou clique fora. Se devolver true, outra tela já assumiu
+    // o foco (o perfil), e o foco não volta para quem abriu o modal.
+    function configurarModal(raiz, { aoFechar = null } = {}) {
         const form = raiz.querySelector('[data-form-cliente]');
         const modalErros = raiz.querySelector('[data-modal-erros]');
         const inputCreditos = form.querySelector('[data-form-creditos]');
@@ -912,6 +963,22 @@ function iniciarPaginaClientes() {
         const creditosExibicao = form.querySelector('[data-creditos-exibicao]');
         const inputObservacoes = form.querySelector('[data-input-observacoes]');
         const contadorObservacoes = form.querySelector('[data-contador-observacoes]');
+        const inputNascimento = form.querySelector('[data-input-nascimento]');
+        const dicaIdade = form.querySelector('[data-dica-idade]');
+        const seloStatus = form.querySelector('[data-selo-status]');
+        const botoesCancelar = raiz.querySelectorAll('[data-cancelar-edicao]');
+        const historicoLista = form.querySelector('[data-edicao-historico]');
+        const historicoVazio = form.querySelector('[data-edicao-historico-vazio]');
+        const operacaoGrupo = form.querySelector('[data-operacao-grupo]');
+        const operacaoRadios = form.querySelectorAll('[data-operacao-creditos]');
+        const avisoDefinir = form.querySelector('[data-aviso-definir]');
+        const rotuloValor = form.querySelector('[data-rotulo-valor]');
+        const previa = form.querySelector('[data-credito-previa]');
+        const inputMotivo = form.querySelector('[data-input-motivo]');
+        const botaoAplicar = form.querySelector('[data-aplicar-creditos]');
+        const textoAplicar = form.querySelector('[data-texto-aplicar]');
+        const dicaCreditos = form.querySelector('[data-credito-dica]');
+        const botaoAlternarDefinir = form.querySelector('[data-alternar-definir]');
 
         let elementoAnteriorFoco = null;
 
@@ -939,7 +1006,17 @@ function iniciarPaginaClientes() {
                 creditosMensagem.textContent = '';
             }
             atualizarContadorObservacoes();
-            if (elementoAnteriorFoco && elementoAnteriorFoco.focus) elementoAnteriorFoco.focus();
+            atualizarDicaIdade();
+            atualizarSeloStatus();
+            definirModoCreditos('adicionar');
+            // Movimentações já foram salvas na hora; a lista só precisa refletir
+            // o novo saldo quando o modal fecha.
+            if (houveMovimento) {
+                houveMovimento = false;
+                carregarLista();
+            }
+            const retomouOutraTela = aoFechar ? aoFechar() : false;
+            if (!retomouOutraTela && elementoAnteriorFoco && elementoAnteriorFoco.focus) elementoAnteriorFoco.focus();
         }
 
         raiz.querySelectorAll('[data-fechar-modal]').forEach((botao) => {
@@ -960,7 +1037,7 @@ function iniciarPaginaClientes() {
         // repetir a mesma mensagem duas vezes na tela.
 
         function limparErrosDeCampos() {
-            form.querySelectorAll('[data-erro]').forEach((span) => {
+            form.querySelectorAll('.campo__erro').forEach((span) => {
                 span.hidden = true;
                 span.textContent = '';
             });
@@ -1062,21 +1139,54 @@ function iniciarPaginaClientes() {
             inputObservacoes.addEventListener('input', atualizarContadorObservacoes);
         }
 
-        // Ajuste de créditos (adicionar / descontar / definir) — sem prompt()
-        // nativo: o valor vem de um campo numérico próprio (min="0"), e o
-        // resultado nunca pode ficar negativo (trava tanto aqui quanto no
-        // servidor). "Definir" pula a soma/subtração mental: o valor digitado
-        // vira o novo saldo direto.
-        function atualizarEstadoBotaoDescontar() {
-            const botaoDescontar = form.querySelector('[data-ajustar-creditos="descontar"]');
-            if (!botaoDescontar) return;
-            const atual = parseFloat(inputCreditos.value) || 0;
-            botaoDescontar.disabled = atual <= 0;
+        // Idade ao vivo ao lado da data de nascimento — o cadastro guarda só a
+        // data; mostrar a idade aqui ajuda a conferir antes de salvar.
+        function atualizarDicaIdade() {
+            if (!dicaIdade || !inputNascimento) return;
+            const idade = calcularIdade(inputNascimento.value);
+            dicaIdade.hidden = idade === null;
+            dicaIdade.textContent = idade === null ? '' : `${idade} ${idade === 1 ? 'ano' : 'anos'}`;
         }
 
-        function mostrarMensagemCreditos(texto) {
+        if (inputNascimento) {
+            inputNascimento.addEventListener('input', atualizarDicaIdade);
+        }
+
+        // Selo de status ao lado do select — mesmo visual do perfil; só aparece
+        // quando o cliente está inativo.
+        function atualizarSeloStatus() {
+            if (!seloStatus || !inputStatus) return;
+            seloStatus.hidden = inputStatus.value !== 'inativo';
+        }
+
+        if (inputStatus) {
+            inputStatus.addEventListener('change', atualizarSeloStatus);
+        }
+
+        // "Cancelar" do rodapé faz o mesmo que fechar pelo X.
+        botoesCancelar.forEach((botao) => botao.addEventListener('click', fechar));
+
+        // ---- Créditos ------------------------------------------------------
+        // Edição: cada movimentação vai para o servidor na hora (POST
+        // /clientes/{id}/creditos), vira um lançamento no histórico, e o saldo
+        // e as movimentações da tela atualizam logo em seguida. Criação: o saldo
+        // inicial é só local e entra no cadastro quando o cliente é salvo.
+        // Antes de confirmar, a prévia mostra "saldo atual → novo saldo", e o
+        // botão só habilita quando a operação é válida. Nada é recortado em
+        // silêncio: descontar mais do que o saldo é recusado com o motivo.
+
+        const ehEdicao = Boolean(form.dataset.urlBase);
+        let saldoBase = 0;
+        let modoCreditos = 'adicionar'; // 'adicionar' | 'descontar' | 'definir'
+        let houveMovimento = false;
+
+        const ROTULOS_OPERACAO = { adicionar: 'Adicionar', descontar: 'Descontar', definir: 'Definir saldo' };
+
+        function mostrarMensagemCreditos(texto, tipo = 'erro') {
             if (!creditosMensagem) return;
             creditosMensagem.textContent = texto;
+            creditosMensagem.classList.toggle('creditos__mensagem--sucesso', tipo === 'sucesso');
+            creditosMensagem.classList.toggle('creditos__mensagem--erro', tipo === 'erro');
             creditosMensagem.hidden = false;
         }
 
@@ -1086,53 +1196,244 @@ function iniciarPaginaClientes() {
             creditosMensagem.textContent = '';
         }
 
-        if (inputAjusteValor) {
-            // Bloqueia negativo já na digitação (min="0" no input já ajuda,
-            // mas alguns navegadores/teclados ainda deixam colar "-").
-            inputAjusteValor.addEventListener('input', () => {
-                if (inputAjusteValor.value !== '' && parseFloat(inputAjusteValor.value) < 0) {
-                    inputAjusteValor.value = '';
-                }
+        // Máscara de dinheiro enquanto digita: só dígitos, lidos como centavos
+        // ("3050" vira "30,50"). Evita o problema de vírgula decimal em
+        // type="number", que muda de um navegador para outro.
+        function formatarDigitacaoValor(texto) {
+            const digitos = String(texto || '').replace(/\D/g, '').slice(0, 11);
+            if (digitos === '') return '';
+            const centavos = parseInt(digitos, 10);
+            return (centavos / 100).toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
             });
         }
 
-        form.querySelectorAll('[data-ajustar-creditos]').forEach((botao) => {
-            botao.addEventListener('click', () => {
-                const acao = botao.getAttribute('data-ajustar-creditos');
-                const valor = parseFloat(inputAjusteValor ? inputAjusteValor.value : '');
-                const valorInvalido = isNaN(valor) || valor < 0 || (acao !== 'definir' && valor <= 0);
+        function valorDigitado() {
+            if (!inputAjusteValor) return null;
+            const digitos = inputAjusteValor.value.replace(/\D/g, '');
+            return digitos === '' ? null : parseInt(digitos, 10) / 100;
+        }
 
-                if (valorInvalido) {
-                    mostrarMensagemCreditos(
-                        acao === 'definir' ? 'Informe um valor válido.' : 'Informe um valor válido, maior que zero.'
-                    );
-                    if (inputAjusteValor) inputAjusteValor.focus();
+        // Decide, sem efeito colateral, o novo saldo e se a operação é válida.
+        // "erro" é o motivo de não poder confirmar (mostrado como dica).
+        function calcularOperacao() {
+            const valor = valorDigitado();
+            const vazio = valor === null;
+            const resultado = { valor, novo: saldoBase, erro: null, vazio };
+
+            if (modoCreditos === 'definir') {
+                if (!vazio && valor === saldoBase) {
+                    resultado.erro = 'O saldo já é esse valor.';
+                }
+                resultado.novo = vazio ? saldoBase : valor;
+                return resultado;
+            }
+
+            if (modoCreditos === 'descontar' && saldoBase <= 0) {
+                resultado.erro = 'Este cliente não tem saldo para descontar.';
+                return resultado;
+            }
+
+            if (vazio) return resultado;
+
+            if (valor <= 0) {
+                resultado.erro = 'Digite um valor maior que zero.';
+                return resultado;
+            }
+
+            if (modoCreditos === 'adicionar') {
+                resultado.novo = Math.round((saldoBase + valor) * 100) / 100;
+            } else if (valor > saldoBase) {
+                resultado.erro = `Saldo insuficiente: o máximo a descontar é ${formatarMoeda(saldoBase)}.`;
+            } else {
+                resultado.novo = Math.round((saldoBase - valor) * 100) / 100;
+            }
+
+            return resultado;
+        }
+
+        // Atualiza prévia, texto e estado do botão e a dica, a partir do que
+        // está digitado agora. Chamada depois de cada mudança na tela.
+        function atualizarCreditos() {
+            const { valor, novo, erro, vazio } = calcularOperacao();
+
+            if (previa) {
+                if (modoCreditos === 'definir') {
+                    previa.textContent = vazio
+                        ? 'Digite o novo saldo para ver a prévia.'
+                        : `Saldo: ${formatarMoeda(saldoBase)} → ${formatarMoeda(novo)}`;
+                } else if (vazio) {
+                    previa.textContent = 'Digite um valor para ver o novo saldo.';
+                } else {
+                    const mostrado = erro ? saldoBase : novo;
+                    previa.textContent = `Saldo: ${formatarMoeda(saldoBase)} → ${formatarMoeda(mostrado)}`;
+                }
+            }
+
+            if (textoAplicar) {
+                const rotulo = ROTULOS_OPERACAO[modoCreditos];
+                textoAplicar.textContent = vazio || erro
+                    ? rotulo
+                    : `${rotulo} ${formatarMoeda(valor)}`;
+            }
+
+            if (botaoAplicar) {
+                botaoAplicar.disabled = vazio || Boolean(erro);
+            }
+
+            if (dicaCreditos) {
+                let texto = erro;
+                if (!texto && vazio) {
+                    texto = modoCreditos === 'definir'
+                        ? 'Digite o novo saldo para continuar.'
+                        : 'Digite um valor para continuar.';
+                }
+                dicaCreditos.textContent = texto || '';
+                dicaCreditos.hidden = !texto;
+                dicaCreditos.classList.toggle('creditos__dica--erro', Boolean(erro));
+            }
+        }
+
+        // Troca entre somar/subtrair e corrigir o saldo direto. No modo
+        // "definir" o seletor some e a explicação aparece no lugar.
+        function definirModoCreditos(novoModo) {
+            modoCreditos = novoModo;
+            if (operacaoGrupo) operacaoGrupo.hidden = novoModo === 'definir';
+            if (avisoDefinir) avisoDefinir.hidden = novoModo !== 'definir';
+            if (rotuloValor) rotuloValor.textContent = novoModo === 'definir' ? 'Novo saldo' : 'Quanto?';
+            if (botaoAlternarDefinir) {
+                botaoAlternarDefinir.textContent = novoModo === 'definir'
+                    ? 'Voltar a adicionar ou descontar'
+                    : 'Corrigir saldo manualmente';
+            }
+            if (novoModo !== 'definir') {
+                operacaoRadios.forEach((radio) => { radio.checked = radio.value === novoModo; });
+            }
+            ocultarMensagemCreditos();
+            atualizarCreditos();
+        }
+
+        // Define o saldo de partida (vindo do servidor na edição, zero na
+        // criação) e zera a parte digitada.
+        function definirSaldoBase(valor) {
+            saldoBase = Number(valor) || 0;
+            houveMovimento = false;
+            if (inputCreditos) inputCreditos.value = saldoBase.toFixed(2);
+            if (creditosExibicao) creditosExibicao.textContent = formatarMoeda(saldoBase);
+            definirModoCreditos('adicionar');
+        }
+
+        function textoResumoMovimento(tipo, valor, novoSaldo) {
+            const acao = {
+                adicionar: `${formatarMoeda(valor)} adicionado.`,
+                descontar: `${formatarMoeda(valor)} descontado.`,
+                definir: `Saldo definido em ${formatarMoeda(valor)}.`,
+            }[tipo];
+            return `${acao} Saldo atual: ${formatarMoeda(novoSaldo)}.`;
+        }
+
+        function limparCamposCreditos() {
+            if (inputAjusteValor) inputAjusteValor.value = '';
+            if (inputMotivo) inputMotivo.value = '';
+        }
+
+        // Edição: grava a movimentação no servidor e atualiza saldo e histórico.
+        async function registrarMovimento(op) {
+            const tipo = modoCreditos;
+            const motivo = inputMotivo ? inputMotivo.value.trim() : '';
+
+            botaoAplicar.disabled = true;
+            textoAplicar.textContent = 'Salvando...';
+
+            try {
+                const resposta = await fetch(form.action + '/creditos', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ tipo, valor: op.valor, motivo: motivo || null }),
+                });
+
+                const dados = await resposta.json().catch(() => ({}));
+
+                if (!resposta.ok) {
+                    const erroValor = dados.errors && dados.errors.valor ? dados.errors.valor[0] : null;
+                    mostrarMensagemCreditos(erroValor || dados.message || 'Não foi possível registrar a movimentação.', 'erro');
                     return;
                 }
 
-                const atual = parseFloat(inputCreditos.value) || 0;
-                let novoValor;
-                if (acao === 'definir') {
-                    novoValor = valor;
-                } else {
-                    novoValor = acao === 'adicionar' ? atual + valor : atual - valor;
-                }
+                saldoBase = Number(dados.creditos) || 0;
+                if (creditosExibicao) creditosExibicao.textContent = formatarMoeda(saldoBase);
+                renderizarHistorico(historicoLista, historicoVazio, dados.historico);
+                houveMovimento = true;
+                limparCamposCreditos();
+                mostrarMensagemCreditos(textoResumoMovimento(tipo, op.valor, saldoBase), 'sucesso');
+            } catch (erro) {
+                mostrarMensagemCreditos('Erro de conexão ao registrar a movimentação.', 'erro');
+            } finally {
+                atualizarCreditos();
+            }
+        }
 
-                if (novoValor < 0) {
-                    novoValor = 0;
-                    mostrarMensagemCreditos(
-                        `Esse cliente só tinha ${formatarMoeda(atual)}; o saldo foi ajustado para R$ 0,00 (créditos nunca ficam negativos).`
-                    );
-                } else {
-                    ocultarMensagemCreditos();
-                }
+        // Criação: o saldo inicial só vai para o campo oculto do formulário;
+        // quem grava é o cadastro (ver ClienteController::store).
+        function aplicarSaldoLocal(op) {
+            saldoBase = op.novo;
+            if (inputCreditos) inputCreditos.value = saldoBase.toFixed(2);
+            if (creditosExibicao) creditosExibicao.textContent = formatarMoeda(saldoBase);
+            limparCamposCreditos();
+            mostrarMensagemCreditos(`Saldo inicial: ${formatarMoeda(saldoBase)}. Será salvo ao cadastrar o cliente.`, 'sucesso');
+            atualizarCreditos();
+        }
 
-                inputCreditos.value = novoValor.toFixed(2);
-                creditosExibicao.textContent = formatarMoeda(novoValor);
-                if (inputAjusteValor) inputAjusteValor.value = '';
-                atualizarEstadoBotaoDescontar();
+        if (inputAjusteValor) {
+            inputAjusteValor.addEventListener('input', () => {
+                inputAjusteValor.value = formatarDigitacaoValor(inputAjusteValor.value);
+                ocultarMensagemCreditos();
+                atualizarCreditos();
+            });
+        }
+
+        operacaoRadios.forEach((radio) => {
+            radio.addEventListener('change', () => {
+                modoCreditos = radio.value;
+                ocultarMensagemCreditos();
+                atualizarCreditos();
             });
         });
+
+        form.querySelectorAll('[data-valor-rapido]').forEach((botao) => {
+            botao.addEventListener('click', () => {
+                const reais = parseInt(botao.getAttribute('data-valor-rapido'), 10);
+                if (inputAjusteValor) inputAjusteValor.value = formatarDigitacaoValor(String(reais * 100));
+                ocultarMensagemCreditos();
+                atualizarCreditos();
+                if (inputAjusteValor) inputAjusteValor.focus();
+            });
+        });
+
+        if (botaoAlternarDefinir) {
+            botaoAlternarDefinir.addEventListener('click', () => {
+                definirModoCreditos(modoCreditos === 'definir' ? 'adicionar' : 'definir');
+            });
+        }
+
+        if (botaoAplicar) {
+            botaoAplicar.addEventListener('click', () => {
+                const op = calcularOperacao();
+                if (op.vazio || op.erro) return;
+
+                if (ehEdicao) {
+                    registrarMovimento(op);
+                } else {
+                    aplicarSaldoLocal(op);
+                }
+            });
+        }
 
         // Envio do formulário
         form.addEventListener('submit', async (evento) => {
@@ -1173,6 +1474,9 @@ function iniciarPaginaClientes() {
                 }
 
                 mostrarMensagem(dados.message, 'sucesso');
+                // O submit já recarrega a lista logo abaixo, então não precisa
+                // do recarregamento extra que fechar() faria por movimentação.
+                houveMovimento = false;
                 fechar();
                 termoAtual = buscaCampo.value.trim();
                 await carregarLista();
@@ -1198,19 +1502,34 @@ function iniciarPaginaClientes() {
             previewIniciais,
             iconeVazio,
             botaoSelecionarFoto,
-            atualizarEstadoBotaoDescontar,
+            definirSaldoBase,
             atualizarContadorObservacoes,
+            atualizarDicaIdade,
+            atualizarSeloStatus,
+            historicoLista,
+            historicoVazio,
         };
     }
 
     const modalCriar = configurarModal(document.querySelector('[data-modal="criar"]'));
-    const modalEditar = configurarModal(document.querySelector('[data-modal="editar"]'));
+
+    // Edição aberta a partir do perfil volta para ele ao sair (salvar, cancelar
+    // ou fechar), com os dados já atualizados — o perfil é buscado de novo.
+    // Edição aberta pela lista só fecha, como antes.
+    let retornarAoPerfilId = null;
+    const modalEditar = configurarModal(document.querySelector('[data-modal="editar"]'), {
+        aoFechar() {
+            const id = retornarAoPerfilId;
+            retornarAoPerfilId = null;
+            if (!id || !executarAberturaDetalhes) return false;
+            executarAberturaDetalhes(id);
+            return true;
+        },
+    });
 
     function abrirModalCriacao() {
         modalCriar.form.reset();
-        modalCriar.inputCreditos.value = '0';
-        modalCriar.creditosExibicao.textContent = formatarMoeda(0);
-        modalCriar.atualizarEstadoBotaoDescontar();
+        modalCriar.definirSaldoBase(0);
         modalCriar.previewImagem.hidden = true;
         modalCriar.previewImagem.src = '';
         if (modalCriar.iconeVazio) modalCriar.iconeVazio.hidden = false;
@@ -1219,7 +1538,13 @@ function iniciarPaginaClientes() {
         window.setTimeout(() => modalCriar.form.querySelector('[data-input-nome]').focus(), 50);
     }
 
-    async function abrirModalEdicao(id) {
+    async function abrirModalEdicao(id, origem = null) {
+        // Se a edição veio do perfil e não deu para abrir, o perfil volta — o
+        // usuário não fica sem tela nenhuma depois de ter clicado em Editar.
+        const voltarAoPerfil = () => {
+            if (origem === 'perfil' && executarAberturaDetalhes) executarAberturaDetalhes(id);
+        };
+
         try {
             const resposta = await fetch('/clientes/' + id, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -1227,13 +1552,15 @@ function iniciarPaginaClientes() {
 
             if (!resposta.ok) {
                 mostrarMensagem('Não foi possível carregar os dados do cliente.', 'erro');
+                voltarAoPerfil();
                 return;
             }
 
             const cliente = await resposta.json();
             const {
-                form, previewAvatar, previewImagem, previewIniciais, inputCreditos,
-                creditosExibicao, inputWhatsapp, inputStatus, botaoAbrirWhatsapp, atualizarEstadoBotaoDescontar,
+                form, previewAvatar, previewImagem, previewIniciais,
+                inputWhatsapp, inputStatus, botaoAbrirWhatsapp, definirSaldoBase,
+                atualizarDicaIdade, atualizarSeloStatus, historicoLista, historicoVazio,
             } = modalEditar;
 
             form.reset();
@@ -1242,11 +1569,12 @@ function iniciarPaginaClientes() {
             form.querySelector('[data-input-nascimento]').value = cliente.data_nascimento;
             form.querySelector('[data-input-observacoes]').value = cliente.observacoes || '';
             modalEditar.atualizarContadorObservacoes();
+            atualizarDicaIdade();
             if (inputStatus) inputStatus.value = cliente.status || 'ativo';
-            inputCreditos.value = cliente.creditos;
-            creditosExibicao.textContent = formatarMoeda(cliente.creditos);
-            atualizarEstadoBotaoDescontar();
+            atualizarSeloStatus();
+            definirSaldoBase(cliente.creditos);
             modalEditar.botaoSelecionarFoto.classList.remove('tem-foto');
+            renderizarHistorico(historicoLista, historicoVazio, cliente.historico);
 
             if (inputWhatsapp) {
                 inputWhatsapp.value = formatarWhatsapp(cliente.whatsapp || '');
@@ -1274,9 +1602,11 @@ function iniciarPaginaClientes() {
                 previewAvatar.style.backgroundColor = cliente.cor_avatar || AVATAR_CORES[0];
             }
 
+            retornarAoPerfilId = origem === 'perfil' ? String(id) : null;
             modalEditar.abrir();
         } catch (erro) {
             mostrarMensagem('Erro de conexão ao carregar cliente.', 'erro');
+            voltarAoPerfil();
         }
     }
 

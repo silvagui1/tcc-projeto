@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ClienteController extends Controller
@@ -150,13 +152,23 @@ class ClienteController extends Controller
             'iniciais' => $cliente->iniciais,
             'cor_avatar' => $cliente->cor_avatar,
             'criado_em' => $cliente->created_at->format('d/m/Y'),
-            'historico' => $cliente->historicoCreditos()->take(5)->get()->map(fn (ClienteCreditoHistorico $item) => [
-                'tipo' => $item->tipo,
-                'valor' => (float) $item->valor,
-                'saldo_novo' => (float) $item->saldo_novo,
-                'data' => $item->created_at->format('d/m/Y \à\s H:i'),
-            ]),
+            'historico' => $this->historicoJson($cliente),
         ]);
+    }
+
+    /**
+     * Últimas movimentações de créditos do cliente, no formato que o modal
+     * de perfil e o de edição exibem.
+     */
+    private function historicoJson(Cliente $cliente): array
+    {
+        return $cliente->historicoCreditos()->take(5)->get()->map(fn (ClienteCreditoHistorico $item) => [
+            'tipo' => $item->tipo,
+            'valor' => (float) $item->valor,
+            'saldo_novo' => (float) $item->saldo_novo,
+            'motivo' => $item->motivo,
+            'data' => $item->created_at->format('d/m/Y \à\s H:i'),
+        ])->all();
     }
 
     /**
@@ -188,11 +200,12 @@ class ClienteController extends Controller
     }
 
     /**
-     * Atualiza os dados (e créditos) de um cliente existente.
+     * Atualiza os dados do cliente. Os créditos não passam por aqui: cada
+     * movimentação de saldo é feita por ajustarCreditos(), que grava o
+     * lançamento no histórico na hora.
      */
     public function update(UpdateClienteRequest $request, Cliente $cliente): JsonResponse
     {
-        $saldoAnterior = (float) $cliente->creditos;
         $dados = $request->validated();
 
         if ($request->hasFile('foto')) {
@@ -205,12 +218,6 @@ class ClienteController extends Controller
 
         $cliente->update($dados);
 
-        $saldoNovo = (float) $cliente->creditos;
-        if ($saldoNovo !== $saldoAnterior) {
-            $tipo = $saldoNovo > $saldoAnterior ? 'adicionar' : 'descontar';
-            $this->registrarHistoricoCreditos($cliente, $tipo, $saldoAnterior, $saldoNovo);
-        }
-
         return response()->json([
             'success' => true,
             'message' => "Dados de {$cliente->nome} atualizados com sucesso!",
@@ -219,15 +226,93 @@ class ClienteController extends Controller
     }
 
     /**
-     * Registra um lançamento no extrato de créditos do cliente.
+     * Movimenta o saldo de créditos de um cliente (adicionar, descontar ou
+     * definir o saldo direto) e grava o lançamento no histórico, com motivo
+     * opcional. Cada movimentação é salva na hora, sem depender do "Salvar"
+     * do formulário de dados.
+     *
+     * O saldo nunca fica negativo: descontar mais do que o saldo é recusado
+     * com 422, em vez de zerar o valor em silêncio. A linha do cliente é
+     * travada durante a operação para duas movimentações simultâneas não
+     * calcularem sobre o mesmo saldo antigo.
      */
-    private function registrarHistoricoCreditos(Cliente $cliente, string $tipo, float $saldoAnterior, float $saldoNovo): void
+    public function ajustarCreditos(Request $request, Cliente $cliente): JsonResponse
     {
+        $dados = $request->validate([
+            'tipo' => ['required', 'in:adicionar,descontar,definir'],
+            'valor' => ['required', 'numeric', 'min:0', 'max:99999.99'],
+            'motivo' => ['nullable', 'string', 'max:120'],
+        ], [
+            'tipo.required' => 'Escolha se o valor deve ser adicionado, descontado ou definido como saldo.',
+            'tipo.in' => 'Operação inválida.',
+            'valor.required' => 'Informe um valor.',
+            'valor.numeric' => 'Informe um valor numérico.',
+            'valor.min' => 'O valor não pode ser negativo.',
+            'valor.max' => 'O valor é maior que o permitido.',
+            'motivo.max' => 'O motivo pode ter no máximo :max caracteres.',
+        ]);
+
+        $tipo = $dados['tipo'];
+        $valor = round((float) $dados['valor'], 2);
+        $motivo = trim((string) ($dados['motivo'] ?? '')) ?: null;
+
+        if ($tipo !== 'definir' && $valor <= 0) {
+            throw ValidationException::withMessages(['valor' => 'Informe um valor maior que zero.']);
+        }
+
+        DB::transaction(function () use ($cliente, $tipo, $valor, $motivo) {
+            $atual = Cliente::query()->whereKey($cliente->id)->lockForUpdate()->firstOrFail();
+            $saldoAnterior = (float) $atual->creditos;
+
+            if ($tipo === 'definir') {
+                $saldoNovo = $valor;
+            } elseif ($tipo === 'adicionar') {
+                $saldoNovo = $saldoAnterior + $valor;
+            } else {
+                if ($valor > $saldoAnterior) {
+                    throw ValidationException::withMessages([
+                        'valor' => 'Saldo insuficiente: o máximo a descontar é R$ '.number_format($saldoAnterior, 2, ',', '.').'.',
+                    ]);
+                }
+                $saldoNovo = $saldoAnterior - $valor;
+            }
+
+            if ($saldoNovo === $saldoAnterior) {
+                throw ValidationException::withMessages(['valor' => 'O saldo já é esse valor.']);
+            }
+
+            $atual->update(['creditos' => $saldoNovo]);
+            $this->registrarHistoricoCreditos($atual, $tipo, $saldoAnterior, $saldoNovo, $motivo);
+        });
+
+        $cliente->refresh();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Saldo atualizado com sucesso!',
+            'creditos' => (float) $cliente->creditos,
+            'historico' => $this->historicoJson($cliente),
+        ]);
+    }
+
+    /**
+     * Registra um lançamento no extrato de créditos do cliente. Em "definir"
+     * o valor registrado é o próprio saldo definido (o que o usuário digitou),
+     * não a diferença — assim o extrato diz "Saldo definido · R$ 50,00".
+     */
+    private function registrarHistoricoCreditos(
+        Cliente $cliente,
+        string $tipo,
+        float $saldoAnterior,
+        float $saldoNovo,
+        ?string $motivo = null,
+    ): void {
         $cliente->historicoCreditos()->create([
             'tipo' => $tipo,
-            'valor' => abs($saldoNovo - $saldoAnterior),
+            'valor' => $tipo === 'definir' ? $saldoNovo : abs($saldoNovo - $saldoAnterior),
             'saldo_anterior' => $saldoAnterior,
             'saldo_novo' => $saldoNovo,
+            'motivo' => $motivo,
         ]);
     }
 

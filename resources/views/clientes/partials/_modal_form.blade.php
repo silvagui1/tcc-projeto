@@ -1,19 +1,11 @@
 {{-- Modal de criação OU edição de cliente — um template só, parametrizado
      por $modo ('criar'|'editar'), incluído duas vezes em index.blade.php.
-     Antes eram dois arquivos praticamente idênticos (risco de um campo ser
-     atualizado num e esquecido no outro); a única diferença real de verdade
-     entre os dois é o componente de foto (círculo vazio clicável na criação,
-     vs. avatar + botão "Editar foto" na edição, já que só na edição existe
-     uma foto/iniciais prévias pra mostrar) e alguns campos que só fazem
-     sentido pra quem já existe (status, link de WhatsApp, histórico).
 
-     Os campos de nome/nascimento/status, contato e observações dividem um
-     único card ("Dados do cliente"), com divisórias sutis entre os grupos
-     em vez de cada um ter sua própria caixa branca — mesma linguagem de
-     "menos cardização" já aplicada na tela principal (ver .cartao__grupo
-     no CSS). Só Foto e Créditos continuam em cards próprios, por serem
-     blocos com um comportamento visual genuinamente diferente (upload de
-     imagem; número + botões de ajuste). --}}
+     Segue a mesma linguagem do perfil (_modal_detalhes): foto circular grande
+     e centralizada no topo, seções com divisórias (sem cards) e os mesmos
+     rótulos ("Informações", "Créditos"). Na edição, cada movimentação de
+     saldo é salva na hora (ver clientes.js, registrarMovimento). Ao sair de
+     uma edição aberta a partir do perfil, o perfil volta (ver clientes.js). --}}
 @php
     $ehEdicao = $modo === 'editar';
     $tituloId = 'modal-'.$modo.'-titulo';
@@ -29,119 +21,113 @@
             @csrf
             @if ($ehEdicao)
                 <input type="hidden" name="_method" value="PUT">
+            @else
+                {{-- Na criação o saldo inicial vai junto com o cadastro. Na
+                     edição não existe este campo: o saldo só muda pelas
+                     movimentações, que são salvas na hora. --}}
+                <input type="hidden" name="creditos" value="0" data-form-creditos>
             @endif
-            <input type="hidden" name="creditos" value="0" data-form-creditos>
 
             <header class="modal-cliente__topo">
                 <button type="button" class="modal-cliente__fechar" data-fechar-modal aria-label="Fechar">
                     <i class="bi bi-x-lg"></i>
                 </button>
-                <h2 id="{{ $tituloId }}">{{ $ehEdicao ? 'Editar cliente' : 'Adicionar cliente' }}</h2>
+                <h2 id="{{ $tituloId }}">{{ $ehEdicao ? 'Editar perfil' : 'Adicionar cliente' }}</h2>
                 <span class="modal-cliente__espaco" aria-hidden="true"></span>
             </header>
 
             <div class="modal-cliente__corpo">
                 {{-- Resumo genérico do erro — o detalhe de cada campo já
-                     aparece junto do próprio input (campo__erro), então essa
-                     mensagem só avisa "tem algo pra corrigir" sem repetir a
-                     lista inteira de novo aqui em cima. --}}
+                     aparece junto do próprio input (campo__erro). --}}
                 <div class="modal-cliente__erros" data-modal-erros hidden>
                     Corrija os campos destacados abaixo.
                 </div>
 
-                @if ($ehEdicao)
-                    <section class="cartao">
-                        <h3 class="cartao__titulo">Foto cliente</h3>
-                        <div class="cartao__linha-foto">
-                            <span class="avatar avatar--grande" data-preview-avatar>
-                                <img data-preview-imagem hidden alt="Pré-visualização da foto">
+                <section class="perfil__cabecalho">
+                    <button
+                        type="button"
+                        class="perfil__avatar-botao"
+                        data-selecionar-foto
+                        aria-label="{{ $ehEdicao ? 'Trocar foto do cliente' : 'Adicionar foto do cliente' }}"
+                    >
+                        <span class="perfil__avatar" data-preview-avatar>
+                            <img data-preview-imagem hidden alt="Pré-visualização da foto">
+                            @if ($ehEdicao)
                                 <span data-preview-iniciais>--</span>
-                            </span>
-                            <button type="button" class="botao botao--principal" data-selecionar-foto>
-                                Editar foto
-                            </button>
-                            <input
-                                type="file"
-                                name="foto"
-                                accept="image/png,image/jpeg,image/webp"
-                                hidden
-                                data-input-foto
-                            >
-                        </div>
-                        <span class="campo__erro" data-erro-foto hidden></span>
-                    </section>
-                @else
-                    <section class="cartao cartao--foto-upload">
-                        <button type="button" class="avatar-upload" data-selecionar-foto aria-label="Adicionar foto do cliente">
-                            <span class="avatar-upload__preview" data-preview-avatar>
-                                <img data-preview-imagem hidden alt="Pré-visualização da foto">
-                                <i class="bi bi-camera-fill" data-preview-icone-vazio></i>
-                            </span>
-                            <span class="avatar-upload__badge" aria-hidden="true">
-                                <i class="bi bi-camera-fill"></i>
-                            </span>
-                        </button>
-                        <input
-                            type="file"
-                            name="foto"
-                            accept="image/png,image/jpeg,image/webp"
-                            hidden
-                            data-input-foto
-                        >
-                        <p class="avatar-upload__legenda">toque para adicionar uma foto</p>
-                        <span class="campo__erro" data-erro-foto hidden></span>
-                    </section>
-                @endif
+                            @else
+                                <i class="bi bi-person-fill" data-preview-icone-vazio aria-hidden="true"></i>
+                            @endif
+                        </span>
+                        <span class="perfil__selo-camera" aria-hidden="true">
+                            <i class="bi bi-camera-fill"></i>
+                        </span>
+                    </button>
+                    <span class="perfil__legenda-foto">{{ $ehEdicao ? 'Trocar foto' : 'Adicionar foto' }}</span>
+                    <input
+                        type="file"
+                        name="foto"
+                        accept="image/png,image/jpeg,image/webp"
+                        hidden
+                        data-input-foto
+                    >
+                    <span class="campo__erro" data-erro-foto hidden></span>
+                </section>
 
-                <section class="cartao">
-                    <h3 class="cartao__titulo">Dados do cliente</h3>
+                <section class="perfil__secao">
+                    <h3 class="perfil__titulo">Informações</h3>
+
                     <div class="campo">
                         <label for="cliente-{{ $modo }}-nome">Nome</label>
                         <input type="text" id="cliente-{{ $modo }}-nome" name="nome" placeholder="Nome do cliente" required data-input-nome>
                         <span class="campo__erro" data-erro-nome hidden></span>
                     </div>
+
                     <div class="campo">
-                        <label for="cliente-{{ $modo }}-nascimento">Data de nascimento</label>
+                        <label for="cliente-{{ $modo }}-nascimento">Nascimento</label>
                         <input type="date" id="cliente-{{ $modo }}-nascimento" name="data_nascimento" required data-input-nascimento>
+                        <p class="campo__dica" data-dica-idade hidden></p>
                         <span class="campo__erro" data-erro-data_nascimento hidden></span>
                     </div>
+
                     @if ($ehEdicao)
                         {{-- Só existe na edição: um cliente recém-criado
-                             sempre começa ativo (default do banco), não faz
-                             sentido pedir isso já na criação. --}}
+                             sempre começa ativo (default do banco). O selo ao
+                             lado é o mesmo do perfil, para a mudança aparecer
+                             antes de salvar. --}}
                         <div class="campo">
                             <label for="cliente-{{ $modo }}-status">Status</label>
-                            <select id="cliente-{{ $modo }}-status" name="status" data-input-status>
-                                <option value="ativo">Ativo</option>
-                                <option value="inativo">Inativo</option>
-                            </select>
+                            <div class="campo__linha">
+                                <select id="cliente-{{ $modo }}-status" name="status" data-input-status>
+                                    <option value="ativo">Ativo</option>
+                                    <option value="inativo">Inativo</option>
+                                </select>
+                                <span class="status-badge status-badge--inativo" data-selo-status hidden>Inativo</span>
+                            </div>
                             <span class="campo__erro" data-erro-status hidden></span>
                         </div>
                     @endif
 
-                    <div class="cartao__grupo">
-                        <div class="campo">
-                            <label for="cliente-{{ $modo }}-whatsapp">WhatsApp</label>
-                            <div class="campo__com-icone">
-                                <i class="bi bi-whatsapp" aria-hidden="true"></i>
-                                <input
-                                    type="tel"
-                                    id="cliente-{{ $modo }}-whatsapp"
-                                    name="whatsapp"
-                                    placeholder="(11) 91234-5678"
-                                    inputmode="numeric"
-                                    maxlength="16"
-                                    data-input-whatsapp
-                                >
-                            </div>
-                            <span class="campo__erro" data-erro-whatsapp hidden></span>
+                    <div class="campo">
+                        <label for="cliente-{{ $modo }}-whatsapp">WhatsApp</label>
+                        <div class="campo__com-icone">
+                            <i class="bi bi-whatsapp" aria-hidden="true"></i>
+                            <input
+                                type="tel"
+                                id="cliente-{{ $modo }}-whatsapp"
+                                name="whatsapp"
+                                placeholder="(11) 91234-5678"
+                                inputmode="numeric"
+                                maxlength="16"
+                                data-input-whatsapp
+                            >
                         </div>
+                        <span class="campo__erro" data-erro-whatsapp hidden></span>
                         @if ($ehEdicao)
                             <a
                                 href="#"
                                 target="_blank"
                                 rel="noopener"
-                                class="botao botao--whatsapp botao--full"
+                                class="perfil__acao-link"
                                 data-abrir-whatsapp
                                 hidden
                             >
@@ -151,63 +137,109 @@
                         @endif
                     </div>
 
-                    <div class="cartao__grupo">
-                        <div class="campo campo--textarea">
-                            <label for="cliente-{{ $modo }}-observacoes">Observações</label>
-                            <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" maxlength="1000" data-input-observacoes></textarea>
-                            <span class="campo__erro" data-erro-observacoes hidden></span>
-                            {{-- Mesmo limite de 1000 caracteres validado no
-                                 back-end (UpdateClienteRequest/StoreClienteRequest)
-                                 — antes só se descobria ao tentar salvar. --}}
-                            <span class="campo__contador" data-contador-observacoes>0/1000</span>
-                        </div>
+                    <div class="campo campo--textarea">
+                        <label for="cliente-{{ $modo }}-observacoes">Observações</label>
+                        <textarea id="cliente-{{ $modo }}-observacoes" name="observacoes" rows="3" placeholder="Observações" maxlength="1000" data-input-observacoes></textarea>
+                        <span class="campo__erro" data-erro-observacoes hidden></span>
+                        {{-- Mesmo limite de 1000 caracteres validado no back-end. --}}
+                        <span class="campo__contador" data-contador-observacoes>0/1000</span>
                     </div>
                 </section>
 
-                <section class="cartao cartao--creditos">
-                    <h3 class="cartao__titulo">Créditos cliente</h3>
-                    <p class="creditos__rotulo">créditos atuais</p>
-                    <p class="creditos__valor" data-creditos-exibicao>R$ 0,00</p>
+                <section class="perfil__secao">
+                    <h3 class="perfil__titulo">Créditos</h3>
+                    <p class="perfil__rotulo">saldo atual</p>
+                    <p class="perfil__saldo" data-creditos-exibicao>R$ 0,00</p>
 
                     <div class="creditos__ajuste">
-                        <div class="creditos__campo-valor">
-                            <span class="creditos__prefixo" aria-hidden="true">R$</span>
-                            <input
-                                type="number"
-                                inputmode="decimal"
-                                min="0"
-                                step="0.01"
-                                placeholder="0,00"
-                                class="creditos__input-valor"
-                                data-input-ajuste-valor
-                                aria-label="Valor em reais para adicionar, descontar ou definir como novo saldo"
-                            >
+                        <div class="creditos__operacao" role="radiogroup" aria-label="Tipo de operação" data-operacao-grupo>
+                            <label class="creditos__opcao creditos__opcao--adicionar">
+                                <input type="radio" name="operacao_creditos_{{ $modo }}" value="adicionar" checked data-operacao-creditos>
+                                <span><i class="bi bi-plus-lg" aria-hidden="true"></i> Adicionar</span>
+                            </label>
+                            <label class="creditos__opcao creditos__opcao--descontar">
+                                <input type="radio" name="operacao_creditos_{{ $modo }}" value="descontar" data-operacao-creditos>
+                                <span><i class="bi bi-dash-lg" aria-hidden="true"></i> Descontar</span>
+                            </label>
                         </div>
-                        <div class="creditos__acoes">
-                            <button type="button" class="botao botao--principal" data-ajustar-creditos="adicionar">
-                                <i class="bi bi-plus-lg" aria-hidden="true"></i>
-                                Adicionar
-                            </button>
-                            <button type="button" class="botao botao--perigo" data-ajustar-creditos="descontar">
-                                <i class="bi bi-dash-lg" aria-hidden="true"></i>
-                                Descontar
-                            </button>
+
+                        <p class="creditos__aviso-definir" data-aviso-definir hidden>
+                            Corrigindo o saldo: o valor digitado passa a ser o saldo do cliente.
+                        </p>
+
+                        <div class="campo">
+                            <label for="cliente-{{ $modo }}-valor-credito" data-rotulo-valor>Quanto?</label>
+                            <div class="creditos__campo-valor">
+                                <span class="creditos__prefixo" aria-hidden="true">R$</span>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    autocomplete="off"
+                                    placeholder="0,00"
+                                    id="cliente-{{ $modo }}-valor-credito"
+                                    class="creditos__input-valor"
+                                    data-input-ajuste-valor
+                                >
+                            </div>
+                            <div class="creditos__rapidos" data-valores-rapidos>
+                                @foreach ([10, 20, 50, 100] as $valorRapido)
+                                    <button type="button" class="creditos__rapido" data-valor-rapido="{{ $valorRapido }}">R$ {{ $valorRapido }}</button>
+                                @endforeach
+                            </div>
                         </div>
-                        {{-- Alternativa a somar/subtrair mentalmente: digita
-                             o saldo final desejado e define direto. --}}
-                        <button type="button" class="botao botao--neutro botao--full" data-ajustar-creditos="definir">
-                            <i class="bi bi-pencil-fill" aria-hidden="true"></i>
-                            Definir como novo saldo
+
+                        <p class="creditos__previa" data-credito-previa>Digite um valor para ver o novo saldo.</p>
+
+                        @if ($ehEdicao)
+                            <div class="campo">
+                                <label for="cliente-{{ $modo }}-motivo">Motivo <span class="campo__opcional">(opcional)</span></label>
+                                <input
+                                    type="text"
+                                    id="cliente-{{ $modo }}-motivo"
+                                    maxlength="120"
+                                    list="motivos-credito-{{ $modo }}"
+                                    autocomplete="off"
+                                    placeholder="Ex.: compra no balcão"
+                                    data-input-motivo
+                                >
+                                <datalist id="motivos-credito-{{ $modo }}">
+                                    <option value="Compra no balcão"></option>
+                                    <option value="Estorno"></option>
+                                    <option value="Bonificação"></option>
+                                    <option value="Correção de lançamento"></option>
+                                </datalist>
+                            </div>
+                        @endif
+
+                        <button type="button" class="botao botao--principal botao--full" data-aplicar-creditos disabled>
+                            <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            <span data-texto-aplicar>Adicionar</span>
+                        </button>
+                        <p class="creditos__dica" data-credito-dica hidden></p>
+                        <p class="creditos__mensagem" data-creditos-mensagem role="status" hidden></p>
+
+                        <button type="button" class="perfil__acao-link" data-alternar-definir>
+                            Corrigir saldo manualmente
                         </button>
                     </div>
-                    <p class="creditos__mensagem" data-creditos-mensagem hidden></p>
+
+                    @if ($ehEdicao)
+                        {{-- Últimas movimentações: atualizam logo após cada
+                             ajuste, sem precisar salvar o formulário. --}}
+                        <h4 class="perfil__subtitulo">Últimas movimentações</h4>
+                        <ul class="creditos__historico-lista" data-edicao-historico></ul>
+                        <p class="perfil__vazio" data-edicao-historico-vazio hidden>
+                            Nenhuma movimentação registrada ainda.
+                        </p>
+                    @endif
                 </section>
             </div>
 
-            <footer class="modal-cliente__rodape">
+            <footer class="perfil__acoes-form">
                 <button type="submit" class="botao botao--principal botao--full" data-botao-salvar>
                     {{ $ehEdicao ? 'Salvar alterações' : 'Adicionar cliente' }}
                 </button>
+                <button type="button" class="perfil__cancelar" data-cancelar-edicao>Cancelar</button>
             </footer>
         </form>
     </div>

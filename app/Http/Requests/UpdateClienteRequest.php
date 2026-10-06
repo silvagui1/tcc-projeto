@@ -46,7 +46,6 @@ class UpdateClienteRequest extends FormRequest
             'status' => ['nullable', 'in:ativo,inativo'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'observacoes' => ['nullable', 'string', 'max:1000'],
-            'creditos' => ['required', 'numeric', 'min:0'],
         ];
     }
 
@@ -62,7 +61,6 @@ class UpdateClienteRequest extends FormRequest
             'status' => 'status',
             'foto' => 'foto',
             'observacoes' => 'observações',
-            'creditos' => 'créditos',
         ];
     }
 
@@ -85,9 +83,6 @@ class UpdateClienteRequest extends FormRequest
             'foto.max' => 'A foto deve ter no máximo 2MB.',
             'observacoes.string' => 'As observações devem ser um texto.',
             'observacoes.max' => 'As observações podem ter no máximo :max caracteres.',
-            'creditos.required' => 'Informe o valor de créditos do cliente.',
-            'creditos.numeric' => 'Os créditos devem ser um valor numérico.',
-            'creditos.min' => 'Os créditos não podem ser negativos.',
         ];
     }
 }
