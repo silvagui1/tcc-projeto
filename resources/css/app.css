@@ -411,6 +411,29 @@ img {
     font-size: 14px;
 }
 
+/* quando a busca é um <form> de verdade (estoque) */
+.search-bar input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+}
+
+.search-bar input::placeholder {
+    color: var(--text-muted-2);
+}
+
+.search-bar button {
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+}
+
 /* ==========================================================================
    Filtros (chips)
    ========================================================================== */
@@ -447,6 +470,10 @@ img {
     border: 1px solid var(--purple-light-800);
     color: var(--text);
     background: transparent;
+}
+
+a.chip {
+    text-decoration: none;
 }
 
 .chip.is-active {
@@ -512,6 +539,19 @@ img {
     align-items: center;
     justify-content: center;
     font-size: 12px;
+}
+
+/* editar + apagar lado a lado no canto da imagem */
+.product-card__actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.product-card__actions .product-card__delete {
+    position: static;
 }
 
 .product-card__body {
@@ -1139,6 +1179,87 @@ img {
 
 .card-field--check > span {
     font-weight: 400;
+}
+
+/* Campo de imagem dos pop-ups do estoque (partials/imagem-campo) */
+.imagem-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.imagem-campo__area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 170px;
+    border: 2px dashed var(--surface-border);
+    border-radius: var(--radius-sm);
+    background: var(--field);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.imagem-campo__area:hover,
+.imagem-campo__area.is-arrastando {
+    border-color: var(--purple-light-800);
+}
+
+.imagem-campo__area.is-arrastando {
+    background: var(--purple-light-300);
+}
+
+.imagem-campo__preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.imagem-campo__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    color: var(--text-muted-2);
+    font-size: 13px;
+    text-align: center;
+}
+
+.imagem-campo__vazio i {
+    font-size: 28px;
+}
+
+.imagem-campo__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.imagem-campo__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--purple-light-800);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.imagem-campo__btn--remover {
+    border-color: #d9534f;
+    color: #d9534f;
+}
+
+.imagem-campo__btn[hidden],
+.imagem-campo__preview[hidden],
+.imagem-campo__vazio[hidden] {
+    display: none;
 }
 
 .card-form__errors {

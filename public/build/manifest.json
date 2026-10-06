@@ -280,7 +280,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-9d21a3b9.css",
+    "file": "assets/app-82505257.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -290,7 +290,7 @@
     "src": "resources/css/clientes.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-752fa34d.js",
+    "file": "assets/app-3c024bd8.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

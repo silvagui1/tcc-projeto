@@ -12,6 +12,9 @@
 
     <form method="GET" action="{{ route('estoque.cartas') }}" class="cartas-filtros__form">
         <input type="hidden" name="jogo" value="{{ $jogoAtual }}">
+        @if ($filtros['busca'] !== '')
+            <input type="hidden" name="busca" value="{{ $filtros['busca'] }}">
+        @endif
 
         @foreach (['estado' => 'estado', 'raridade' => 'raridade', 'idioma' => 'idioma'] as $campo => $titulo)
             @if ($opcoes[$campo])
