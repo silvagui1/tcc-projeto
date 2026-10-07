@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SalvarAluguelRequest;
 use App\Models\Aluguel;
+use App\Models\Atividade;
 use App\Models\Mesa;
+use App\Services\Configuracoes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -67,6 +69,9 @@ class AluguelController extends Controller
             ? "{$criados->count()} datas reservadas: toda {$primeiro->dia_semana} às {$primeiro->inicio->format('H:i')}, até {$criados->last()->inicio->format('d/m')}."
             : "{$primeiro->mesa->nome} reservada para {$primeiro->inicio->format('d/m')} às {$primeiro->inicio->format('H:i')}.";
 
+        Atividade::registrar('alugueis', "{$primeiro->mesa->nome} · {$primeiro->nome_exibicao}: "
+            .($criados->count() > 1 ? "{$criados->count()} datas, toda {$primeiro->dia_semana} às {$primeiro->inicio->format('H:i')}" : "reserva em {$primeiro->inicio->format('d/m H:i')}"));
+
         return response()->json([
             'success' => true,
             'message' => $mensagem,
@@ -101,6 +106,9 @@ class AluguelController extends Controller
             ]);
         });
 
+        $aluguel->load('mesa', 'cliente');
+        Atividade::registrar('alugueis', "Reserva editada · {$aluguel->mesa->nome} · {$aluguel->nome_exibicao} em {$inicio->format('d/m H:i')}");
+
         return response()->json([
             'success' => true,
             'message' => 'Reserva atualizada.',
@@ -130,6 +138,8 @@ class AluguelController extends Controller
             $mensagem = 'Reserva cancelada.';
         }
 
+        Atividade::registrar('alugueis', "{$mensagem} {$aluguel->mesa->nome} · {$aluguel->nome_exibicao} · {$aluguel->inicio->format('d/m H:i')}");
+
         return response()->json(['success' => true, 'message' => $mensagem]);
     }
 
@@ -152,9 +162,11 @@ class AluguelController extends Controller
      */
     private function garantirSemConflitos(Mesa $mesa, Collection $intervalos, ?int $ignorarId = null): void
     {
+        $intervalo = (int) Configuracoes::valor('alugueis.intervalo');
+
         $conflitos = $intervalos
             ->map(fn (array $i) => Aluguel::with('cliente')
-                ->conflitantes($mesa->id, $i[0], $i[1])
+                ->conflitantes($mesa->id, $i[0], $i[1], $intervalo)
                 ->when($ignorarId, fn ($q) => $q->whereKeyNot($ignorarId))
                 ->orderBy('inicio')
                 ->first())
@@ -172,6 +184,10 @@ class AluguelController extends Controller
         if ($conflitos->count() > 1) {
             $outras = $conflitos->count() - 1;
             $mensagem .= $outras === 1 ? ' e em mais 1 data da série' : " e em mais {$outras} datas da série";
+        }
+
+        if ($intervalo > 0) {
+            $mensagem .= " — a loja pede {$intervalo} min livres entre reservas";
         }
 
         throw ValidationException::withMessages([

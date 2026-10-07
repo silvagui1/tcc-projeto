@@ -81,7 +81,8 @@
                     </label>
 
                     <div class="formas-pagamento" role="radiogroup" aria-label="Forma de pagamento" data-formas-pagamento>
-                        @foreach ($formasPagamento as $valor => $forma)
+                        {{-- só as formas aceitas (Configurações > Vendas) --}}
+                        @foreach ($formasAtivas as $valor => $forma)
                             <label class="forma-pagamento">
                                 <input type="radio" name="forma_pagamento" value="{{ $valor }}" data-forma-pagamento>
                                 <span>

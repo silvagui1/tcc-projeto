@@ -182,7 +182,7 @@
                                 >
                             </div>
                             <div class="creditos__rapidos" data-valores-rapidos>
-                                @foreach ([10, 20, 50, 100] as $valorRapido)
+                                @foreach (\App\Services\Configuracoes::valor('clientes.valores_rapidos') as $valorRapido)
                                     <button type="button" class="creditos__rapido" data-valor-rapido="{{ $valorRapido }}">R$ {{ $valorRapido }}</button>
                                 @endforeach
                             </div>
@@ -203,10 +203,10 @@
                                     data-input-motivo
                                 >
                                 <datalist id="motivos-credito-{{ $modo }}">
-                                    <option value="Compra no balcão"></option>
-                                    <option value="Estorno"></option>
-                                    <option value="Bonificação"></option>
-                                    <option value="Correção de lançamento"></option>
+                                    {{-- sugestões de Configurações > Clientes e créditos --}}
+                                    @foreach (\App\Services\Configuracoes::valor('clientes.motivos_credito') as $motivoSugerido)
+                                        <option value="{{ $motivoSugerido }}"></option>
+                                    @endforeach
                                 </datalist>
                             </div>
                         @endif

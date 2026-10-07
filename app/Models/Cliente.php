@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Configuracoes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -158,8 +159,8 @@ class Cliente extends Model
 
     /**
      * Link "wa.me" pronto para abrir uma conversa com o cliente, ou null
-     * quando ele não tem WhatsApp cadastrado. Assume DDI 55 (Brasil), já
-     * que `whatsapp` é armazenado só com DDD + número (ver migration).
+     * quando ele não tem WhatsApp cadastrado. `whatsapp` é armazenado só com
+     * DDD + número (ver migration); o DDI vem de Configurações > Clientes.
      */
     public function getWhatsappUrlAttribute(): ?string
     {
@@ -167,6 +168,8 @@ class Cliente extends Model
             return null;
         }
 
-        return 'https://wa.me/55'.preg_replace('/\D/', '', $this->whatsapp);
+        $ddi = preg_replace('/\D/', '', (string) Configuracoes::valor('clientes.whatsapp_ddi'));
+
+        return 'https://wa.me/'.$ddi.preg_replace('/\D/', '', $this->whatsapp);
     }
 }

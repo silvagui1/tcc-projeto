@@ -1,5 +1,7 @@
 @php
-    $iconesJogo = ['rpg' => 'bi-dice-6', 'cartas' => 'bi-suit-spade', 'tabuleiro' => 'bi-grid-3x3-gap', 'outro' => 'bi-controller'];
+    // chips de duração até o máximo de Configurações > Mesas e aluguéis
+    $duracaoMaxima = (int) \App\Services\Configuracoes::valor('alugueis.duracao_maxima');
+    $duracoes = array_filter([60 => '1h', 120 => '2h', 180 => '3h', 240 => '4h'], fn ($minutos) => $minutos <= $duracaoMaxima, ARRAY_FILTER_USE_KEY);
 @endphp
 {{-- Novo aluguel / editar uma data. Ordem do formulário segue a conversa no
      balcão: qual mesa → quando e por quanto tempo → se repete → quem → que
@@ -47,9 +49,10 @@
                     <div class="campo">
                         <span class="campo__rotulo" id="aluguel-duracao-rotulo">Duração</span>
                         <div class="chips-opcoes" role="radiogroup" aria-labelledby="aluguel-duracao-rotulo">
-                            @foreach ([60 => '1h', 120 => '2h', 180 => '3h', 240 => '4h'] as $minutos => $rotulo)
+                            {{-- a duração padrão é marcada pelo vendas.js --}}
+                            @foreach ($duracoes as $minutos => $rotulo)
                                 <label class="chip-opcao">
-                                    <input type="radio" name="duracao" value="{{ $minutos }}" @checked($minutos === 180) data-aluguel-duracao>
+                                    <input type="radio" name="duracao" value="{{ $minutos }}" data-aluguel-duracao>
                                     <span>{{ $rotulo }}</span>
                                 </label>
                             @endforeach
@@ -65,6 +68,11 @@
                         <input type="time" id="aluguel-fim" step="900" data-aluguel-fim>
                     </div>
                     <p class="campo__dica aluguel__horario-resumo" data-aluguel-horario-resumo></p>
+                    {{-- aviso de horário fora do funcionamento da loja (não impede salvar) --}}
+                    <p class="aluguel__aviso" data-aluguel-horario-aviso role="status" hidden>
+                        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                        <span data-aluguel-horario-aviso-texto></span>
+                    </p>
                     <span class="campo__erro" data-erro="hora_fim" hidden></span>
 
                     <div class="campo" data-repetir-bloco>
@@ -101,10 +109,10 @@
                 <section class="perfil__secao">
                     <h3 class="perfil__titulo">Jogo</h3>
                     <div class="chips-opcoes chips-opcoes--jogo" role="radiogroup" aria-label="Tipo de jogo">
-                        @foreach ($tiposJogo as $tipo => $rotulo)
-                            <label class="chip-opcao chip-opcao--{{ $tipo }}">
-                                <input type="radio" name="tipo_jogo" value="{{ $tipo }}" data-aluguel-tipo-jogo>
-                                <span><i class="bi {{ $iconesJogo[$tipo] }}" aria-hidden="true"></i> {{ $rotulo }}</span>
+                        @foreach ($tiposJogo as $tipo)
+                            <label class="chip-opcao chip-opcao--{{ $tipo['cor'] }}">
+                                <input type="radio" name="tipo_jogo" value="{{ $tipo['chave'] }}" data-aluguel-tipo-jogo>
+                                <span><i class="bi {{ $tipo['icone'] }}" aria-hidden="true"></i> {{ $tipo['nome'] }}</span>
                             </label>
                         @endforeach
                     </div>

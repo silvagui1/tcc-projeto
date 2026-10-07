@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Carta;
+use App\Models\JogoCarta;
 use App\Models\Categoria;
 use App\Models\Produto;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,13 +38,15 @@ class EstoqueController extends Controller
         $cartasDestaque = Carta::latest('id')->take(4)->get();
 
         return view('pages.estoque.index', [
+            'estoqueBaixo' => Produto::estoqueBaixo()->orderBy('quantidade')->get(),
+            'alertaMinimo' => Produto::alertaMinimo(),
             'tab' => $tab,
             'filtros' => $filtros,
             'resumo' => $this->resumo(),
             'categorias' => Categoria::orderBy('nome')->get(),
             'produtos' => $produtos,
             'cartasDestaque' => $cartasDestaque,
-            'jogosDisponiveis' => Carta::JOGOS,
+            'jogosDisponiveis' => JogoCarta::opcoes(),
         ]);
     }
 

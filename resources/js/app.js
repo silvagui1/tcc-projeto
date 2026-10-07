@@ -1,5 +1,6 @@
 import './clientes';
 import './vendas';
+import './configuracoes';
 import './bootstrap';
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).
@@ -182,6 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 if (input.type === 'checkbox') {
                     input.checked = Boolean(valor);
+                } else if (input.tagName === 'SELECT' && valor && !Array.from(input.options).some((o) => o.value === String(valor))) {
+                    // valor que saiu da lista em Configurações (ex.: um estado
+                    // de carta removido): entra como opção para não trocar o
+                    // valor da carta sem a pessoa perceber
+                    input.add(new Option(`${valor} (fora da lista)`, valor, true, true));
                 } else {
                     input.value = valor ?? '';
                 }

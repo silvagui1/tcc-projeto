@@ -6,11 +6,13 @@ use App\Http\Controllers\AluguelController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\CartaController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\VendaController;
-use App\Models\Carta;
+use App\Models\JogoCarta;
+use App\Models\Produto;
 use App\Models\Venda;
 /*
 |--------------------------------------------------------------------------
@@ -56,8 +58,10 @@ Route::get('/inicio', function () {
     // cartões do topo: vendido hoje x ontem (vendas concluídas)
     $hoje = Venda::resumoDoDia(today());
     $ontem = Venda::resumoDoDia(today()->subDay());
+    // alerta de estoque baixo (Configurações > Estoque)
+    $estoqueBaixo = Produto::estoqueBaixo()->count();
 
-    return view('pages.home', compact('hoje', 'ontem'));
+    return view('pages.home', compact('hoje', 'ontem', 'estoqueBaixo'));
 })->name('home');
 
 
@@ -209,7 +213,7 @@ Route::get('/campeonatos', function () {
     // filtros da barra acima da lista (vêm na url, ex.: ?jogo=magic&status=finalizado)
     $filtros = [
         'busca' => trim((string) request('busca', '')),
-        'jogo' => in_array(request('jogo'), Carta::JOGOS) ? request('jogo') : '',
+        'jogo' => in_array(request('jogo'), JogoCarta::chaves()) ? request('jogo') : '',
         'status' => in_array(request('status'), ['ativo', 'finalizado']) ? request('status') : '',
         'ordenar' => request('ordenar') === 'antigos' ? 'antigos' : 'recentes',
     ];
@@ -232,7 +236,7 @@ Route::get('/campeonatos', function () {
     $ativos = array_values(array_filter($todos, fn ($c) => $c['status'] === 'ativo'));
     $outras = array_values(array_filter($todos, fn ($c) => $c['status'] !== 'ativo'));
 
-    $jogosDisponiveis = Carta::JOGOS;
+    $jogosDisponiveis = JogoCarta::opcoes();
 
     return view('pages.campeonatos.index', compact('ativos', 'outras', 'filtros', 'filtrosAtivos', 'jogosDisponiveis'));
 })->name('campeonatos.index');
@@ -335,11 +339,27 @@ Route::prefix('vendas')->name('vendas.')->group(function () {
     Route::post('/{venda}/cancelar', [VendaController::class, 'cancelar'])->whereNumber('venda')->name('cancelar');
 });
 
-Route::get('/config', function () {
-    $conta = [
-        'usuario' => 'ADM ART PLAY',
-        'email' => 'artplay123@gmail.com',
-    ];
+// --- Configurações (valem para a loja inteira; ainda sem login) ------------------
 
-    return view('pages.config', compact('conta'));
-})->name('config');
+Route::prefix('config')->name('config')->controller(ConfiguracaoController::class)->group(function () {
+    Route::get('/', 'index')->name('');
+
+    Route::put('/loja', 'salvarLoja')->name('.loja');
+    Route::post('/loja/logo', 'enviarLogo')->name('.logo');
+    Route::delete('/loja/logo', 'removerLogo')->name('.logo.remover');
+    Route::put('/vendas', 'salvarVendas')->name('.vendas');
+    Route::put('/alugueis', 'salvarAlugueis')->name('.alugueis');
+    Route::put('/estoque', 'salvarEstoque')->name('.estoque');
+    Route::put('/clientes', 'salvarClientes')->name('.clientes');
+
+    Route::post('/categorias', 'salvarCategoria')->name('.categorias.store');
+    Route::put('/categorias/{categoria}', 'salvarCategoria')->name('.categorias.update');
+    Route::delete('/categorias/{categoria}', 'excluirCategoria')->name('.categorias.destroy');
+    Route::post('/jogos-carta', 'salvarJogo')->name('.jogos.store');
+    Route::put('/jogos-carta/{jogoCarta}', 'salvarJogo')->name('.jogos.update');
+    Route::delete('/jogos-carta/{jogoCarta}', 'excluirJogo')->name('.jogos.destroy');
+
+    Route::get('/atividades', 'atividades')->name('.atividades');
+    Route::get('/exportar/vendas', 'exportarVendas')->name('.exportar.vendas');
+    Route::get('/exportar/estoque', 'exportarEstoque')->name('.exportar.estoque');
+});

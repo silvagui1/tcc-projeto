@@ -17,6 +17,7 @@
                 <p class="recibo__total" data-recibo-total>R$ 0,00</p>
                 <p class="recibo__data" data-recibo-data></p>
                 <span class="status-badge status-badge--cancelada" data-recibo-cancelada hidden></span>
+                <p class="recibo__motivo" data-recibo-motivo hidden></p>
             </section>
 
             <section class="perfil__secao">
@@ -38,6 +39,22 @@
                 <h3 class="perfil__titulo">Observações</h3>
                 <p class="perfil__observacoes" data-recibo-observacoes></p>
             </section>
+
+            {{-- Dados da loja (Configurações > Loja), como no rodapé de um cupom. --}}
+            @php
+                $configLoja = app(\App\Services\Configuracoes::class);
+                $linhasLoja = array_filter([
+                    $configLoja->get('loja.cnpj') ? 'CNPJ '.\App\Support\Formatar::cnpj($configLoja->get('loja.cnpj')) : null,
+                    $configLoja->get('loja.endereco'),
+                    $configLoja->get('loja.telefone') ? 'Tel. '.\App\Support\Formatar::telefone($configLoja->get('loja.telefone')) : null,
+                ]);
+            @endphp
+            <footer class="recibo__loja">
+                <strong>{{ $configLoja->get('loja.nome') }}</strong>
+                @foreach ($linhasLoja as $linha)
+                    <span>{{ $linha }}</span>
+                @endforeach
+            </footer>
         </div>
 
         <footer class="perfil__rodape" data-recibo-rodape>

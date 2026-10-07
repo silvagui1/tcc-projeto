@@ -10,8 +10,11 @@
 @php
     $erros = $errors->carta;
     $editandoId = $erros->any() ? old('_editar') : null;
-    $padrao = ['nome' => '', 'jogo' => $jogoPadrao, 'colecao' => '', 'raridade' => '', 'idioma' => 'Português',
-               'estado' => 'Novo', 'foil' => false, 'quantidade' => 1, 'preco' => '', 'imagem' => '', 'imagem_preview' => ''];
+    // estados e idiomas vêm de Configurações > Estoque
+    $estados = \App\Services\Configuracoes::valor('estoque.estados_carta');
+    $idiomas = \App\Services\Configuracoes::valor('estoque.idiomas_carta');
+    $padrao = ['nome' => '', 'jogo' => $jogoPadrao, 'colecao' => '', 'raridade' => '', 'idioma' => $idiomas[0] ?? '',
+               'estado' => $estados[0] ?? '', 'foil' => false, 'quantidade' => 1, 'preco' => '', 'imagem' => '', 'imagem_preview' => ''];
 @endphp
 
 <dialog class="card-dialog" data-form-dialog="carta" @if ($erros->any()) data-open-on-load @endif
@@ -57,8 +60,8 @@
             <label class="card-field">
                 <span>Jogo *</span>
                 <select name="jogo" required>
-                    @foreach ($jogosDisponiveis as $jogo)
-                        <option value="{{ $jogo }}" @selected(old('jogo', $jogoPadrao) === $jogo)>{{ ucfirst($jogo) }}</option>
+                    @foreach ($jogosDisponiveis as $chave => $nomeJogo)
+                        <option value="{{ $chave }}" @selected(old('jogo', $jogoPadrao) === $chave)>{{ $nomeJogo }}</option>
                     @endforeach
                 </select>
             </label>
@@ -87,8 +90,8 @@
             <label class="card-field">
                 <span>Idioma *</span>
                 <select name="idioma" required>
-                    @foreach (\App\Models\Carta::IDIOMAS as $idioma)
-                        <option value="{{ $idioma }}" @selected(old('idioma', 'Português') === $idioma)>{{ $idioma }}</option>
+                    @foreach ($idiomas as $idioma)
+                        <option value="{{ $idioma }}" @selected(old('idioma', $padrao['idioma']) === $idioma)>{{ $idioma }}</option>
                     @endforeach
                 </select>
             </label>
@@ -100,8 +103,8 @@
             <label class="card-field">
                 <span>Estado *</span>
                 <select name="estado" required>
-                    @foreach (\App\Models\Carta::ESTADOS as $estado)
-                        <option value="{{ $estado }}" @selected(old('estado', 'Novo') === $estado)>{{ $estado }}</option>
+                    @foreach ($estados as $estado)
+                        <option value="{{ $estado }}" @selected(old('estado', $padrao['estado']) === $estado)>{{ $estado }}</option>
                     @endforeach
                 </select>
             </label>

@@ -16,7 +16,7 @@ return new class extends Migration
             // nome já inclui o número da carta (ex.: "Shiftry 163/162"), como
             // a tela pede — por isso não há coluna "numero" separada.
             $table->string('nome', 150);
-            // 'pokemon' | 'magic' | 'onepiece' (ver Carta::JOGOS)
+            // chave de jogos_carta ('pokemon', 'magic', 'onepiece'...)
             $table->string('jogo', 20);
             $table->string('colecao', 150)->nullable();
             $table->string('raridade', 100)->nullable();

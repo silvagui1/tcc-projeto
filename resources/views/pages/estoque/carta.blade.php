@@ -26,7 +26,7 @@
         </div>
 
         <div class="card-detail__info">
-            <span class="card-detail__game">{{ ucfirst($carta->jogo) }}</span>
+            <span class="card-detail__game">{{ $jogosDisponiveis[$carta->jogo] ?? ucfirst($carta->jogo) }}</span>
             <h1>{{ $carta->nome }}</h1>
 
             <p class="card-detail__price">

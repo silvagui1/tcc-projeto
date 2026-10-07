@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Services\Configuracoes;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,15 +15,8 @@ class Aluguel extends Model
 {
     protected $table = 'alugueis';
 
-    /**
-     * Tipos de jogo aceitos e o rótulo mostrado na tela.
-     */
-    public const TIPOS_JOGO = [
-        'rpg' => 'RPG',
-        'cartas' => 'Cartas',
-        'tabuleiro' => 'Tabuleiro',
-        'outro' => 'Outro',
-    ];
+    // Tipos de jogo (RPG, Cartas...) são configuráveis: ver
+    // Configuracoes::tiposJogo() e Configurações > Mesas e aluguéis.
 
     public const STATUS = ['agendado', 'pago', 'cancelado'];
 
@@ -73,14 +68,16 @@ class Aluguel extends Model
     /**
      * Reservas da mesma mesa que se sobrepõem ao intervalo informado — base
      * da regra "não pode haver duas reservas na mesma mesa ao mesmo tempo".
-     * Encostar não conta como conflito (uma termina 20:00, outra começa 20:00).
+     * Encostar não conta como conflito (uma termina 20:00, outra começa 20:00),
+     * a não ser que a loja exija um intervalo livre entre reservas
+     * (Configurações > Mesas e aluguéis): aí o intervalo entra na conta.
      */
-    public function scopeConflitantes(Builder $query, int $mesaId, $inicio, $fim): Builder
+    public function scopeConflitantes(Builder $query, int $mesaId, $inicio, $fim, int $intervaloMinutos = 0): Builder
     {
         return $query->ativos()
             ->where('mesa_id', $mesaId)
-            ->where('inicio', '<', $fim)
-            ->where('fim', '>', $inicio);
+            ->where('inicio', '<', Carbon::parse($fim)->addMinutes($intervaloMinutos))
+            ->where('fim', '>', Carbon::parse($inicio)->subMinutes($intervaloMinutos));
     }
 
     /**
@@ -123,7 +120,20 @@ class Aluguel extends Model
 
     public function getTipoJogoRotuloAttribute(): string
     {
-        return self::TIPOS_JOGO[$this->tipo_jogo] ?? 'Outro';
+        return Configuracoes::tipoJogo($this->tipo_jogo)['nome'];
+    }
+
+    /**
+     * Cor (classe .jogo-chip--{cor}) e ícone do tipo de jogo.
+     */
+    public function getTipoJogoCorAttribute(): string
+    {
+        return Configuracoes::tipoJogo($this->tipo_jogo)['cor'];
+    }
+
+    public function getTipoJogoIconeAttribute(): string
+    {
+        return Configuracoes::tipoJogo($this->tipo_jogo)['icone'];
     }
 
     /**
@@ -172,6 +182,8 @@ class Aluguel extends Model
             'valor' => (float) $this->valor,
             'tipo_jogo' => $this->tipo_jogo,
             'tipo_jogo_rotulo' => $this->tipo_jogo_rotulo,
+            'tipo_jogo_cor' => $this->tipo_jogo_cor,
+            'tipo_jogo_icone' => $this->tipo_jogo_icone,
             'jogo' => $this->jogo,
             'status' => $this->status,
             'observacoes' => $this->observacoes,

@@ -6,10 +6,12 @@ use App\Http\Requests\StoreVendaRequest;
 use App\Models\Aluguel;
 use App\Models\Carta;
 use App\Models\Cliente;
+use App\Models\JogoCarta;
 use App\Models\Mesa;
 use App\Models\Produto;
 use App\Models\Venda;
 use App\Models\VendaItem;
+use App\Services\Configuracoes;
 use App\Services\VendaService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -20,14 +22,7 @@ use Illuminate\View\View;
 
 class VendaController extends Controller
 {
-    private const VENDAS_POR_PAGINA = 20;
-
     private const PERIODOS = ['hoje', '7dias', 'mes', 'tudo'];
-
-    /**
-     * Rótulos dos jogos de carta (Carta::JOGOS guarda só a chave).
-     */
-    private const JOGOS_CARTA = ['pokemon' => 'Pokémon', 'magic' => 'Magic', 'onepiece' => 'One Piece'];
 
     /**
      * Tela de vendas, com duas abas: o histórico de vendas e a agenda de
@@ -44,8 +39,10 @@ class VendaController extends Controller
             'filtros' => $filtros,
             'resumo' => $this->resumo(),
             'mesas' => Mesa::orderBy('id')->get(),
+            // todas (filtro do histórico) e só as aceitas hoje (nova venda)
             'formasPagamento' => Venda::FORMAS_PAGAMENTO,
-            'tiposJogo' => Aluguel::TIPOS_JOGO,
+            'formasAtivas' => Venda::formasAtivas(),
+            'tiposJogo' => Configuracoes::tiposJogo(),
             // ?nova=1 (atalho "adicionar venda" da página inicial) abre o
             // modal de nova venda assim que a página carrega.
             'abrirNovaVenda' => $request->boolean('nova'),
@@ -96,9 +93,17 @@ class VendaController extends Controller
         ], 201);
     }
 
-    public function cancelar(Venda $venda, VendaService $service): JsonResponse
+    public function cancelar(Request $request, Venda $venda, VendaService $service): JsonResponse
     {
-        $service->cancelar($venda);
+        $dados = $request->validate([
+            // obrigatório só se a loja pede (Configurações > Vendas)
+            'motivo' => [Configuracoes::valor('vendas.exigir_motivo_cancelamento') ? 'required' : 'nullable', 'string', 'max:255'],
+        ], [
+            'motivo.required' => 'Informe o motivo do cancelamento.',
+            'motivo.max' => 'O motivo pode ter no máximo :max caracteres.',
+        ]);
+
+        $service->cancelar($venda, $dados['motivo'] ?? null);
 
         return response()->json([
             'success' => true,
@@ -188,7 +193,7 @@ class VendaController extends Controller
         return $this->aplicarFiltros(Venda::query()->with('itens', 'cliente'), $filtros)
             ->latest('created_at')
             ->latest('id')
-            ->paginate(self::VENDAS_POR_PAGINA)
+            ->paginate((int) Configuracoes::valor('vendas.por_pagina'))
             ->withPath(route('vendas.index'))
             ->withQueryString();
     }
@@ -306,11 +311,16 @@ class VendaController extends Controller
             ->orderBy('id')
             ->get();
 
-        // Faixa de horas do quadro: 10h às 24h, alargada se alguma reserva
-        // começa antes ou termina depois.
+        // Faixa de horas do quadro: o horário de funcionamento do dia
+        // (Configurações > Loja), alargada se alguma reserva começa antes ou
+        // termina depois. Dia fechado usa 10h–22h só para o quadro existir.
+        $funcionamento = Configuracoes::faixaDoDia($dia->dayOfWeek);
+        $horaInicial = $funcionamento ? intdiv($funcionamento[0], 60) : 10;
+        $horaFinal = $funcionamento ? (int) ceil($funcionamento[1] / 60) : 22;
+
         $ativos = $alugueis->where('status', '!=', 'cancelado');
-        $horaInicial = min(10, (int) ($ativos->min(fn (Aluguel $a) => $a->inicio->hour) ?? 10));
-        $horaFinal = max(24, (int) ($ativos->max(fn (Aluguel $a) => $this->horaFinalNoDia($a, $dia)) ?? 24));
+        $horaInicial = min($horaInicial, (int) ($ativos->min(fn (Aluguel $a) => $a->inicio->hour) ?? $horaInicial));
+        $horaFinal = max($horaFinal, $horaInicial + 4, (int) ($ativos->max(fn (Aluguel $a) => $this->horaFinalNoDia($a, $dia)) ?? 0));
 
         return [
             'dia' => $dia,
@@ -318,6 +328,7 @@ class VendaController extends Controller
             'alugueis' => $alugueis,
             'mesasDoDia' => $mesasDoDia,
             'faixaHoras' => [$horaInicial, min($horaFinal, 30)],
+            'funcionamento' => $funcionamento,
         ];
     }
 
@@ -355,6 +366,8 @@ class VendaController extends Controller
 
     private function catalogoCartas(string $termo): array
     {
+        $jogos = JogoCarta::opcoes();
+
         return Carta::query()
             ->when($termo !== '', fn (Builder $q) => $q->where('nome', 'like', "%{$termo}%"))
             ->orderByRaw('quantidade = 0')
@@ -366,7 +379,7 @@ class VendaController extends Controller
                 'id' => $carta->id,
                 'nome' => $carta->nome,
                 'detalhe' => implode(' · ', array_filter([
-                    self::JOGOS_CARTA[$carta->jogo] ?? $carta->jogo,
+                    $jogos[$carta->jogo] ?? $carta->jogo,
                     $carta->estado,
                     $carta->foil ? 'Foil' : null,
                 ])),

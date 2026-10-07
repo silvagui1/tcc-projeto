@@ -289,13 +289,18 @@
     "isEntry": true,
     "src": "resources/css/clientes.css"
   },
+  "resources/css/configuracoes.css": {
+    "file": "assets/configuracoes-327ca802.css",
+    "isEntry": true,
+    "src": "resources/css/configuracoes.css"
+  },
   "resources/css/vendas.css": {
-    "file": "assets/vendas-876460f6.css",
+    "file": "assets/vendas-9dd396cf.css",
     "isEntry": true,
     "src": "resources/css/vendas.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-1d40d507.js",
+    "file": "assets/app-82b5d9e1.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

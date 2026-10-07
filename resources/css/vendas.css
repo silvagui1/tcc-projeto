@@ -21,18 +21,24 @@
 
     /* tipos de jogo (aluguel de mesas): fundo claro + texto escuro nos chips,
        cor cheia (com texto branco) nos blocos do quadro de ocupação */
-    --jogo-rpg: var(--purple-500);
-    --jogo-rpg-bg: var(--purple-light-300);
-    --jogo-rpg-texto: #3d4063;
-    --jogo-cartas: var(--blue-glow);
-    --jogo-cartas-bg: var(--blue-200);
-    --jogo-cartas-texto: var(--blue-900);
-    --jogo-tabuleiro: var(--pink-500);
-    --jogo-tabuleiro-bg: var(--pink-200);
-    --jogo-tabuleiro-texto: var(--pink-900);
-    --jogo-outro: var(--purple-light-800);
-    --jogo-outro-bg: var(--surface-border);
-    --jogo-outro-texto: var(--text);
+    --jogo-roxo: var(--purple-500);
+    --jogo-roxo-bg: var(--purple-light-300);
+    --jogo-roxo-texto: #3d4063;
+    --jogo-azul: var(--blue-glow);
+    --jogo-azul-bg: var(--blue-200);
+    --jogo-azul-texto: var(--blue-900);
+    --jogo-rosa: var(--pink-500);
+    --jogo-rosa-bg: var(--pink-200);
+    --jogo-rosa-texto: var(--pink-900);
+    --jogo-cinza: var(--purple-light-800);
+    --jogo-cinza-bg: var(--surface-border);
+    --jogo-cinza-texto: var(--text);
+    --jogo-verde: #2f7a4f;
+    --jogo-verde-bg: #d6eedf;
+    --jogo-verde-texto: #1d5236;
+    --jogo-laranja: #b05a22;
+    --jogo-laranja-bg: #f9e0cc;
+    --jogo-laranja-texto: #7a3d12;
 }
 
 :root[data-theme="dark"] {
@@ -41,13 +47,17 @@
     --vendas-borda: var(--yellow-400);
     --vendas-texto: var(--yellow-300);
 
-    --jogo-rpg-bg: rgba(140, 142, 168, .22);
-    --jogo-rpg-texto: #c9cbec;
-    --jogo-cartas-bg: rgba(158, 197, 240, .16);
-    --jogo-cartas-texto: var(--blue-300);
-    --jogo-tabuleiro-bg: rgba(212, 174, 193, .16);
-    --jogo-tabuleiro-texto: var(--pink-200);
-    --jogo-outro-bg: rgba(255, 255, 255, .08);
+    --jogo-roxo-bg: rgba(140, 142, 168, .22);
+    --jogo-roxo-texto: #c9cbec;
+    --jogo-azul-bg: rgba(158, 197, 240, .16);
+    --jogo-azul-texto: var(--blue-300);
+    --jogo-rosa-bg: rgba(212, 174, 193, .16);
+    --jogo-rosa-texto: var(--pink-200);
+    --jogo-cinza-bg: rgba(255, 255, 255, .08);
+    --jogo-verde-bg: rgba(95, 208, 138, .16);
+    --jogo-verde-texto: #8fe0ad;
+    --jogo-laranja-bg: rgba(240, 160, 100, .16);
+    --jogo-laranja-texto: #f3b98c;
 }
 
 /* Mesmo ajuste de contraste do texto secundário e de espaço para o botão
@@ -748,10 +758,12 @@ a.resumo-item {
     filter: brightness(1.12);
 }
 
-.ocupacao__bloco--rpg { background: var(--jogo-rpg); }
-.ocupacao__bloco--cartas { background: var(--jogo-cartas); }
-.ocupacao__bloco--tabuleiro { background: var(--jogo-tabuleiro); }
-.ocupacao__bloco--outro { background: var(--jogo-outro); }
+.ocupacao__bloco--roxo { background: var(--jogo-roxo); }
+.ocupacao__bloco--azul { background: var(--jogo-azul); }
+.ocupacao__bloco--rosa { background: var(--jogo-rosa); }
+.ocupacao__bloco--cinza { background: var(--jogo-cinza); }
+.ocupacao__bloco--verde { background: var(--jogo-verde); }
+.ocupacao__bloco--laranja { background: var(--jogo-laranja); }
 
 /* pago: contorno amarelo (cor de vendas) por dentro do bloco */
 .ocupacao__bloco--pago {
@@ -959,10 +971,12 @@ a.resumo-item {
     white-space: nowrap;
 }
 
-.jogo-chip--rpg { background: var(--jogo-rpg-bg); color: var(--jogo-rpg-texto); }
-.jogo-chip--cartas { background: var(--jogo-cartas-bg); color: var(--jogo-cartas-texto); }
-.jogo-chip--tabuleiro { background: var(--jogo-tabuleiro-bg); color: var(--jogo-tabuleiro-texto); }
-.jogo-chip--outro { background: var(--jogo-outro-bg); color: var(--jogo-outro-texto); }
+.jogo-chip--roxo { background: var(--jogo-roxo-bg); color: var(--jogo-roxo-texto); }
+.jogo-chip--azul { background: var(--jogo-azul-bg); color: var(--jogo-azul-texto); }
+.jogo-chip--rosa { background: var(--jogo-rosa-bg); color: var(--jogo-rosa-texto); }
+.jogo-chip--cinza { background: var(--jogo-cinza-bg); color: var(--jogo-cinza-texto); }
+.jogo-chip--verde { background: var(--jogo-verde-bg); color: var(--jogo-verde-texto); }
+.jogo-chip--laranja { background: var(--jogo-laranja-bg); color: var(--jogo-laranja-texto); }
 
 /* ==========================================================================
    Controles compartilhados pelos modais
@@ -1074,10 +1088,12 @@ a.resumo-item {
     color: var(--vendas-on-acento);
 }
 
-.chip-opcao--rpg input:checked + span { background: var(--jogo-rpg-bg); border-color: var(--jogo-rpg); color: var(--jogo-rpg-texto); }
-.chip-opcao--cartas input:checked + span { background: var(--jogo-cartas-bg); border-color: var(--jogo-cartas); color: var(--jogo-cartas-texto); }
-.chip-opcao--tabuleiro input:checked + span { background: var(--jogo-tabuleiro-bg); border-color: var(--jogo-tabuleiro); color: var(--jogo-tabuleiro-texto); }
-.chip-opcao--outro input:checked + span { background: var(--jogo-outro-bg); border-color: var(--jogo-outro); color: var(--jogo-outro-texto); }
+.chip-opcao--roxo input:checked + span { background: var(--jogo-roxo-bg); border-color: var(--jogo-roxo); color: var(--jogo-roxo-texto); }
+.chip-opcao--azul input:checked + span { background: var(--jogo-azul-bg); border-color: var(--jogo-azul); color: var(--jogo-azul-texto); }
+.chip-opcao--rosa input:checked + span { background: var(--jogo-rosa-bg); border-color: var(--jogo-rosa); color: var(--jogo-rosa-texto); }
+.chip-opcao--cinza input:checked + span { background: var(--jogo-cinza-bg); border-color: var(--jogo-cinza); color: var(--jogo-cinza-texto); }
+.chip-opcao--verde input:checked + span { background: var(--jogo-verde-bg); border-color: var(--jogo-verde); color: var(--jogo-verde-texto); }
+.chip-opcao--laranja input:checked + span { background: var(--jogo-laranja-bg); border-color: var(--jogo-laranja); color: var(--jogo-laranja-texto); }
 
 /* Lista de sugestões (busca de cliente) */
 .seletor-cliente__escolhido {
@@ -1407,8 +1423,8 @@ a.resumo-item {
     color: var(--text-soft);
 }
 
-.carrinho__tipo--produto { background: var(--jogo-rpg-bg); color: var(--jogo-rpg-texto); }
-.carrinho__tipo--carta { background: var(--jogo-cartas-bg); color: var(--jogo-cartas-texto); }
+.carrinho__tipo--produto { background: var(--jogo-roxo-bg); color: var(--jogo-roxo-texto); }
+.carrinho__tipo--carta { background: var(--jogo-azul-bg); color: var(--jogo-azul-texto); }
 .carrinho__tipo--aluguel { background: var(--vendas-tint); color: var(--vendas-tint-texto); }
 
 .carrinho__info {
@@ -2140,4 +2156,57 @@ a.resumo-item {
 .mesa-item__botao--perigo:hover {
     background: var(--red-50);
     color: var(--red-700);
+}
+
+/* ==========================================================================
+   Itens ligados a Configurações (motivo de cancelamento, dados da loja no
+   recibo, aviso de horário fora do funcionamento)
+   ========================================================================== */
+
+.recibo__motivo {
+    margin: var(--space-2) 0 0;
+    max-width: 320px;
+    font-size: 13px;
+    color: var(--text-soft);
+}
+
+.recibo__loja {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: var(--space-2);
+    padding-top: var(--space-4);
+    border-top: 1px dashed var(--line);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.recibo__loja strong {
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.cancelar-venda__motivo {
+    margin: 0 0 var(--space-5);
+    text-align: left;
+}
+
+.aluguel__aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+    background: var(--vendas-tint);
+    color: var(--vendas-tint-texto);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.agenda-titulo__fechada {
+    color: var(--red-600);
+    font-weight: 600;
 }

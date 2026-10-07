@@ -16,14 +16,21 @@
     {{-- Dados que o vendas.js precisa e que vêm do banco/back-end: mesas
          (formulário de aluguel e modal de mesas), rótulos e o dia aberto
          na agenda. --}}
+    @php $ajustes = app(\App\Services\Configuracoes::class); @endphp
     <script type="application/json" data-vendas-config>{!! json_encode([
         'mesas' => $mesas->map->dadosJson()->values(),
         'tiposJogo' => $tiposJogo,
         'formasPagamento' => collect($formasPagamento)->map(fn ($f) => $f['rotulo']),
         'hoje' => today()->format('Y-m-d'),
         'dia' => isset($dia) ? $dia->format('Y-m-d') : today()->format('Y-m-d'),
-        'maxSemanas' => \App\Http\Requests\SalvarAluguelRequest::MAX_SEMANAS,
-    ]) !!}</script>
+        // Configurações > Vendas e > Mesas e aluguéis
+        'permitirCreditos' => (bool) $ajustes->get('vendas.permitir_creditos'),
+        'exigirMotivoCancelamento' => (bool) $ajustes->get('vendas.exigir_motivo_cancelamento'),
+        'maxSemanas' => (int) $ajustes->get('alugueis.max_semanas'),
+        'duracaoPadrao' => (int) $ajustes->get('alugueis.duracao_padrao'),
+        'duracaoMaxima' => (int) $ajustes->get('alugueis.duracao_maxima'),
+        'horario' => $ajustes->get('loja.horario'),
+    ], JSON_HEX_TAG) !!}</script>
 
     <div class="page-topbar">
         <p class="page-topbar__title">Vendas</p>
@@ -103,6 +110,7 @@
     @include('vendas.partials._modal_aluguel')
     @include('vendas.partials._modal_detalhes_aluguel')
     @include('vendas.partials._modal_cancelar_aluguel')
+    @include('vendas.partials._modal_cancelar_venda')
     @include('vendas.partials._modal_mesas')
     @include('clientes.partials._modal_confirmar')
 </div>

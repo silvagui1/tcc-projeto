@@ -32,6 +32,25 @@
         </div>
     </div>
 
+    {{-- Alerta de estoque baixo (Configurações > Estoque) --}}
+    @if ($estoqueBaixo->isNotEmpty())
+        <div class="alerta-estoque" role="status">
+            <i class="bi bi-exclamation-triangle-fill alerta-estoque__icone" aria-hidden="true"></i>
+            <div class="alerta-estoque__texto">
+                <strong>
+                    {{ $estoqueBaixo->count() }} {{ $estoqueBaixo->count() === 1 ? 'produto está' : 'produtos estão' }}
+                    com estoque baixo
+                </strong>
+                <span>
+                    {{ $estoqueBaixo->take(4)->map(fn ($p) => "{$p->nome} ({$p->quantidade})")->implode(' · ') }}{{ $estoqueBaixo->count() > 4 ? ' · e mais '.($estoqueBaixo->count() - 4) : '' }}
+                </span>
+            </div>
+            <a href="{{ route('config') }}#estoque" class="alerta-estoque__link" title="Alerta a partir de {{ $alertaMinimo }} unidades — mudar em Configurações">
+                até {{ $alertaMinimo }} un.
+            </a>
+        </div>
+    @endif
+
     <hr class="divider">
 
     {{-- abas + busca: empilhadas no mobile, lado a lado no desktop --}}
@@ -126,7 +145,12 @@
                                     <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
                                 </div>
                                 <p>{{ $produto->descricao }}</p>
-                                <p><strong>qtd {{ $produto->quantidade }}</strong></p>
+                                <p>
+                                    <strong>qtd {{ $produto->quantidade }}</strong>
+                                    @if ($produto->estoque_baixo)
+                                        <span class="selo-estoque-baixo">estoque baixo</span>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     @endforeach
@@ -147,7 +171,7 @@
                 @include('pages.estoque.partials.adicionar-carta-botao')
             </div>
 
-            @include('pages.estoque.partials.carta-form', ['jogoPadrao' => 'pokemon'])
+            @include('pages.estoque.partials.carta-form', ['jogoPadrao' => array_key_first($jogosDisponiveis)])
 
             @if ($cartasDestaque->isEmpty())
                 <p style="color: var(--text-muted-2);">Nenhuma carta cadastrada ainda.</p>

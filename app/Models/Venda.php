@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Configuracoes;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,17 @@ class Venda extends Model
         'credito' => ['rotulo' => 'Crédito', 'icone' => 'bi-credit-card'],
     ];
 
+    /**
+     * Formas de pagamento ligadas em Configurações > Vendas, na ordem de
+     * FORMAS_PAGAMENTO. As desligadas continuam com rótulo no histórico.
+     *
+     * @return array<string, array{rotulo: string, icone: string}>
+     */
+    public static function formasAtivas(): array
+    {
+        return array_intersect_key(self::FORMAS_PAGAMENTO, array_flip(Configuracoes::valor('vendas.formas_pagamento')));
+    }
+
     protected $fillable = [
         'cliente_id',
         'total',
@@ -27,6 +39,7 @@ class Venda extends Model
         'observacoes',
         'status',
         'cancelada_em',
+        'motivo_cancelamento',
     ];
 
     protected $casts = [
@@ -131,6 +144,7 @@ class Venda extends Model
             'data' => $this->created_at->format('d/m/Y \à\s H:i'),
             'status' => $this->status,
             'cancelada_em' => $this->cancelada_em?->format('d/m/Y \à\s H:i'),
+            'motivo_cancelamento' => $this->motivo_cancelamento,
             'total' => (float) $this->total,
             'valor_creditos' => (float) $this->valor_creditos,
             'valor_restante' => (float) $this->valor_restante,

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Aluguel;
+use App\Models\Atividade;
 use App\Models\Carta;
 use App\Models\Cliente;
 use App\Models\Produto;
@@ -54,7 +55,8 @@ class VendaService
             $total = round($total, 2);
             $valorCreditos = 0.0;
 
-            if ($cliente && ! empty($dados['usar_creditos'])) {
+            // créditos só se a loja permite (Configurações > Vendas)
+            if ($cliente && ! empty($dados['usar_creditos']) && Configuracoes::valor('vendas.permitir_creditos')) {
                 $saldoAnterior = (float) $cliente->creditos;
                 $valorCreditos = round(min($saldoAnterior, $total), 2);
 
@@ -88,6 +90,9 @@ class VendaService
                 'forma_pagamento' => $restante > 0 ? $forma : null,
             ]);
 
+            Atividade::registrar('vendas', "Venda #{$venda->id} registrada · R$ ".number_format($total, 2, ',', '.')
+                .($cliente ? " · {$cliente->nome}" : ''));
+
             return $venda->load('itens', 'cliente');
         });
     }
@@ -97,9 +102,9 @@ class VendaService
      * cartas, aluguéis voltam a "agendado" e os créditos usados voltam para
      * o cliente. A venda continua no histórico, marcada como cancelada.
      */
-    public function cancelar(Venda $venda): Venda
+    public function cancelar(Venda $venda, ?string $motivo = null): Venda
     {
-        return DB::transaction(function () use ($venda) {
+        return DB::transaction(function () use ($venda, $motivo) {
             $venda = Venda::query()->whereKey($venda->id)->lockForUpdate()->firstOrFail();
 
             if ($venda->cancelada) {
@@ -139,7 +144,10 @@ class VendaService
                 }
             }
 
-            $venda->update(['status' => 'cancelada', 'cancelada_em' => now()]);
+            $motivo = trim((string) $motivo) ?: null;
+            $venda->update(['status' => 'cancelada', 'cancelada_em' => now(), 'motivo_cancelamento' => $motivo]);
+
+            Atividade::registrar('vendas', "Venda #{$venda->id} cancelada".($motivo ? " · motivo: {$motivo}" : ''));
 
             return $venda->load('itens', 'cliente');
         });

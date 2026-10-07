@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Models\Carta;
+use App\Models\JogoCarta;
+use App\Services\Configuracoes;
 use App\Http\Requests\Concerns\TrataImagemDoEstoque;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -43,11 +45,11 @@ class SalvarCartaRequest extends FormRequest
     {
         return [
             'nome' => ['required', 'string', 'max:150'],
-            'jogo' => ['required', Rule::in(Carta::JOGOS)],
+            'jogo' => ['required', Rule::in(JogoCarta::chaves())],
             'colecao' => ['nullable', 'string', 'max:150'],
             'raridade' => ['nullable', 'string', 'max:100'],
-            'estado' => ['required', Rule::in(Carta::ESTADOS)],
-            'idioma' => ['required', Rule::in(Carta::IDIOMAS)],
+            'estado' => ['required', Rule::in($this->opcoesComValorAtual('estoque.estados_carta', 'estado'))],
+            'idioma' => ['required', Rule::in($this->opcoesComValorAtual('estoque.idiomas_carta', 'idioma'))],
             'foil' => ['boolean'],
             'quantidade' => ['required', 'integer', 'min:0', 'max:9999'],
             'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
@@ -57,6 +59,21 @@ class SalvarCartaRequest extends FormRequest
     /**
      * @return array<string, string>
      */
+    /**
+     * Opções configuradas + o valor que a carta editada já tem: se alguém
+     * tirou "Danificado" da lista, uma carta antiga com esse estado ainda
+     * pode ser salva sem trocar de estado à força.
+     *
+     * @return array<int, string>
+     */
+    private function opcoesComValorAtual(string $configuracao, string $campo): array
+    {
+        $opcoes = Configuracoes::valor($configuracao);
+        $carta = $this->route('carta');
+
+        return $carta instanceof Carta ? [...$opcoes, $carta->{$campo}] : $opcoes;
+    }
+
     public function attributes(): array
     {
         return [

@@ -6,14 +6,14 @@
     {{-- Exigido pelo clientes.js (csrfToken()) para as chamadas AJAX de
          criar/editar/excluir cliente. --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'TCC Projeto') — ArtPlay</title>
+    <title>@yield('title', 'TCC Projeto') — {{ \App\Services\Configuracoes::valor('loja.nome') }}</title>
 
     {{-- Config compartilhada com resources/js/clientes.js — evita manter a
          paleta de cores do avatar (App\Models\Cliente::CORES_AVATAR) e o DDI
          do WhatsApp duplicados "de cabeça" em PHP e em JS. --}}
     <script id="app-config" type="application/json">{!! json_encode([
         'avatarCores' => \App\Models\Cliente::coresAvatar(),
-        'whatsappDdi' => '55',
+        'whatsappDdi' => \App\Services\Configuracoes::valor('clientes.whatsapp_ddi'),
     ]) !!}</script>
 
     {{-- Favicons: favicon.ico (logo sobre fundo azul-marinho) é a reserva para Safari e navegadores antigos;
@@ -43,7 +43,7 @@
         })();
     </script>
 
-    @vite(['resources/css/app.css', 'resources/css/clientes.css', 'resources/css/vendas.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/clientes.css', 'resources/css/vendas.css', 'resources/css/configuracoes.css', 'resources/js/app.js'])
 </head>
 <body>
     <div class="app-shell">

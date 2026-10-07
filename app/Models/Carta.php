@@ -9,15 +9,8 @@ class Carta extends Model
 {
     use TemImagemDeEstoque;
 
-    /**
-     * Jogos aceitos no estoque de cartas (filtro da página, campo do
-     * formulário e filtro de campeonatos).
-     */
-    public const JOGOS = ['pokemon', 'magic', 'onepiece'];
-
-    public const ESTADOS = ['Novo', 'Semi-Novo', 'Usado', 'Danificado'];
-
-    public const IDIOMAS = ['Português', 'Inglês', 'Japonês', 'Espanhol', 'Outro'];
+    // Jogos, estados e idiomas aceitos são configuráveis (Configurações >
+    // Estoque): ver JogoCarta e as chaves estoque.* de App\Services\Configuracoes.
 
     protected $fillable = [
         'nome',
@@ -46,10 +39,15 @@ class Carta extends Model
     /**
      * Imagem genérica do jogo (public/images/placeholders), usada quando a
      * carta não tem imagem e de reserva quando a url informada não carrega.
+     * Jogos cadastrados depois (sem arte própria) usam a genérica.
      */
     public function getImagemPadraoAttribute(): string
     {
-        $arquivo = in_array($this->jogo, self::JOGOS, true) ? "carta-{$this->jogo}.svg" : 'carta-generica.svg';
+        $arquivo = "carta-{$this->jogo}.svg";
+
+        if (! preg_match('/^[a-z0-9-]+$/', (string) $this->jogo) || ! is_file(public_path('images/placeholders/'.$arquivo))) {
+            $arquivo = 'carta-generica.svg';
+        }
 
         return asset('images/placeholders/'.$arquivo);
     }

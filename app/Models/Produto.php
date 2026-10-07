@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\TemImagemDeEstoque;
+use App\Services\Configuracoes;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class Produto extends Model
@@ -31,6 +33,33 @@ class Produto extends Model
     public function movimentacoes()
     {
         return $this->hasMany(ProdutoMovimentacao::class)->latest('id');
+    }
+
+    /**
+     * Quantidade a partir da qual o produto entra no alerta de estoque baixo
+     * (Configurações > Estoque), ou null com o alerta desligado.
+     */
+    public static function alertaMinimo(): ?int
+    {
+        return Configuracoes::valor('estoque.alerta_ativo') ? (int) Configuracoes::valor('estoque.alerta_minimo') : null;
+    }
+
+    /**
+     * Produtos com quantidade menor ou igual ao mínimo do alerta (nenhum,
+     * se o alerta está desligado).
+     */
+    public function scopeEstoqueBaixo(Builder $query): Builder
+    {
+        $minimo = self::alertaMinimo();
+
+        return $minimo === null ? $query->whereRaw('1 = 0') : $query->where('quantidade', '<=', $minimo);
+    }
+
+    public function getEstoqueBaixoAttribute(): bool
+    {
+        $minimo = self::alertaMinimo();
+
+        return $minimo !== null && $this->quantidade <= $minimo;
     }
 
     /**

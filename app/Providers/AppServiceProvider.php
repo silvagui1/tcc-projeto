@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\Configuracoes;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // uma leitura da tabela de configurações por requisição
+        $this->app->singleton(Configuracoes::class);
     }
 
     /**

@@ -21,18 +21,18 @@
             <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
         </form>
 
-        {{-- filtro por jogo (Pokémon / Magic / One Piece) --}}
+        {{-- filtro por jogo (cadastrados em Configurações > Estoque) --}}
         <div class="tabs tabs--pill">
-            @foreach ($jogosDisponiveis as $jogo)
-                <a href="{{ route('estoque.cartas', ['jogo' => $jogo]) }}" class="{{ $jogoAtual === $jogo ? 'is-active' : '' }}">
-                    {{ ucfirst($jogo) }}
+            @foreach ($jogosDisponiveis as $chave => $nomeJogo)
+                <a href="{{ route('estoque.cartas', ['jogo' => $chave]) }}" class="{{ $jogoAtual === $chave ? 'is-active' : '' }}">
+                    {{ $nomeJogo }}
                 </a>
             @endforeach
         </div>
     </div>
 
     <div class="cartas-header" style="margin-top: 24px;">
-        <h2>{{ $cartas->count() }} {{ $cartas->count() === 1 ? 'carta' : 'cartas' }} de {{ ucfirst($jogoAtual) }}</h2>
+        <h2>{{ $cartas->count() }} {{ $cartas->count() === 1 ? 'carta' : 'cartas' }} de {{ $jogosDisponiveis[$jogoAtual] ?? ucfirst($jogoAtual) }}</h2>
         @include('pages.estoque.partials.adicionar-carta-botao')
     </div>
 

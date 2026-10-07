@@ -40,6 +40,17 @@
         </div>
     </div>
 
+    @if ($estoqueBaixo > 0)
+        <a href="{{ route('estoque.index') }}" class="alerta-estoque alerta-estoque--link">
+            <i class="bi bi-exclamation-triangle-fill alerta-estoque__icone" aria-hidden="true"></i>
+            <div class="alerta-estoque__texto">
+                <strong>{{ $estoqueBaixo }} {{ $estoqueBaixo === 1 ? 'produto está' : 'produtos estão' }} com estoque baixo</strong>
+                <span>Toque para ver no estoque.</span>
+            </div>
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </a>
+    @endif
+
     <h2 style="font-size: 20px;">Realize suas ações</h2>
 
     <div class="action-list">

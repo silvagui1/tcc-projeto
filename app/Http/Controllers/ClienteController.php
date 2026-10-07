@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreClienteRequest;
 use App\Http\Requests\UpdateClienteRequest;
+use App\Models\Atividade;
 use App\Models\Cliente;
 use App\Models\ClienteCreditoHistorico;
 use Illuminate\Database\Eloquent\Builder;
@@ -192,6 +193,8 @@ class ClienteController extends Controller
             $this->registrarHistoricoCreditos($cliente, 'definir', 0.0, (float) $cliente->creditos);
         }
 
+        Atividade::registrar('clientes', "Cliente cadastrado: {$cliente->nome}");
+
         return response()->json([
             'success' => true,
             'message' => "Cliente {$cliente->nome} cadastrado com sucesso!",
@@ -217,6 +220,8 @@ class ClienteController extends Controller
         }
 
         $cliente->update($dados);
+
+        Atividade::registrar('clientes', "Dados de {$cliente->nome} atualizados");
 
         return response()->json([
             'success' => true,
@@ -287,6 +292,10 @@ class ClienteController extends Controller
 
         $cliente->refresh();
 
+        $acoes = ['adicionar' => 'adicionados a', 'descontar' => 'descontados de', 'definir' => 'definidos como saldo de'];
+        Atividade::registrar('clientes', 'Créditos: R$ '.number_format($valor, 2, ',', '.')." {$acoes[$tipo]} {$cliente->nome}"
+            .($motivo ? " · {$motivo}" : ''));
+
         return response()->json([
             'success' => true,
             'message' => 'Saldo atualizado com sucesso!',
@@ -335,6 +344,8 @@ class ClienteController extends Controller
 
         $cliente->delete();
 
+        Atividade::registrar('clientes', "Cliente excluído: {$nome}");
+
         return response()->json([
             'success' => true,
             'message' => "Cliente {$nome} removido com sucesso!",
@@ -357,7 +368,7 @@ class ClienteController extends Controller
         ]);
 
         $ids = $validated['ids'];
-        $clientes = Cliente::whereIn('id', $ids)->get(['id', 'foto']);
+        $clientes = Cliente::whereIn('id', $ids)->get(['id', 'nome', 'foto']);
 
         foreach ($clientes as $cliente) {
             if ($cliente->foto) {
@@ -366,6 +377,10 @@ class ClienteController extends Controller
         }
 
         Cliente::whereIn('id', $ids)->delete();
+
+        Atividade::registrar('clientes', $clientes->count() === 1
+            ? "Cliente excluído: {$clientes->first()->nome}"
+            : "{$clientes->count()} clientes excluídos: ".$clientes->pluck('nome')->implode(', '));
 
         return response()->json([
             'success' => true,

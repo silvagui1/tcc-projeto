@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SalvarCartaRequest;
+use App\Models\Atividade;
 use App\Models\Carta;
+use App\Models\JogoCarta;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +19,7 @@ class CartaController extends Controller
      */
     public function index(Request $request): View
     {
-        $jogoAtual = in_array($request->query('jogo'), Carta::JOGOS, true) ? $request->query('jogo') : 'pokemon';
+        $jogoAtual = in_array($request->query('jogo'), $jogos = JogoCarta::chaves(), true) ? $request->query('jogo') : ($jogos[0] ?? '');
 
         // filtros escolhidos (vêm na url, ex.: ?estado[]=Novo&foil=1&preco_max=10)
         $filtros = [
@@ -63,7 +65,7 @@ class CartaController extends Controller
             + ($filtros['busca'] !== '' ? 1 : 0);
 
         return view('pages.estoque.cartas', [
-            'jogosDisponiveis' => Carta::JOGOS,
+            'jogosDisponiveis' => JogoCarta::opcoes(),
             'jogoAtual' => $jogoAtual,
             'cartas' => $cartas->get(),
             'opcoes' => $opcoes,
@@ -79,7 +81,7 @@ class CartaController extends Controller
     {
         return view('pages.estoque.carta', [
             'carta' => $carta,
-            'jogosDisponiveis' => Carta::JOGOS,
+            'jogosDisponiveis' => JogoCarta::opcoes(),
         ]);
     }
 
@@ -95,6 +97,8 @@ class CartaController extends Controller
         if ($carta->quantidade > 0) {
             $this->registrarMovimentacao($carta, 0, $carta->quantidade, 'Cadastro da carta');
         }
+
+        Atividade::registrar('estoque', "Carta cadastrada: {$carta->nome} (qtd {$carta->quantidade})");
 
         return back()->with('estoqueMensagem', "\"{$carta->nome}\" foi adicionada ao estoque.");
     }
@@ -112,6 +116,9 @@ class CartaController extends Controller
             $this->registrarMovimentacao($carta, $quantidadeAnterior, $carta->quantidade, 'Edição da carta');
         }
 
+        Atividade::registrar('estoque', "Carta editada: {$carta->nome}"
+            .($carta->quantidade !== $quantidadeAnterior ? " (qtd {$quantidadeAnterior} → {$carta->quantidade})" : ''));
+
         return back()->with('estoqueMensagem', "\"{$carta->nome}\" foi atualizada.");
     }
 
@@ -127,6 +134,8 @@ class CartaController extends Controller
 
         $carta->apagarArquivoDeImagem();
         $carta->delete();
+
+        Atividade::registrar('estoque', "Carta excluída: {$nome}");
 
         $resposta = $veioDosDetalhes
             ? redirect()->route('estoque.cartas', ['jogo' => $carta->jogo])

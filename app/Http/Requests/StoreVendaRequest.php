@@ -27,7 +27,8 @@ class StoreVendaRequest extends FormRequest
             'itens.*.id' => ['required', 'integer', 'min:1'],
             'itens.*.quantidade' => ['nullable', 'integer', 'min:1', 'max:999'],
             'usar_creditos' => ['boolean'],
-            'forma_pagamento' => ['nullable', Rule::in(array_keys(Venda::FORMAS_PAGAMENTO))],
+            // só as formas ligadas em Configurações > Vendas
+            'forma_pagamento' => ['nullable', Rule::in(array_keys(Venda::formasAtivas()))],
             'observacoes' => ['nullable', 'string', 'max:255'],
         ];
     }
@@ -45,7 +46,7 @@ class StoreVendaRequest extends FormRequest
             'itens.*.quantidade.min' => 'A quantidade mínima é 1.',
             'itens.*.quantidade.max' => 'A quantidade máxima por item é :max.',
             'cliente_id.exists' => 'O cliente selecionado não existe mais.',
-            'forma_pagamento.in' => 'Forma de pagamento inválida.',
+            'forma_pagamento.in' => 'Essa forma de pagamento não é aceita pela loja.',
             'observacoes.max' => 'As observações podem ter no máximo :max caracteres.',
         ];
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SalvarMesaRequest;
+use App\Models\Atividade;
 use App\Models\Mesa;
 use Illuminate\Http\JsonResponse;
 
@@ -20,6 +21,7 @@ class MesaController extends Controller
     public function store(SalvarMesaRequest $request): JsonResponse
     {
         $mesa = Mesa::create($request->validated());
+        Atividade::registrar('alugueis', "Mesa cadastrada: {$mesa->nome}");
 
         return response()->json([
             'success' => true,
@@ -31,6 +33,8 @@ class MesaController extends Controller
     public function update(SalvarMesaRequest $request, Mesa $mesa): JsonResponse
     {
         $mesa->update($request->validated());
+        $acao = $mesa->wasChanged('ativa') ? ($mesa->ativa ? 'Mesa reativada' : 'Mesa desativada') : 'Mesa editada';
+        Atividade::registrar('alugueis', "{$acao}: {$mesa->nome}");
 
         return response()->json([
             'success' => true,
@@ -55,6 +59,7 @@ class MesaController extends Controller
 
         $nome = $mesa->nome;
         $mesa->delete();
+        Atividade::registrar('alugueis', "Mesa excluída: {$nome}");
 
         return response()->json([
             'success' => true,

@@ -15,7 +15,6 @@
     };
     $agoraPosicao = $dia->isToday() ? $posicao(now()) : null;
 
-    $iconesJogo = ['rpg' => 'bi-dice-6', 'cartas' => 'bi-suit-spade', 'tabuleiro' => 'bi-grid-3x3-gap', 'outro' => 'bi-controller'];
     $statusRotulo = ['agendado' => 'Agendado', 'pago' => 'Pago', 'cancelado' => 'Cancelado'];
 @endphp
 
@@ -54,6 +53,13 @@
                 @else
                     {{ $ativosDoDia->count() }} {{ $ativosDoDia->count() === 1 ? 'reserva' : 'reservas' }}
                     · R$ {{ number_format($ativosDoDia->sum('valor'), 2, ',', '.') }}
+                @endif
+                {{-- horário de funcionamento do dia (Configurações > Loja) --}}
+                @if ($funcionamento)
+                    · loja aberta das {{ sprintf('%02d:%02d', intdiv($funcionamento[0], 60), $funcionamento[0] % 60) }}
+                    às {{ sprintf('%02d:%02d', intdiv($funcionamento[1], 60) % 24, $funcionamento[1] % 60) }}
+                @else
+                    · <span class="agenda-titulo__fechada">loja fechada neste dia</span>
                 @endif
             </span>
         </div>
@@ -111,7 +117,7 @@
                                     @endphp
                                     <button
                                         type="button"
-                                        class="ocupacao__bloco ocupacao__bloco--{{ $aluguel->tipo_jogo }} {{ $aluguel->status === 'pago' ? 'ocupacao__bloco--pago' : '' }}"
+                                        class="ocupacao__bloco ocupacao__bloco--{{ $aluguel->tipo_jogo_cor }} {{ $aluguel->status === 'pago' ? 'ocupacao__bloco--pago' : '' }}"
                                         style="left: {{ $esquerda }}%; width: {{ $largura }}%"
                                         data-abrir-aluguel="{{ $aluguel->id }}"
                                         title="{{ $aluguel->horario }} · {{ $aluguel->nome_exibicao }} · {{ $aluguel->tipo_jogo_rotulo }}"
@@ -129,8 +135,8 @@
                 </div>
             </div>
             <p class="ocupacao__legenda">
-                @foreach ($tiposJogo as $tipo => $rotulo)
-                    <span><i class="ocupacao__cor ocupacao__bloco--{{ $tipo }}" aria-hidden="true"></i>{{ $rotulo }}</span>
+                @foreach ($tiposJogo as $tipo)
+                    <span><i class="ocupacao__cor ocupacao__bloco--{{ $tipo['cor'] }}" aria-hidden="true"></i>{{ $tipo['nome'] }}</span>
                 @endforeach
                 <span><i class="ocupacao__cor ocupacao__cor--pago" aria-hidden="true"></i>Pago</span>
             </p>
@@ -148,8 +154,8 @@
                         <span class="aluguel-card__corpo">
                             <span class="aluguel-card__titulo">{{ $aluguel->nome_exibicao }}</span>
                             <span class="aluguel-card__meta">
-                                <span class="jogo-chip jogo-chip--{{ $aluguel->tipo_jogo }}">
-                                    <i class="bi {{ $iconesJogo[$aluguel->tipo_jogo] ?? 'bi-controller' }}" aria-hidden="true"></i>
+                                <span class="jogo-chip jogo-chip--{{ $aluguel->tipo_jogo_cor }}">
+                                    <i class="bi {{ $aluguel->tipo_jogo_icone }}" aria-hidden="true"></i>
                                     {{ $aluguel->tipo_jogo_rotulo }}
                                 </span>
                                 <span>{{ $aluguel->mesa->nome }} · {{ $aluguel->duracao_texto }}@if ($aluguel->jogo) · {{ $aluguel->jogo }}@endif</span>

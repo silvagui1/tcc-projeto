@@ -18,7 +18,6 @@ const ICONES_MENSAGEM = {
 };
 
 const ICONES_TIPO = { produto: 'bi-box-seam', carta: 'bi-stack', aluguel: 'bi-dice-5' };
-const ICONES_JOGO = { rpg: 'bi-dice-6', cartas: 'bi-suit-spade', tabuleiro: 'bi-grid-3x3-gap', outro: 'bi-controller' };
 const PLACEHOLDER_CATALOGO = {
     produto: 'Buscar produto',
     carta: 'Buscar carta',
@@ -861,7 +860,8 @@ function iniciarPaginaVendas() {
         const { subtotal, saldo, creditos, restante } = calcularTotais();
         const cliente = clienteDaVenda();
 
-        elVenda.usarCreditosBloco.hidden = !(cliente && saldo > 0);
+        // pagamento com créditos pode estar desligado em Configurações > Vendas
+        elVenda.usarCreditosBloco.hidden = !(config.permitirCreditos && cliente && saldo > 0);
         if (elVenda.usarCreditosBloco.hidden) elVenda.usarCreditos.checked = false;
         elVenda.usarCreditosSaldo.textContent = `saldo de ${cliente ? cliente.nome.split(' ')[0] : ''}: ${formatarMoeda(saldo)}`;
 
@@ -974,6 +974,9 @@ function iniciarPaginaVendas() {
         const selo = modalRecibo.querySelector('[data-recibo-cancelada]');
         selo.hidden = !cancelada;
         selo.textContent = cancelada ? `Cancelada em ${dados.cancelada_em}` : '';
+        const motivo = modalRecibo.querySelector('[data-recibo-motivo]');
+        motivo.hidden = !(cancelada && dados.motivo_cancelamento);
+        motivo.textContent = dados.motivo_cancelamento ? `Motivo: ${dados.motivo_cancelamento}` : '';
 
         const itens = modalRecibo.querySelector('[data-recibo-itens]');
         itens.innerHTML = '';
@@ -1022,7 +1025,20 @@ function iniciarPaginaVendas() {
         abrirModal('detalhes-venda');
     }
 
-    modalRecibo.querySelector('[data-cancelar-venda]').addEventListener('click', async () => {
+    // Cancelar venda: confirmação com o motivo (obrigatório ou não, conforme
+    // Configurações > Vendas).
+    const modalCancelarVenda = overlayDe('cancelar-venda');
+    const campoMotivo = modalCancelarVenda.querySelector('[data-cancelar-venda-motivo]');
+    const erroMotivo = modalCancelarVenda.querySelector('[data-cancelar-venda-erro]');
+    const botaoConfirmarCancelarVenda = modalCancelarVenda.querySelector('[data-cancelar-venda-confirmar]');
+
+    function mostrarErroMotivo(texto) {
+        erroMotivo.textContent = texto || '';
+        erroMotivo.hidden = !texto;
+        campoMotivo.closest('.campo').classList.toggle('campo--invalido', Boolean(texto));
+    }
+
+    modalRecibo.querySelector('[data-cancelar-venda]').addEventListener('click', () => {
         const dados = modalRecibo._venda;
         if (!dados) return;
 
@@ -1032,17 +1048,38 @@ function iniciarPaginaVendas() {
         if (dados.valor_creditos > 0 && dados.cliente) partes.push(`${formatarMoeda(dados.valor_creditos)} voltam para os créditos de ${dados.cliente.nome}`);
         const resumo = partes.length ? partes.join(', ').replace(/^./, (c) => c.toUpperCase()) + '. ' : '';
 
-        const confirmou = await confirmar({
-            titulo: `Cancelar a venda #${dados.id}?`,
-            texto: `${resumo}A venda continua no histórico, marcada como cancelada.`,
-            textoOk: 'Cancelar venda',
-        });
-        if (!confirmou) return;
+        modalCancelarVenda.querySelector('[data-cancelar-venda-titulo]').textContent = `Cancelar a venda #${dados.id}?`;
+        modalCancelarVenda.querySelector('[data-cancelar-venda-texto]').textContent =
+            `${resumo}A venda continua no histórico, marcada como cancelada.`;
+        campoMotivo.value = '';
+        mostrarErroMotivo('');
+        abrirModal('cancelar-venda', config.exigirMotivoCancelamento ? campoMotivo : modalCancelarVenda.querySelector('[data-fechar-modal]'));
+    });
 
-        const { ok, dados: resposta } = await requisicao(`${urlBase}/${dados.id}/cancelar`, { metodo: 'POST' });
+    campoMotivo.addEventListener('input', () => mostrarErroMotivo(''));
+
+    botaoConfirmarCancelarVenda.addEventListener('click', async () => {
+        const dados = modalRecibo._venda;
+        const motivo = campoMotivo.value.trim();
+        if (config.exigirMotivoCancelamento && !motivo) {
+            mostrarErroMotivo('Informe o motivo do cancelamento.');
+            campoMotivo.focus();
+            return;
+        }
+
+        botaoConfirmarCancelarVenda.disabled = true;
+        const { ok, dados: resposta } = await requisicao(`${urlBase}/${dados.id}/cancelar`, {
+            metodo: 'POST',
+            corpo: { motivo: motivo || null },
+        });
+        botaoConfirmarCancelarVenda.disabled = false;
+
         if (ok) {
+            fecharModal(modalCancelarVenda);
             fecharModal(modalRecibo);
             recarregarComMensagem(resposta.message);
+        } else if (resposta.errors && resposta.errors.motivo) {
+            mostrarErroMotivo(resposta.errors.motivo[0]);
         } else {
             mostrarMensagem(mensagemDeErro(resposta), 'erro');
         }
@@ -1083,7 +1120,8 @@ function iniciarPaginaVendas() {
         const jogo = modalReserva.querySelector('[data-reserva-jogo]');
         jogo.innerHTML = '';
         const chip = criar('span', `jogo-chip jogo-chip--${dados.tipo_jogo}`);
-        chip.append(icone(ICONES_JOGO[dados.tipo_jogo] || 'bi-controller'), document.createTextNode(` ${dados.tipo_jogo_rotulo}`));
+        chip.className = `jogo-chip jogo-chip--${dados.tipo_jogo_cor}`;
+        chip.append(icone(dados.tipo_jogo_icone), document.createTextNode(` ${dados.tipo_jogo_rotulo}`));
         jogo.append(chip);
         if (dados.jogo) jogo.append(document.createTextNode(` ${dados.jogo}`));
 
@@ -1195,6 +1233,7 @@ function iniciarPaginaVendas() {
         fimCampo: form.querySelector('[data-fim-campo]'),
         fim: form.querySelector('[data-aluguel-fim]'),
         horarioResumo: form.querySelector('[data-aluguel-horario-resumo]'),
+        horarioAviso: form.querySelector('[data-aluguel-horario-aviso]'),
         repetirBloco: form.querySelector('[data-repetir-bloco]'),
         repetir: form.querySelectorAll('[data-aluguel-repetir]'),
         repetirAteCampo: form.querySelector('[data-repetir-ate-campo]'),
@@ -1276,13 +1315,27 @@ function iniciarPaginaVendas() {
         const inicio = paraMinutos(elAluguel.inicio.value);
         elAluguel.fimCampo.hidden = !Array.from(elAluguel.duracoes).some((r) => r.checked && r.value === 'outra');
 
+        let aviso = '';
         if (Number.isNaN(inicio) || Number.isNaN(duracao)) {
             elAluguel.horarioResumo.textContent = '';
         } else {
             const passaDaMeiaNoite = inicio + duracao >= 1440;
             elAluguel.horarioResumo.textContent =
                 `Das ${elAluguel.inicio.value} às ${horaFim()} (${textoDuracao(duracao)})${passaDaMeiaNoite ? ' — termina no dia seguinte' : ''}.`;
+
+            // Aviso (não bloqueia) com base em Configurações > Loja
+            const faixa = faixaDoDia(elAluguel.data.value);
+            if (elAluguel.data.value && !faixa) {
+                aviso = 'A loja está fechada neste dia, pelo horário de funcionamento.';
+            } else if (faixa && (inicio < faixa[0] || inicio + duracao > faixa[1])) {
+                aviso = `Fora do horário de funcionamento (${paraHora(faixa[0])}–${paraHora(faixa[1])}).`;
+            }
+            if (duracao > config.duracaoMaxima) {
+                aviso = `A duração máxima de um aluguel é ${textoDuracao(config.duracaoMaxima)}.`;
+            }
         }
+        elAluguel.horarioAviso.querySelector('[data-aluguel-horario-aviso-texto]').textContent = aviso;
+        elAluguel.horarioAviso.hidden = !aviso;
 
         atualizarRepeticao();
         atualizarValorAutomatico();
@@ -1335,11 +1388,43 @@ function iniciarPaginaVendas() {
         elAluguel.recalcular.hidden = !diferente;
     }
 
-    /** Próxima hora cheia (hoje, em horário de loja) ou 18:00. */
+    /**
+     * Abertura e fechamento (minutos) do dia da data, pelo horário de
+     * funcionamento; null se a loja não abre. Fechar antes de abrir = dia seguinte.
+     */
+    function faixaDoDia(iso) {
+        const data = lerData(iso);
+        const horario = data && config.horario ? config.horario[data.getDay()] : null;
+        if (!horario || !horario.aberto) return null;
+        const abre = paraMinutos(horario.abre);
+        const fecha = paraMinutos(horario.fecha);
+        return [abre, fecha <= abre ? fecha + 1440 : fecha];
+    }
+
+    /**
+     * Início sugerido: hoje, a próxima hora cheia (se a loja estiver aberta);
+     * outro dia, 18:00 se der tempo antes de fechar — senão, a abertura.
+     */
     function horaPadrao(data) {
-        const proxima = new Date().getHours() + 1;
-        if (data !== config.hoje || proxima < 9 || proxima > 22) return '18:00';
-        return paraHora(proxima * 60);
+        const faixa = faixaDoDia(data) || [10 * 60, 22 * 60];
+        const cabe = (minutos) => minutos >= faixa[0] && minutos + 60 <= faixa[1];
+
+        if (data === config.hoje) {
+            const proxima = (new Date().getHours() + 1) * 60;
+            if (cabe(proxima)) return paraHora(proxima);
+        }
+        return cabe(18 * 60) ? '18:00' : paraHora(faixa[0]);
+    }
+
+    /** Marca o chip da duração padrão (ou "Outra", se ela não for 1h–4h). */
+    function aplicarDuracaoPadrao() {
+        const chip = Array.from(elAluguel.duracoes).find((r) => Number(r.value) === config.duracaoPadrao);
+        if (chip) {
+            chip.checked = true;
+            return;
+        }
+        elAluguel.duracoes.forEach((r) => { r.checked = r.value === 'outra'; });
+        elAluguel.fim.value = paraHora(paraMinutos(elAluguel.inicio.value || '18:00') + config.duracaoPadrao);
     }
 
     function abrirFormAluguel({ edicao = null, mesaId = null, data = null, hora = null } = {}) {
@@ -1385,7 +1470,9 @@ function iniciarPaginaVendas() {
             const dia = data || (config.dia < config.hoje ? config.hoje : config.dia);
             elAluguel.data.value = dia;
             elAluguel.inicio.value = hora || horaPadrao(dia);
-            elAluguel.repetirAte.value = somarDias(dia, 7 * 7);
+            aplicarDuracaoPadrao();
+            // padrão: 8 datas, ou menos se o limite de semanas for menor
+            elAluguel.repetirAte.value = somarDias(dia, 7 * (Math.min(8, config.maxSemanas) - 1));
             seletorClienteAluguel.definir(null);
             atualizarHorario();
         }
@@ -1399,6 +1486,7 @@ function iniciarPaginaVendas() {
         if (!elAluguel.data.value) erros.data = ['Informe a data.'];
         if (!elAluguel.inicio.value) erros.hora_inicio = ['Informe o horário de início.'];
         if (Number.isNaN(duracaoEscolhida())) erros.hora_fim = ['Informe o horário de término.'];
+        else if (duracaoEscolhida() > config.duracaoMaxima) erros.hora_fim = [`O aluguel pode durar no máximo ${textoDuracao(config.duracaoMaxima)}.`];
         if (!seletorClienteAluguel.valor()) erros.responsavel = ['Escolha um cliente ou digite o nome de quem está alugando.'];
         if (!Array.from(elAluguel.tipos).some((r) => r.checked)) erros.tipo_jogo = ['Escolha o tipo de jogo.'];
         const valor = lerValor(elAluguel.valor.value);
@@ -1702,6 +1790,15 @@ function iniciarPaginaVendas() {
         url.searchParams.delete('nova');
         window.history.replaceState(null, '', url);
         abrirNovaVenda();
+    }
+
+    // ?mesas=1 (atalho "Gerenciar mesas" de Configurações)
+    const parametros = new URLSearchParams(window.location.search);
+    if (parametros.get('mesas') === '1') {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('mesas');
+        window.history.replaceState(null, '', url);
+        abrirMesas();
     }
 }
 

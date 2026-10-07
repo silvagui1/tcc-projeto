@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Aluguel;
+use App\Services\Configuracoes;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -14,12 +15,13 @@ use Illuminate\Validation\Validator;
  */
 class SalvarAluguelRequest extends FormRequest
 {
-    /**
-     * Limite de datas geradas por um aluguel semanal (~6 meses).
-     */
-    public const MAX_SEMANAS = 26;
+    // Limite de semanas, duração máxima e tipos de jogo vêm de
+    // Configurações > Mesas e aluguéis (alugueis.*).
 
-    private const DURACAO_MAXIMA_MINUTOS = 12 * 60;
+    private function maxSemanas(): int
+    {
+        return (int) Configuracoes::valor('alugueis.max_semanas');
+    }
 
     public function authorize(): bool
     {
@@ -55,7 +57,7 @@ class SalvarAluguelRequest extends FormRequest
             'cliente_id' => ['nullable', 'integer', 'exists:clientes,id'],
             'responsavel' => ['nullable', 'required_without:cliente_id', 'string', 'max:120'],
             'valor' => ['required', 'numeric', 'min:0', 'max:99999.99'],
-            'tipo_jogo' => ['required', Rule::in(array_keys(Aluguel::TIPOS_JOGO))],
+            'tipo_jogo' => ['required', Rule::in($this->tiposDeJogoAceitos())],
             'jogo' => ['nullable', 'string', 'max:120'],
             'observacoes' => ['nullable', 'string', 'max:255'],
             'repetir' => [$criando ? 'required' : 'nullable', 'in:nao,semanal'],
@@ -78,14 +80,28 @@ class SalvarAluguelRequest extends FormRequest
 
             if ($minutos < 15) {
                 $validator->errors()->add('hora_fim', 'O aluguel precisa ter pelo menos 15 minutos.');
-            } elseif ($minutos > self::DURACAO_MAXIMA_MINUTOS) {
-                $validator->errors()->add('hora_fim', 'O aluguel pode durar no máximo 12 horas.');
+            } elseif ($minutos > ($maxima = (int) Configuracoes::valor('alugueis.duracao_maxima'))) {
+                $validator->errors()->add('hora_fim', 'O aluguel pode durar no máximo '.($maxima / 60).' horas.');
             }
 
-            if ($this->repetir === 'semanal' && count($this->inicios()) > self::MAX_SEMANAS) {
-                $validator->errors()->add('repetir_ate', 'Repita por no máximo '.self::MAX_SEMANAS.' semanas.');
+            if ($this->repetir === 'semanal' && count($this->inicios()) > $this->maxSemanas()) {
+                $validator->errors()->add('repetir_ate', 'Repita por no máximo '.$this->maxSemanas().' semanas.');
             }
         });
+    }
+
+    /**
+     * Tipos configurados + o tipo que a reserva editada já tem (pode ter
+     * saído da lista depois que ela foi feita).
+     *
+     * @return array<int, string>
+     */
+    private function tiposDeJogoAceitos(): array
+    {
+        $tipos = array_keys(Configuracoes::tiposJogo());
+        $aluguel = $this->route('aluguel');
+
+        return $aluguel instanceof Aluguel ? [...$tipos, $aluguel->tipo_jogo] : $tipos;
     }
 
     /**
@@ -123,7 +139,7 @@ class SalvarAluguelRequest extends FormRequest
         $ate = Carbon::createFromFormat('Y-m-d', $this->repetir_ate)->endOfDay();
         $inicios = [];
 
-        for ($data = $inicio->copy(); $data->lessThanOrEqualTo($ate) && count($inicios) <= self::MAX_SEMANAS; $data->addWeek()) {
+        for ($data = $inicio->copy(); $data->lessThanOrEqualTo($ate) && count($inicios) <= $this->maxSemanas(); $data->addWeek()) {
             $inicios[] = $data->copy();
         }
 

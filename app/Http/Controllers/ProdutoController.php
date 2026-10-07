@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SalvarProdutoRequest;
+use App\Models\Atividade;
 use App\Models\Produto;
 use Illuminate\Http\RedirectResponse;
 
@@ -21,6 +22,8 @@ class ProdutoController extends Controller
             $this->registrarMovimentacao($produto, 0, $produto->quantidade, 'Cadastro do produto');
         }
 
+        Atividade::registrar('estoque', "Produto cadastrado: {$produto->nome} (qtd {$produto->quantidade})");
+
         return back()->with('estoqueMensagem', "\"{$produto->nome}\" foi adicionado ao estoque.");
     }
 
@@ -37,6 +40,9 @@ class ProdutoController extends Controller
             $this->registrarMovimentacao($produto, $quantidadeAnterior, $produto->quantidade, 'Edição do produto');
         }
 
+        Atividade::registrar('estoque', "Produto editado: {$produto->nome}"
+            .($produto->quantidade !== $quantidadeAnterior ? " (qtd {$quantidadeAnterior} → {$produto->quantidade})" : ''));
+
         return back()->with('estoqueMensagem', "\"{$produto->nome}\" foi atualizado.");
     }
 
@@ -50,6 +56,8 @@ class ProdutoController extends Controller
 
         $produto->apagarArquivoDeImagem();
         $produto->delete();
+
+        Atividade::registrar('estoque', "Produto excluído: {$nome}");
 
         return back()->with('estoqueMensagem', "\"{$nome}\" foi removido do estoque.");
     }

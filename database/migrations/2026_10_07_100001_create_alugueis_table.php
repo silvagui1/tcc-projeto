@@ -25,7 +25,7 @@ return new class extends Migration
             $table->dateTime('inicio');
             $table->dateTime('fim');
             $table->decimal('valor', 10, 2)->default(0);
-            // 'rpg' | 'cartas' | 'tabuleiro' | 'outro' (ver Aluguel::TIPOS_JOGO)
+            // chave do tipo de jogo (Configurações > Mesas e aluguéis: 'rpg', 'cartas'...)
             $table->string('tipo_jogo', 15);
             $table->string('jogo', 120)->nullable();
             $table->uuid('serie')->nullable()->index();
