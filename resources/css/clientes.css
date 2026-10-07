@@ -22,6 +22,10 @@
        --blue-glow: branco sobre ele dá 7,7:1 e ele lê bem sobre fundo claro. */
     --clientes-acento: var(--blue-glow);
     --clientes-acento-forte: var(--blue-900);
+    /* WhatsApp: verde da marca no tema claro (texto 4,9:1 sobre a superfície). */
+    --whatsapp: #2a7343;
+    --whatsapp-tint: rgba(42, 115, 67, .10);
+    --whatsapp-on: #ffffff;
     /* Texto de destaque (aniversariantes, foco): azul escuro no claro e azul
        claro no escuro, para manter contraste nos dois temas. */
     --destaque-texto: var(--blue-glow);
@@ -1574,15 +1578,19 @@ a.cliente-linha__whatsapp:hover {
     color: var(--text-soft);
 }
 
-/* #2a7343 (antes green-700 #338f53, 4,0:1 com texto branco; agora 5,8:1). */
-.botao--whatsapp {
-    background: #2a7343;
-    color: var(--white);
-    margin-top: var(--space-3);
+/* WhatsApp como ação secundária no perfil: tom verde suave com borda e texto
+   verde, ao lado do "Editar" (azul preenchido, a ação principal). Contraste do
+   texto: 4,9:1 no claro e 8,2:1 no escuro. No hover ele preenche, com o texto
+   invertido para continuar legível nos dois temas. */
+.perfil__acoes .botao--whatsapp {
+    background: var(--whatsapp-tint);
+    color: var(--whatsapp);
+    border-color: var(--whatsapp);
 }
 
-.botao--whatsapp:hover {
-    background: #2a7343;
+.perfil__acoes .botao--whatsapp:hover {
+    background: var(--whatsapp);
+    color: var(--whatsapp-on);
 }
 
 /* Rodapé do formulário: "Salvar alterações" em largura total e "Cancelar" como
@@ -1699,16 +1707,23 @@ a.cliente-linha__whatsapp:hover {
     overflow-wrap: anywhere;
 }
 
+/* Linha de ações do perfil (WhatsApp + Editar): mesma altura e largura nos dois
+   botões, centralizados. Se o WhatsApp não existir, o Editar fica sozinho
+   no centro. */
 .perfil__acoes {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: var(--space-2);
-    margin-top: var(--space-3);
+    gap: var(--space-3);
+    margin-top: var(--space-4);
 }
 
 .perfil__acoes .botao {
-    min-width: 128px;
+    flex: 1 1 0;
+    max-width: 200px;
+    min-width: 0;
+    height: var(--controle-altura);
+    padding: 0 var(--space-4);
+    border: 1px solid transparent;
 }
 
 .perfil__secao {
@@ -1881,6 +1896,9 @@ a.cliente-linha__whatsapp:hover {
     --red-50: #3a2328;
     --green-100: #1f3328;
     --destaque-texto: var(--blue-300);
+    --whatsapp: #5fd08a;
+    --whatsapp-tint: rgba(95, 208, 138, .14);
+    --whatsapp-on: #15161e;
 }
 
 :root[data-theme="dark"] .cliente-linha--selecionado {

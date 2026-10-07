@@ -17,5 +17,6 @@ class DatabaseSeeder extends Seeder
         // completo com "class not found". Removidos.
         $this->call(ClienteSeeder::class);
         $this->call(EstoqueSeeder::class);
+        $this->call(VendaSeeder::class);
     }
 }

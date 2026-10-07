@@ -2,12 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\LogAcessoMiddleware;
+use App\Http\Controllers\AluguelController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\CartaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\VendaController;
 use App\Models\Carta;
+use App\Models\Venda;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -49,7 +53,11 @@ Route::prefix('aluno')->name('aluno.')->group(function () {
 */
 
 Route::get('/inicio', function () {
-    return view('pages.home');
+    // cartões do topo: vendido hoje x ontem (vendas concluídas)
+    $hoje = Venda::resumoDoDia(today());
+    $ontem = Venda::resumoDoDia(today()->subDay());
+
+    return view('pages.home', compact('hoje', 'ontem'));
 })->name('home');
 
 
@@ -304,9 +312,28 @@ Route::prefix('clientes')->name('clientes.')->group(function () {
     Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
 });
 
-Route::get('/vendas', function () {
-    return view('pages.vendas');
-})->name('vendas');
+// --- Vendas (histórico, nova venda) + aluguéis de mesas -------------------------
+
+Route::prefix('vendas')->name('vendas.')->group(function () {
+    Route::get('/', [VendaController::class, 'index'])->name('index');
+    Route::get('/listar', [VendaController::class, 'listar'])->name('listar');
+    Route::get('/catalogo', [VendaController::class, 'catalogo'])->name('catalogo');
+    Route::get('/clientes', [VendaController::class, 'clientes'])->name('clientes');
+    Route::post('/', [VendaController::class, 'store'])->name('store');
+
+    Route::get('/mesas', [MesaController::class, 'index'])->name('mesas.index');
+    Route::post('/mesas', [MesaController::class, 'store'])->name('mesas.store');
+    Route::put('/mesas/{mesa}', [MesaController::class, 'update'])->name('mesas.update');
+    Route::delete('/mesas/{mesa}', [MesaController::class, 'destroy'])->name('mesas.destroy');
+
+    Route::post('/alugueis', [AluguelController::class, 'store'])->name('alugueis.store');
+    Route::get('/alugueis/{aluguel}', [AluguelController::class, 'show'])->name('alugueis.show');
+    Route::put('/alugueis/{aluguel}', [AluguelController::class, 'update'])->name('alugueis.update');
+    Route::post('/alugueis/{aluguel}/cancelar', [AluguelController::class, 'cancelar'])->name('alugueis.cancelar');
+
+    Route::get('/{venda}', [VendaController::class, 'show'])->whereNumber('venda')->name('show');
+    Route::post('/{venda}/cancelar', [VendaController::class, 'cancelar'])->whereNumber('venda')->name('cancelar');
+});
 
 Route::get('/config', function () {
     $conta = [

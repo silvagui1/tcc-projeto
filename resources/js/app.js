@@ -1,4 +1,5 @@
 import './clientes';
+import './vendas';
 import './bootstrap';
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).

@@ -59,6 +59,30 @@ class Cliente extends Model
         return $this->hasMany(ClienteCreditoHistorico::class)->latest('id');
     }
 
+    public function vendas()
+    {
+        return $this->hasMany(Venda::class);
+    }
+
+    /**
+     * Dados curtos do cliente (avatar, nome e saldo) usados pela tela de
+     * Vendas — busca de cliente, detalhes da venda e do aluguel.
+     *
+     * @return array<string, mixed>
+     */
+    public function dadosResumidos(): array
+    {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'iniciais' => $this->iniciais,
+            'cor_avatar' => $this->cor_avatar,
+            'foto_url' => $this->foto_url,
+            'creditos' => (float) $this->creditos,
+            'inativo' => $this->status === 'inativo',
+        ];
+    }
+
     public function scopeAtivos(Builder $query): Builder
     {
         return $query->where('status', 'ativo');

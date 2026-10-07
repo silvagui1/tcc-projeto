@@ -285,12 +285,17 @@
     "src": "resources/css/app.css"
   },
   "resources/css/clientes.css": {
-    "file": "assets/clientes-cc9eec0c.css",
+    "file": "assets/clientes-a60171b7.css",
     "isEntry": true,
     "src": "resources/css/clientes.css"
   },
+  "resources/css/vendas.css": {
+    "file": "assets/vendas-876460f6.css",
+    "isEntry": true,
+    "src": "resources/css/vendas.css"
+  },
   "resources/js/app.js": {
-    "file": "assets/app-affa51f7.js",
+    "file": "assets/app-1d40d507.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

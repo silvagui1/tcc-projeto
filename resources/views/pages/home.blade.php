@@ -10,25 +10,30 @@
     {{-- resumo do dia: empilhado no mobile, lado a lado no desktop --}}
     <div class="home-resumo">
         <div class="stat-card stat-card--blue stat-card--split">
+            @php $diferenca = $hoje['total'] - $ontem['total']; @endphp
             <div>
-                <span class="stat-card__label">lucro de hoje</span>
-                <p class="stat-card__value stat-card__value--lg">R$ 125,00</p>
-                <span class="stat-card__label">em 3 vendas</span>
+                <span class="stat-card__label">vendido hoje</span>
+                <p class="stat-card__value stat-card__value--lg">R$ {{ number_format($hoje['total'], 2, ',', '.') }}</p>
+                <span class="stat-card__label">em {{ $hoje['quantidade'] }} {{ $hoje['quantidade'] === 1 ? 'venda' : 'vendas' }}</span>
             </div>
-            <strong style="color: var(--blue-200); align-self: flex-end;">+R$ 25</strong>
+            {{-- diferença para ontem --}}
+            <strong style="color: var(--blue-200); align-self: flex-end;" title="em relação a ontem">
+                {{ $diferenca >= 0 ? '+' : '−' }}R$ {{ number_format(abs($diferenca), 2, ',', '.') }}
+            </strong>
         </div>
 
         <div class="stat-card stat-card--blue stat-grid" style="grid-template-columns: 1fr auto auto; align-items: center; margin-bottom: 0;">
             <div>
                 <span class="stat-card__label">ontem</span>
-                <p class="stat-card__value">R$ 210,00</p>
-                <span class="stat-card__label">em 5 vendas</span>
+                <p class="stat-card__value">R$ {{ number_format($ontem['total'], 2, ',', '.') }}</p>
+                <span class="stat-card__label">em {{ $ontem['quantidade'] }} {{ $ontem['quantidade'] === 1 ? 'venda' : 'vendas' }}</span>
             </div>
-            <a href="{{ route('vendas') }}" style="text-align:center; color: var(--text); background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 10px;">
+            {{-- ?nova=1 abre o modal de nova venda direto --}}
+            <a href="{{ route('vendas.index', ['nova' => 1]) }}" style="text-align:center; color: var(--text); background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 10px;">
                 <i class="bi bi-plus-lg" style="font-size: 20px; display:block; margin-bottom:4px;"></i>
                 adicionar<br>venda
             </a>
-            <a href="{{ route('vendas') }}" style="text-align:center; color: var(--text); background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 10px;">
+            <a href="{{ route('vendas.index') }}" style="text-align:center; color: var(--text); background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 10px;">
                 <i class="bi bi-arrow-90deg-up" style="font-size: 20px; display:block; margin-bottom:4px;"></i>
                 ver<br>vendas
             </a>
@@ -65,7 +70,7 @@
             <span class="action-card__arrow"><i class="bi bi-chevron-right"></i></span>
         </a>
 
-        <a href="{{ route('vendas') }}" class="action-card">
+        <a href="{{ route('vendas.index') }}" class="action-card">
             <span class="action-card__icon" style="background: var(--yellow-400);"><i class="bi bi-credit-card-fill"></i></span>
             <span class="action-card__text">
                 <strong>Vendas</strong>

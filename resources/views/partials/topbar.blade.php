@@ -19,7 +19,7 @@
 
     <nav class="topbar__nav topbar__nav--right">
         <a href="{{ route('clientes.index') }}" class="topbar__link--clientes {{ request()->routeIs('clientes.*') ? 'is-current' : '' }}">Clientes</a>
-        <a href="{{ route('vendas') }}" class="topbar__link--vendas {{ request()->routeIs('vendas') ? 'is-current' : '' }}">Vendas</a>
+        <a href="{{ route('vendas.index') }}" class="topbar__link--vendas {{ request()->routeIs('vendas.*') ? 'is-current' : '' }}">Vendas</a>
     </nav>
 
     {{-- Ícone de engrenagem fixado na ponta direita da navbar, fora do grid

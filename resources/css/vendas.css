@@ -1,0 +1,2143 @@
+/* ==========================================================================
+   Estilos da tela de Vendas (lista de vendas, nova venda, aluguéis de mesas).
+   Carregado depois de app.css e clientes.css (ver layouts/app.blade.php) e
+   reaproveita os componentes de lá: .botao, .busca, .resumo-tira, .filtro,
+   .modal-overlay/.modal-cliente, .campo, .perfil__*, .paginacao, .avatar e
+   .mensagem-flutuante. Aqui ficam só as peças novas e a cor da seção.
+   ========================================================================== */
+
+/* Cor da seção = amarelo da logo (o mesmo do card "Vendas" na home e do
+   destaque da topbar). Como fundo de botão/seleção usa o amarelo claro com
+   texto marrom escuro (--yellow-900): 7:1 de contraste. Texto de destaque
+   solto na página usa o marrom no tema claro e o amarelo no escuro. */
+:root {
+    --vendas-acento: var(--yellow-300);
+    --vendas-acento-hover: var(--yellow-400);
+    --vendas-on-acento: var(--yellow-900);
+    --vendas-tint: var(--yellow-200);
+    --vendas-tint-texto: var(--yellow-900);
+    --vendas-borda: var(--yellow-500);
+    --vendas-texto: var(--yellow-900);
+
+    /* tipos de jogo (aluguel de mesas): fundo claro + texto escuro nos chips,
+       cor cheia (com texto branco) nos blocos do quadro de ocupação */
+    --jogo-rpg: var(--purple-500);
+    --jogo-rpg-bg: var(--purple-light-300);
+    --jogo-rpg-texto: #3d4063;
+    --jogo-cartas: var(--blue-glow);
+    --jogo-cartas-bg: var(--blue-200);
+    --jogo-cartas-texto: var(--blue-900);
+    --jogo-tabuleiro: var(--pink-500);
+    --jogo-tabuleiro-bg: var(--pink-200);
+    --jogo-tabuleiro-texto: var(--pink-900);
+    --jogo-outro: var(--purple-light-800);
+    --jogo-outro-bg: var(--surface-border);
+    --jogo-outro-texto: var(--text);
+}
+
+:root[data-theme="dark"] {
+    --vendas-tint: rgba(255, 220, 155, .14);
+    --vendas-tint-texto: var(--yellow-300);
+    --vendas-borda: var(--yellow-400);
+    --vendas-texto: var(--yellow-300);
+
+    --jogo-rpg-bg: rgba(140, 142, 168, .22);
+    --jogo-rpg-texto: #c9cbec;
+    --jogo-cartas-bg: rgba(158, 197, 240, .16);
+    --jogo-cartas-texto: var(--blue-300);
+    --jogo-tabuleiro-bg: rgba(212, 174, 193, .16);
+    --jogo-tabuleiro-texto: var(--pink-200);
+    --jogo-outro-bg: rgba(255, 255, 255, .08);
+}
+
+/* Mesmo ajuste de contraste do texto secundário e de espaço para o botão
+   flutuante da navegação inferior que a tela de Clientes faz. */
+:root:not([data-theme="dark"]) [data-vendas-page] {
+    --text-muted: #7a7a7a;
+}
+
+[data-vendas-page] {
+    --destaque-texto: var(--vendas-texto);
+}
+
+@media (max-width: 991.98px) {
+    main.app-content:has([data-vendas-page]) {
+        padding-bottom: calc(var(--bottom-nav-height) + 104px);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    main.app-content--wide:has([data-vendas-page]) {
+        max-width: 920px;
+        padding: 20px 24px calc(var(--bottom-nav-height) + 104px);
+    }
+}
+
+[data-vendas-page] .page-topbar__title {
+    font-size: 20px;
+}
+
+[data-vendas-page] button:focus-visible,
+[data-vendas-page] a:focus-visible,
+[data-vendas-page] input:focus-visible,
+[data-vendas-page] select:focus-visible {
+    outline: 2px solid var(--vendas-borda);
+    outline-offset: 2px;
+}
+
+/* Na busca o anel de foco fica na caixa inteira (.busca:focus-within), não
+   num segundo contorno só do input. */
+[data-vendas-page] .busca__campo:focus-visible {
+    outline: none;
+}
+
+[data-vendas-page] .busca:focus-within {
+    box-shadow: 0 0 0 2px var(--vendas-borda);
+}
+
+/* Ação principal na cor da seção. */
+[data-vendas-page] .botao--principal {
+    background: var(--vendas-acento);
+    color: var(--vendas-on-acento);
+}
+
+[data-vendas-page] .botao--principal:hover:not(:disabled) {
+    background: var(--vendas-acento-hover);
+}
+
+.botao--grande {
+    height: 48px;
+    font-size: 15px;
+}
+
+.vendas-contador {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+a.resumo-item {
+    color: inherit;
+}
+
+/* ==========================================================================
+   Toolbar: abas (Vendas | Aluguéis de mesas) + ação principal
+   ========================================================================== */
+
+.vendas-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.vendas-toolbar .clientes-acoes {
+    margin: 0;
+}
+
+.vendas-abas {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+    background: var(--placeholder);
+    border-radius: var(--radius-control);
+}
+
+.vendas-abas__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 9px var(--space-4);
+    border-radius: var(--radius-chip);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transition: background-color .12s ease, color .12s ease;
+}
+
+.vendas-abas__item:hover {
+    color: var(--text);
+}
+
+.vendas-abas__item.is-active {
+    background: var(--field);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+}
+
+.vendas-abas__item.is-active i {
+    color: var(--vendas-texto);
+}
+
+@media (min-width: 768px) {
+    .vendas-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-5);
+    }
+
+    .vendas-abas {
+        display: inline-grid;
+    }
+
+    .vendas-toolbar .clientes-acoes .botao {
+        flex: none;
+    }
+}
+
+/* ==========================================================================
+   Aba Vendas — busca, filtros e lista agrupada por dia
+   ========================================================================== */
+
+.vendas-filtros-barra {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+}
+
+.vendas-filtros-barra .clientes-filtros {
+    margin: 0;
+}
+
+/* Telefone: os três filtros lado a lado, com o rótulo em cima do campo. */
+@media (max-width: 767.98px) {
+    .vendas-filtros {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-2);
+    }
+
+    .vendas-filtros .filtro {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .vendas-filtros .filtro__rotulo {
+        font-size: 11px;
+    }
+
+    .vendas-filtros .filtro select {
+        width: 100%;
+        min-width: 0;
+        padding: 7px var(--space-2);
+    }
+
+    .vendas-filtros [data-limpar-filtros] {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+}
+
+@media (min-width: 992px) {
+    .vendas-filtros-barra {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-5);
+    }
+
+    .vendas-filtros-barra .busca {
+        flex: 0 1 380px;
+    }
+}
+
+.vendas-lista-wrapper {
+    transition: opacity .15s ease;
+}
+
+.vendas-lista-wrapper.esta-carregando {
+    opacity: .45;
+    pointer-events: none;
+}
+
+.vendas-lista-cabecalho {
+    display: none;
+}
+
+.vendas-dia + .vendas-dia {
+    margin-top: var(--space-5);
+}
+
+.vendas-dia__cabecalho {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0 var(--space-4) var(--space-2);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.vendas-dia__titulo {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.vendas-dia__total {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.vendas-dia__total strong {
+    color: var(--text);
+}
+
+.vendas-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.venda-linha {
+    border-bottom: 1px solid var(--surface-border);
+    transition: background-color .1s ease;
+}
+
+.venda-linha:last-child {
+    border-bottom: none;
+}
+
+.venda-linha:hover {
+    background: var(--field);
+}
+
+.venda-linha__botao {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font: inherit;
+    color: inherit;
+}
+
+.venda-linha__hora {
+    flex-shrink: 0;
+    width: 44px;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.venda-linha__hora small {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.venda-linha__principal {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.venda-linha__itens {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.venda-linha__icones {
+    flex-shrink: 0;
+    display: inline-flex;
+    gap: 3px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.venda-linha__resumo {
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.venda-linha__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.venda-linha__cliente {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.venda-linha__cliente-nome {
+    color: var(--text-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.venda-linha__sem-cliente {
+    font-style: italic;
+}
+
+.venda-linha__pagamento {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.venda-linha__total {
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.venda-linha--cancelada .venda-linha__resumo,
+.venda-linha--cancelada .venda-linha__total {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.venda-linha--cancelada .venda-linha__hora,
+.venda-linha--cancelada .venda-linha__meta {
+    opacity: .7;
+}
+
+.status-badge--cancelada {
+    background: var(--red-50);
+    color: var(--red-700);
+    margin-left: 0;
+}
+
+:root[data-theme="dark"] .status-badge--cancelada {
+    color: #f0899a;
+}
+
+.avatar--mini {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+}
+
+.avatar--vazio {
+    background: var(--placeholder);
+    color: var(--text-muted);
+}
+
+/* A partir do tablet: colunas alinhadas com o cabeçalho, como a lista de
+   clientes. display: contents tira os agrupamentos do mobile do caminho. */
+@media (min-width: 768px) {
+    .vendas-lista-cabecalho,
+    .venda-linha__botao {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) 180px 150px 100px;
+        gap: var(--space-4);
+        align-items: center;
+    }
+
+    .vendas-lista-cabecalho {
+        padding: 0 var(--space-4) var(--space-2);
+        margin-bottom: var(--space-3);
+        border-bottom: 1px solid var(--surface-border);
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+
+    .vendas-lista-cabecalho__fim,
+    .venda-linha__total {
+        justify-self: end;
+    }
+
+    .venda-linha__principal,
+    .venda-linha__meta {
+        display: contents;
+    }
+
+    .venda-linha__cliente,
+    .venda-linha__pagamento {
+        font-size: 13px;
+    }
+
+    .vendas-dia__cabecalho {
+        border-bottom: none;
+        padding-bottom: var(--space-1);
+    }
+
+    .vendas-dia__cabecalho + .vendas-lista {
+        border-top: 1px solid var(--surface-border);
+    }
+}
+
+/* ==========================================================================
+   Aba Aluguéis — semana, quadro de ocupação e lista de reservas
+   ========================================================================== */
+
+.agenda-semana {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.agenda-semana__seta {
+    flex-shrink: 0;
+    width: 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-control);
+    color: var(--text-soft);
+}
+
+.agenda-semana__seta:hover {
+    background: var(--field);
+}
+
+.agenda-semana__dias {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.agenda-dia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    padding: 6px 0;
+    border-radius: var(--radius-card);
+    border: 1px solid transparent;
+    color: var(--text);
+    transition: background-color .12s ease;
+}
+
+.agenda-dia:hover {
+    background: var(--field);
+}
+
+.agenda-dia__semana {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.agenda-dia__numero {
+    font-size: 17px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* quantidade de reservas do dia; vazio continua ocupando a mesma altura */
+.agenda-dia__reservas {
+    min-width: 18px;
+    height: 16px;
+    padding: 0 5px;
+    border-radius: var(--radius-full);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    background: var(--vendas-tint);
+    color: var(--vendas-tint-texto);
+}
+
+.agenda-dia__reservas:empty {
+    visibility: hidden;
+}
+
+.agenda-dia--hoje {
+    border-color: var(--vendas-borda);
+}
+
+.agenda-dia--hoje .agenda-dia__semana {
+    color: var(--vendas-texto);
+}
+
+.agenda-dia--atual,
+.agenda-dia--atual:hover {
+    background: var(--vendas-acento);
+    border-color: var(--vendas-acento);
+    color: var(--vendas-on-acento);
+}
+
+.agenda-dia--atual .agenda-dia__semana {
+    color: var(--vendas-on-acento);
+}
+
+.agenda-dia--atual .agenda-dia__reservas {
+    background: var(--vendas-on-acento);
+    color: var(--vendas-acento);
+}
+
+.agenda-titulo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin: var(--space-5) 0 var(--space-3);
+}
+
+.agenda-titulo__dia {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.agenda-titulo__info {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.agenda-titulo__hoje {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* --- Quadro de ocupação --------------------------------------------------- */
+
+.ocupacao {
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    padding: var(--space-3) var(--space-3) var(--space-2);
+    margin-bottom: var(--space-5);
+}
+
+/* no telefone o quadro rola para o lado em vez de espremer as horas */
+.ocupacao__rolagem {
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.ocupacao__grade {
+    min-width: 560px;
+}
+
+.ocupacao__escala,
+.ocupacao__linha {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: center;
+}
+
+.ocupacao__linha {
+    margin-top: 6px;
+}
+
+.ocupacao__horas {
+    position: relative;
+    height: 16px;
+}
+
+.ocupacao__horas span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.ocupacao__horas span:first-child {
+    transform: none;
+}
+
+.ocupacao__horas span:last-child {
+    transform: translateX(-100%);
+}
+
+.ocupacao__mesa {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    min-width: 0;
+}
+
+.ocupacao__mesa small {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.ocupacao__trilho {
+    position: relative;
+    height: 34px;
+    border-radius: var(--radius-chip);
+    background: var(--surface);
+}
+
+.ocupacao__trilho[data-trilho] {
+    cursor: copy;
+}
+
+.ocupacao__trilho[data-trilho]:hover {
+    background: var(--vendas-tint);
+}
+
+.ocupacao__trilho--inativa {
+    opacity: .6;
+    background: repeating-linear-gradient(-45deg, var(--surface), var(--surface) 6px, var(--placeholder) 6px, var(--placeholder) 12px);
+}
+
+.ocupacao__marca {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: var(--surface-border);
+    pointer-events: none;
+}
+
+.ocupacao__bloco {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    padding: 0 6px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: filter .12s ease;
+}
+
+.ocupacao__bloco span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ocupacao__bloco:hover {
+    filter: brightness(1.12);
+}
+
+.ocupacao__bloco--rpg { background: var(--jogo-rpg); }
+.ocupacao__bloco--cartas { background: var(--jogo-cartas); }
+.ocupacao__bloco--tabuleiro { background: var(--jogo-tabuleiro); }
+.ocupacao__bloco--outro { background: var(--jogo-outro); }
+
+/* pago: contorno amarelo (cor de vendas) por dentro do bloco */
+.ocupacao__bloco--pago {
+    box-shadow: inset 0 0 0 2px var(--yellow-300);
+}
+
+.ocupacao__agora {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 2px;
+    border-radius: 1px;
+    background: var(--red-600);
+    pointer-events: none;
+}
+
+.ocupacao__legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: var(--space-3) 0 0;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.ocupacao__legenda span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ocupacao__cor {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+}
+
+.ocupacao__cor--pago {
+    background: var(--surface);
+    box-shadow: inset 0 0 0 2px var(--yellow-300);
+}
+
+/* --- Lista de reservas do dia -------------------------------------------- */
+
+.alugueis-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+}
+
+@media (min-width: 992px) {
+    .alugueis-lista {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-3);
+    }
+
+    .alugueis-lista > .clientes-vazio {
+        grid-column: 1 / -1;
+    }
+}
+
+.aluguel-card {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-left: 4px solid var(--vendas-borda);
+    border-radius: var(--radius-card);
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    transition: box-shadow .12s ease, border-color .12s ease;
+}
+
+.aluguel-card:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.aluguel-card--pago {
+    border-left-color: var(--green-700);
+}
+
+.aluguel-card--cancelado {
+    border-left-color: var(--line);
+    opacity: .6;
+}
+
+.aluguel-card--cancelado .aluguel-card__titulo,
+.aluguel-card--cancelado .aluguel-card__valor {
+    text-decoration: line-through;
+}
+
+.aluguel-card__horario {
+    flex-shrink: 0;
+    min-width: 52px;
+    display: flex;
+    flex-direction: column;
+    font-variant-numeric: tabular-nums;
+}
+
+.aluguel-card__horario strong {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.aluguel-card__horario small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.aluguel-card__corpo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.aluguel-card__titulo {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.aluguel-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px var(--space-2);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.aluguel-card__serie {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--vendas-texto);
+}
+
+.aluguel-card__lado {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.aluguel-card__valor {
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.aluguel-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: var(--radius-chip);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.aluguel-status--agendado {
+    background: var(--vendas-tint);
+    color: var(--vendas-tint-texto);
+}
+
+.aluguel-status--pago {
+    background: var(--green-100);
+    color: var(--green-700);
+}
+
+.aluguel-status--cancelado {
+    background: var(--surface-border);
+    color: var(--text);
+}
+
+:root[data-theme="dark"] .aluguel-status--pago {
+    color: #6fd193;
+}
+
+.jogo-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: var(--radius-chip);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.jogo-chip--rpg { background: var(--jogo-rpg-bg); color: var(--jogo-rpg-texto); }
+.jogo-chip--cartas { background: var(--jogo-cartas-bg); color: var(--jogo-cartas-texto); }
+.jogo-chip--tabuleiro { background: var(--jogo-tabuleiro-bg); color: var(--jogo-tabuleiro-texto); }
+.jogo-chip--outro { background: var(--jogo-outro-bg); color: var(--jogo-outro-texto); }
+
+/* ==========================================================================
+   Controles compartilhados pelos modais
+   ========================================================================== */
+
+/* Escolha entre poucas opções lado a lado (tipo de item, repetir). */
+.segmentado {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 4px;
+    padding: 4px;
+    background: var(--placeholder);
+    border-radius: var(--radius-control);
+}
+
+.segmentado__opcao,
+.chip-opcao,
+.forma-pagamento,
+.mesa-opcao {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.segmentado__opcao input,
+.chip-opcao input,
+.forma-pagamento input,
+.mesa-opcao input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.segmentado__opcao span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    border-radius: var(--radius-chip);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.segmentado__opcao input:checked + span {
+    background: var(--field);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+}
+
+.segmentado__opcao input:focus-visible + span,
+.chip-opcao input:focus-visible + span,
+.forma-pagamento input:focus-visible + span,
+.mesa-opcao input:focus-visible + .mesa-opcao__caixa {
+    outline: 2px solid var(--vendas-borda);
+    outline-offset: 2px;
+}
+
+.campo__rotulo {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.campo-grade {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-3);
+}
+
+.campo__dica--erro {
+    color: var(--red-600);
+    font-weight: 600;
+}
+
+/* Chips de escolha única (duração, tipo de jogo) */
+.chips-opcoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.chip-opcao span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-full);
+    background: var(--field);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    transition: background-color .12s ease, border-color .12s ease;
+}
+
+.chip-opcao:hover span {
+    border-color: var(--line);
+}
+
+.chip-opcao input:checked + span {
+    background: var(--vendas-acento);
+    border-color: var(--vendas-acento);
+    color: var(--vendas-on-acento);
+}
+
+.chip-opcao--rpg input:checked + span { background: var(--jogo-rpg-bg); border-color: var(--jogo-rpg); color: var(--jogo-rpg-texto); }
+.chip-opcao--cartas input:checked + span { background: var(--jogo-cartas-bg); border-color: var(--jogo-cartas); color: var(--jogo-cartas-texto); }
+.chip-opcao--tabuleiro input:checked + span { background: var(--jogo-tabuleiro-bg); border-color: var(--jogo-tabuleiro); color: var(--jogo-tabuleiro-texto); }
+.chip-opcao--outro input:checked + span { background: var(--jogo-outro-bg); border-color: var(--jogo-outro); color: var(--jogo-outro-texto); }
+
+/* Lista de sugestões (busca de cliente) */
+.seletor-cliente__escolhido {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+}
+
+.seletor-cliente__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.seletor-cliente__info strong {
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seletor-cliente__info small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.sugestoes {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 4px 0;
+    max-height: 232px;
+    overflow-y: auto;
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-md);
+}
+
+.sugestoes__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 8px var(--space-3);
+    cursor: pointer;
+}
+
+.sugestoes__item:hover,
+.sugestoes__item--ativo {
+    background: var(--surface);
+}
+
+.sugestoes__item--avulso {
+    border-top: 1px solid var(--surface-border);
+}
+
+.sugestoes__info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sugestoes__info strong {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sugestoes__info small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.sugestoes__vazio {
+    padding: 10px var(--space-3);
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Modal "Nova venda"
+   ========================================================================== */
+
+.modal-venda {
+    padding-bottom: 0;
+}
+
+.modal-venda__secao {
+    padding: var(--space-4) 0;
+}
+
+.modal-venda__secao + .modal-venda__secao,
+.modal-venda__lateral .modal-venda__secao:first-child {
+    border-top: 1px solid var(--surface-border);
+}
+
+.modal-venda__secao--itens {
+    padding-top: 0;
+}
+
+@media (min-width: 768px) {
+    .modal-venda {
+        max-width: 880px;
+    }
+
+    .modal-venda__grade {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: var(--space-6);
+        align-items: start;
+    }
+
+    .modal-venda__lateral .modal-venda__secao:first-child {
+        border-top: none;
+        padding-top: 0;
+    }
+}
+
+.catalogo__busca {
+    margin: var(--space-3) 0 var(--space-2);
+}
+
+.catalogo {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 252px;
+    overflow-y: auto;
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+}
+
+.catalogo:empty {
+    display: none;
+}
+
+.catalogo li + li {
+    border-top: 1px solid var(--surface-border);
+}
+
+.catalogo__item {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto 28px;
+    gap: var(--space-3);
+    align-items: center;
+    padding: 8px var(--space-3);
+    text-align: left;
+    font: inherit;
+    color: inherit;
+}
+
+.catalogo__item:hover:not(:disabled) {
+    background: var(--surface);
+}
+
+.catalogo__item:disabled {
+    cursor: not-allowed;
+    opacity: .5;
+}
+
+.catalogo__miniatura {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-chip);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--placeholder);
+    color: var(--text-muted);
+    font-size: 18px;
+}
+
+.catalogo__miniatura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.catalogo__miniatura--aluguel {
+    background: var(--vendas-tint);
+    color: var(--vendas-tint-texto);
+}
+
+.catalogo__info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.catalogo__info strong,
+.catalogo__info small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.catalogo__info strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.catalogo__info small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.catalogo__lado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    white-space: nowrap;
+}
+
+.catalogo__preco {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.catalogo__lado small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.catalogo__lado .catalogo__estoque--zero {
+    color: var(--red-600);
+    font-weight: 600;
+}
+
+.catalogo__lado .catalogo__no-carrinho {
+    color: var(--green-700);
+    font-weight: 700;
+}
+
+.catalogo__adicionar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vendas-acento);
+    color: var(--vendas-on-acento);
+    font-size: 15px;
+}
+
+.catalogo__item:disabled .catalogo__adicionar {
+    background: var(--placeholder);
+    color: var(--text-muted);
+}
+
+.catalogo__vazio {
+    margin: 0;
+    padding: var(--space-3);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* --- Carrinho ------------------------------------------------------------ */
+
+.carrinho {
+    margin-top: var(--space-5);
+}
+
+.carrinho__cabecalho {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.carrinho__cabecalho .perfil__subtitulo {
+    margin-top: 0;
+}
+
+.carrinho__contagem {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.carrinho__lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Duas linhas: tipo + nome + remover em cima; quantidade e subtotal embaixo. */
+.carrinho__item {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 28px;
+    gap: 6px var(--space-3);
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.carrinho__item:last-child {
+    border-bottom: none;
+}
+
+.carrinho__item--novo {
+    animation: carrinho-novo .9s ease;
+}
+
+@keyframes carrinho-novo {
+    from { background: var(--vendas-tint); }
+    to { background: transparent; }
+}
+
+.carrinho__tipo {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-control);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    background: var(--placeholder);
+    color: var(--text-soft);
+}
+
+.carrinho__tipo--produto { background: var(--jogo-rpg-bg); color: var(--jogo-rpg-texto); }
+.carrinho__tipo--carta { background: var(--jogo-cartas-bg); color: var(--jogo-cartas-texto); }
+.carrinho__tipo--aluguel { background: var(--vendas-tint); color: var(--vendas-tint-texto); }
+
+.carrinho__info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.carrinho__info strong {
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.carrinho__info small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.carrinho__controles {
+    grid-column: 2 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.carrinho__subtotal {
+    margin-left: auto;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.carrinho__remover {
+    grid-column: 3;
+    grid-row: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.carrinho__remover:hover {
+    background: var(--red-50);
+    color: var(--red-700);
+}
+
+.carrinho__vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: var(--space-5) var(--space-3);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-card);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.carrinho__vazio i {
+    font-size: 20px;
+}
+
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.stepper__botao {
+    width: 30px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text);
+}
+
+.stepper__botao:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+}
+
+.stepper__valor {
+    min-width: 24px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Pagamento ----------------------------------------------------------- */
+
+.usar-creditos {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-card);
+    background: var(--green-100);
+    cursor: pointer;
+}
+
+.usar-creditos input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.usar-creditos__chave {
+    flex-shrink: 0;
+    position: relative;
+    width: 38px;
+    height: 22px;
+    border-radius: var(--radius-full);
+    background: var(--line);
+    transition: background-color .15s ease;
+}
+
+.usar-creditos__chave::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s ease;
+}
+
+.usar-creditos input:checked + .usar-creditos__chave {
+    background: var(--green-700);
+}
+
+.usar-creditos input:checked + .usar-creditos__chave::after {
+    transform: translateX(16px);
+}
+
+.usar-creditos input:focus-visible + .usar-creditos__chave {
+    outline: 2px solid var(--green-700);
+    outline-offset: 2px;
+}
+
+.usar-creditos__texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.usar-creditos__texto strong {
+    font-size: 13px;
+}
+
+.usar-creditos__texto small {
+    font-size: 12px;
+    color: var(--text-soft);
+}
+
+.formas-pagamento {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+}
+
+.forma-pagamento span {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 11px var(--space-3);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--field);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-soft);
+    transition: background-color .12s ease, border-color .12s ease;
+}
+
+.forma-pagamento span i {
+    font-size: 17px;
+}
+
+.forma-pagamento:hover span {
+    border-color: var(--line);
+}
+
+.forma-pagamento input:checked + span {
+    background: var(--vendas-tint);
+    border-color: var(--vendas-borda);
+    box-shadow: inset 0 0 0 1px var(--vendas-borda);
+    color: var(--vendas-tint-texto);
+}
+
+.formas-pagamento__aviso {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-card);
+    background: var(--green-100);
+    color: var(--green-700);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+:root[data-theme="dark"] .formas-pagamento__aviso {
+    color: #6fd193;
+}
+
+.venda-observacoes__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-top: var(--space-4);
+}
+
+[data-observacoes-campo] {
+    margin-top: var(--space-4);
+}
+
+/* --- Rodapé fixo com o total ---------------------------------------------- */
+
+.modal-venda__rodape {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin: var(--space-2) calc(-1 * var(--space-5)) 0;
+    padding: var(--space-3) var(--space-5) var(--space-4);
+    background: var(--surface);
+    border-top: 1px solid var(--surface-border);
+    box-shadow: 0 -6px 12px -10px rgba(20, 24, 32, .35);
+}
+
+.totais {
+    margin: 0 0 var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.totais__linha {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.totais__linha dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.totais__linha--creditos dd {
+    color: var(--green-700);
+    font-weight: 700;
+}
+
+.totais__linha--final {
+    margin-top: 2px;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.totais__linha--final dd {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.modal-venda__dica {
+    margin: var(--space-2) 0 0;
+    text-align: center;
+}
+
+.modal-venda__dica--ok {
+    color: var(--text-soft);
+}
+
+@media (min-width: 768px) {
+    .modal-venda__rodape {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        grid-template-rows: auto auto;
+        column-gap: var(--space-6);
+        align-items: center;
+    }
+
+    .modal-venda__rodape .totais {
+        grid-row: 1 / 3;
+        margin: 0;
+    }
+
+    .modal-venda__dica {
+        grid-column: 2;
+    }
+}
+
+/* ==========================================================================
+   Modal de aluguel (novo / editar)
+   ========================================================================== */
+
+.modal-aluguel .modal-venda__secao {
+    padding-top: 0;
+}
+
+.mesas-opcoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: var(--space-2);
+}
+
+.mesa-opcao__caixa {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 10px var(--space-3);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--field);
+    transition: background-color .12s ease, border-color .12s ease;
+}
+
+.mesa-opcao__caixa strong {
+    font-size: 14px;
+}
+
+.mesa-opcao__caixa small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.mesa-opcao:hover .mesa-opcao__caixa {
+    border-color: var(--line);
+}
+
+.mesa-opcao input:checked + .mesa-opcao__caixa {
+    background: var(--vendas-tint);
+    border-color: var(--vendas-borda);
+    box-shadow: inset 0 0 0 1px var(--vendas-borda);
+    color: var(--vendas-tint-texto);
+}
+
+.mesa-opcao input:checked + .mesa-opcao__caixa small {
+    color: var(--vendas-tint-texto);
+}
+
+.aluguel__horario-resumo {
+    margin: var(--space-1) 0 var(--space-3);
+    font-weight: 600;
+    color: var(--text-soft);
+}
+
+.aluguel__repetir-ate {
+    margin-top: var(--space-3);
+}
+
+.aluguel__jogo {
+    margin-top: var(--space-3);
+}
+
+.aluguel__valor-dica {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px var(--space-2);
+    margin-top: 6px;
+}
+
+.aluguel__valor-dica .perfil__acao-link {
+    margin: 0;
+}
+
+.aluguel__observacoes {
+    margin-top: var(--space-4);
+}
+
+/* ==========================================================================
+   Detalhes: recibo da venda e reserva de mesa
+   ========================================================================== */
+
+.recibo__cabecalho,
+.reserva__cabecalho {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 0 var(--space-5);
+}
+
+.recibo__total {
+    margin: 2px 0;
+    font-size: 32px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.recibo__data {
+    margin: 0 0 var(--space-2);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.modal-recibo--cancelada .recibo__total {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.recibo__itens {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.recibo__item {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: var(--space-3);
+    align-items: center;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.recibo__item:last-child {
+    border-bottom: none;
+}
+
+.recibo__item-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.recibo__item-info strong {
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.recibo__item-info small {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.recibo__item-valor {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.recibo__pagamento {
+    margin: 0;
+}
+
+.recibo__pagamento-linha {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 14px;
+}
+
+.recibo__pagamento-linha dt {
+    color: var(--text-soft);
+}
+
+.recibo__pagamento-linha dd {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.recibo__cliente {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.recibo__cliente-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.recibo__cliente-info strong {
+    font-size: 14px;
+}
+
+.recibo__cliente-info small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.reserva__horario {
+    margin: var(--space-3) 0 2px;
+    font-size: 30px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.reserva__data {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.reserva__mesa {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.reserva__acoes {
+    width: 100%;
+}
+
+/* .perfil__acoes (clientes.css) zera a borda dos botões; o neutro precisa dela
+   para não parecer texto solto ao lado do botão amarelo. */
+.reserva__acoes .botao--neutro {
+    background: var(--field);
+    border-color: var(--surface-border);
+}
+
+.reserva__quem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.reserva__sem-cadastro {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* Cancelar reserva de uma série: só esta data ou esta e as próximas */
+.opcoes-cancelamento {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-5);
+    text-align: left;
+}
+
+.opcao-cancelamento {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: 10px var(--space-3);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--field);
+    cursor: pointer;
+}
+
+.opcao-cancelamento:has(input:checked) {
+    border-color: var(--red-400);
+}
+
+.opcao-cancelamento input {
+    margin: 3px 0 0;
+    accent-color: var(--red-600);
+}
+
+.opcao-cancelamento span {
+    display: flex;
+    flex-direction: column;
+}
+
+.opcao-cancelamento strong {
+    font-size: 13px;
+}
+
+.opcao-cancelamento small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Modal de mesas
+   ========================================================================== */
+
+.modal-mesas__intro {
+    margin: 0 0 var(--space-4);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.mesa-form {
+    padding: var(--space-4);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--field);
+}
+
+.mesa-form .campo input {
+    background: var(--surface);
+}
+
+.mesa-form__campos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-3);
+}
+
+.mesa-form__nome {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+    .mesa-form__campos {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+
+    .mesa-form__nome {
+        grid-column: auto;
+    }
+}
+
+.mesa-form .campo {
+    margin-bottom: 0;
+}
+
+.campo__prefixado {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-left: 10px;
+    border-radius: var(--radius-control);
+    background: var(--surface);
+}
+
+.campo__prefixado span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.mesa-form .campo__prefixado input {
+    flex: 1;
+    min-width: 0;
+    padding-left: 2px;
+    background: transparent;
+}
+
+.mesa-form__acoes {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+}
+
+.mesas-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mesa-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.mesa-item:last-child {
+    border-bottom: none;
+}
+
+.mesa-item__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.mesa-item__info strong {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.mesa-item__info small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.mesa-item--inativa .mesa-item__info {
+    opacity: .7;
+}
+
+.mesa-item__acoes {
+    display: flex;
+    gap: 2px;
+}
+
+.mesa-item__botao {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-control);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-soft);
+    font-size: 15px;
+}
+
+.mesa-item__botao:hover {
+    background: var(--placeholder);
+    color: var(--text);
+}
+
+.mesa-item__botao--perigo:hover {
+    background: var(--red-50);
+    color: var(--red-700);
+}

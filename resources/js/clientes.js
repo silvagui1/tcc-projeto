@@ -12,6 +12,8 @@
  * projeto, e só é inicializado quando a página atual é a de clientes.
  */
 
+import { ativarFocusTrap, desativarFocusTrap, formatarMoeda } from './comum';
+
 const ICONES_MENSAGEM = {
     sucesso: 'bi-check-circle-fill',
     erro: 'bi-exclamation-circle-fill',
@@ -46,13 +48,6 @@ const CONFIG_APP = lerConfigApp();
 const AVATAR_CORES = CONFIG_APP.avatarCores && CONFIG_APP.avatarCores.length
     ? CONFIG_APP.avatarCores
     : ['#8bbaed', '#b47194', '#53577d', '#6c6588', '#2e3045'];
-
-function formatarMoeda(valor) {
-    return 'R$ ' + Number(valor || 0).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-}
 
 const ROTULOS_TIPO_CREDITO = { adicionar: 'Adicionado', descontar: 'Descontado', definir: 'Saldo definido' };
 
@@ -175,48 +170,6 @@ function cortarQuadradoCentral(arquivo) {
 
         imagem.src = url;
     });
-}
-
-/**
- * Focus trap simples: mantém o Tab/Shift+Tab preso dentro do container
- * enquanto ele estiver ativo, para o teclado não escapar pro conteúdo atrás
- * do overlay do modal.
- */
-function ativarFocusTrap(container) {
-    if (!container) return;
-
-    function focaveis() {
-        return Array.from(
-            container.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')
-        ).filter((el) => el.offsetParent !== null);
-    }
-
-    function aoTeclar(evento) {
-        if (evento.key !== 'Tab') return;
-        const itens = focaveis();
-        if (itens.length === 0) return;
-
-        const primeiro = itens[0];
-        const ultimo = itens[itens.length - 1];
-
-        if (evento.shiftKey && document.activeElement === primeiro) {
-            evento.preventDefault();
-            ultimo.focus();
-        } else if (!evento.shiftKey && document.activeElement === ultimo) {
-            evento.preventDefault();
-            primeiro.focus();
-        }
-    }
-
-    container.addEventListener('keydown', aoTeclar);
-    container._focusTrapHandler = aoTeclar;
-}
-
-function desativarFocusTrap(container) {
-    if (container && container._focusTrapHandler) {
-        container.removeEventListener('keydown', container._focusTrapHandler);
-        container._focusTrapHandler = null;
-    }
 }
 
 function iniciarPaginaClientes() {
