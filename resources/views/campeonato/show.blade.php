@@ -65,7 +65,7 @@
             </details>
         @endif
 
-        <a href="{{ route('campeonatos.premios', $campeonato) }}" class="champ-detail__prize">
+        <a href="{{ route('campeonatos.premios.index', $campeonato) }}" class="champ-detail__prize">
             Premiação
         </a>
     </div>

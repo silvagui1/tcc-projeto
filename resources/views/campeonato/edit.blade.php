@@ -69,7 +69,7 @@
     @unless ($bloqueado)
         @foreach ($campeonato->participantes as $participante)
             <form id="remover-participante-{{ $participante->id }}" method="POST" hidden
-                  action="{{ route('campeonatos.participantes.remover', [$campeonato, $participante]) }}">
+                  action="{{ route('campeonatos.participantes.destroy', [$campeonato, $participante]) }}">
                 @csrf
                 @method('DELETE')
             </form>

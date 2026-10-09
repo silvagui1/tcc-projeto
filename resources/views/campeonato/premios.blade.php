@@ -15,7 +15,7 @@
     {{-- Um bloco por colocação: quem ficou no lugar (só participantes do
          campeonato), quanto de crédito recebe e uma descrição. Ao enviar, as
          premiações são salvas e o campeonato vira "finalizado". --}}
-    <form method="POST" action="{{ route('campeonatos.finalizar', $campeonato) }}">
+    <form method="POST" action="{{ route('campeonatos.premios.store', $campeonato) }}">
         @csrf
 
         @foreach ($colocacoes as $indice => $colocacao)

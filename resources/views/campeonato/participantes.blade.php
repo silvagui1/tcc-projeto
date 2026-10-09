@@ -20,7 +20,7 @@
         <h3>{{ $campeonato->nome }}</h3>
 
         @unless ($campeonato->finalizado())
-            <form method="POST" action="{{ route('campeonatos.participantes.adicionar', $campeonato) }}">
+            <form method="POST" action="{{ route('campeonatos.participantes.store', $campeonato) }}">
                 @csrf
 
                 @include('campeonato.partials.busca-clientes')
@@ -40,7 +40,7 @@
                         <span>{{ $participante->nascimento_curto }}</span>
                     </span>
                     @unless ($campeonato->finalizado())
-                        <form method="POST" action="{{ route('campeonatos.participantes.remover', [$campeonato, $participante]) }}">
+                        <form method="POST" action="{{ route('campeonatos.participantes.destroy', [$campeonato, $participante]) }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="participant-row__remove" aria-label="Remover {{ $participante->name }}">

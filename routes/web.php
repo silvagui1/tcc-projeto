@@ -749,25 +749,25 @@ Route::prefix('/campeonatos')->group(function () {
 
     // Tela de premiações (1°, 2° e 3° lugar)
     Route::get('/{campeonato}/premios', [PremioController::class, 'index'])
-        ->name('campeonatos.premios');
+        ->name('campeonatos.premios.index');
 
-    // Finalizar campeonato (salva as premiações da tela acima)
-    Route::post('/{campeonato}/finalizar', [CampeonatoController::class, 'finalizar'])
-        ->name('campeonatos.finalizar');
+    // Salvar as premiações da tela acima (também finaliza o campeonato)
+    Route::post('/{campeonato}/premios', [CampeonatoController::class, 'finalizar'])
+        ->name('campeonatos.premios.store');
 
 
 
     // Ver participantes
     Route::get('/{campeonato}/participantes', [CampeonatoController::class, 'participantes'])
-        ->name('campeonatos.participantes');
+        ->name('campeonatos.participantes.index');
 
     // Adicionar User ao campeonato
     Route::post('/{campeonato}/participantes', [CampeonatoController::class, 'adicionarParticipante'])
-        ->name('campeonatos.participantes.adicionar');
+        ->name('campeonatos.participantes.store');
 
     // Remover User do campeonato
     Route::delete('/{campeonato}/participantes/{user}', [CampeonatoController::class, 'removerParticipante'])
-        ->name('campeonatos.participantes.remover');
+        ->name('campeonatos.participantes.destroy');
 
 });
 

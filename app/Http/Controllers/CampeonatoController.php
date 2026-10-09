@@ -69,7 +69,7 @@ class CampeonatoController extends Controller
 
         $campeonato->update($dados);
         // na edição os participantes marcados são somados aos que já existem;
-        // para tirar alguém usa-se a lixeira (campeonatos.participantes.remover)
+        // para tirar alguém usa-se a lixeira (campeonatos.participantes.destroy)
         $campeonato->participantes()->syncWithoutDetaching($dados['participantes'] ?? []);
 
         return redirect()

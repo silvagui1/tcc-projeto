@@ -11,7 +11,7 @@
         <span class="winner-row__value">+R$ {{ number_format($premio->valor, 2, ',', '.') }}</span>
         @if ($editavel)
             <a class="winner-row__action"
-               href="{{ route('campeonatos.premios', $campeonato) }}"
+               href="{{ route('campeonatos.premios.index', $campeonato) }}"
                aria-label="Editar premiação de {{ $premio->usuario->name }}">
                 <img src="{{ asset('images/campeonatos/chevron-right.svg') }}" alt="" width="10" height="15">
             </a>
