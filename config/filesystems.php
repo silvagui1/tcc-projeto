@@ -39,6 +39,14 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
+            // Valor padrão do Laravel (env('APP_URL').'/storage') — de propósito
+            // sem usar asset() aqui: arquivos de config são carregados também
+            // em comandos artisan/tinker, onde ainda não existe uma requisição
+            // HTTP real, e asset() derruba o comando nesse caso ("Argument #2
+            // ($request) must be of type Request, null given"). A URL correta
+            // (com a subpasta /tcc-projeto/public do XAMPP) é montada com
+            // asset() só onde é realmente usada, em Cliente::getFotoUrlAttribute()
+            // — lá sim sempre existe uma requisição real por trás.
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,

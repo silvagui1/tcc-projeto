@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- Exigido pelo clientes.js (csrfToken()) para as chamadas AJAX de
+         criar/editar/excluir cliente. --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'TCC Projeto') — ArtPlay</title>
+
+    {{-- Config compartilhada com resources/js/clientes.js — evita manter a
+         paleta de cores do avatar (App\Models\Cliente::CORES_AVATAR) e o DDI
+         do WhatsApp duplicados "de cabeça" em PHP e em JS. --}}
+    <script id="app-config" type="application/json">{!! json_encode([
+        'avatarCores' => \App\Models\Cliente::coresAvatar(),
+        'whatsappDdi' => '55',
+    ]) !!}</script>
 
     {{-- Favicons: favicon.ico (logo sobre fundo azul-marinho) é a reserva para Safari e navegadores antigos;
          favicon.svg é a logo da navbar com fundo transparente, que troca de cor conforme o tema claro/escuro;
@@ -15,7 +26,7 @@
     {{-- Fonte Inter (a mesma do protótipo no Figma; já é a primeira do font-family no app.css) --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 
     {{-- Ícones (Bootstrap Icons): usados no lugar dos ícones do Figma, que não
          podem ser exportados a partir deste ambiente. Trocar depois pelos SVGs

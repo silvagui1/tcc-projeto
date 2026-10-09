@@ -1,4 +1,5 @@
 import './bootstrap';
+import './clientes';
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).
 document.addEventListener('DOMContentLoaded', () => {

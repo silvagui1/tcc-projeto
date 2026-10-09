@@ -38,7 +38,7 @@
     <h2 style="font-size: 20px;">Realize suas ações</h2>
 
     <div class="action-list">
-        <a href="{{ route('clientes') }}" class="action-card">
+        <a href="{{ route('clientes.index') }}" class="action-card">
             <span class="action-card__icon" style="background: var(--blue-300);"><i class="bi bi-people-fill"></i></span>
             <span class="action-card__text">
                 <strong>Clientes</strong>

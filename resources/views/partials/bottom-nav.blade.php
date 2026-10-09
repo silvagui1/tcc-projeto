@@ -5,7 +5,7 @@
         <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-current' : '' }}" title="Página inicial">
             <i class="bi bi-house-door-fill"></i>
         </a>
-        <a href="{{ route('clientes') }}" class="{{ request()->routeIs('clientes') ? 'is-current' : '' }}" title="Clientes">
+        <a href="{{ route('clientes.index') }}" class="{{ request()->routeIs('clientes.*') ? 'is-current' : '' }}" title="Clientes">
             <i class="bi bi-people-fill"></i>
         </a>
         <a href="{{ route('campeonatos.index') }}" class="{{ request()->routeIs('campeonatos.*') ? 'is-current' : '' }}" title="Campeonatos">

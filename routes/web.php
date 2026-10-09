@@ -6,6 +6,7 @@ use App\Http\Middleware\LogAcessoMiddleware;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\CampeonatoController;
 use App\Http\Controllers\PremioController;
+use App\Http\Controllers\ClienteController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -21,6 +22,16 @@ Route::get('/', function () {
     return redirect()->route('home');
 });
 
+Route::prefix('clientes')->name('clientes.')->group(function () {
+    Route::get('/', [ClienteController::class, 'index'])->name('index');
+    Route::get('/buscar', [ClienteController::class, 'buscar'])->name('buscar');
+    Route::get('/exportar', [ClienteController::class, 'exportar'])->name('exportar');
+    Route::post('/', [ClienteController::class, 'store'])->name('store');
+    Route::delete('/', [ClienteController::class, 'destroyMultiple'])->name('destroyMultiple');
+    Route::get('/{cliente}', [ClienteController::class, 'show'])->name('show');
+    Route::put('/{cliente}', [ClienteController::class, 'update'])->name('update');
+    Route::delete('/{cliente}', [ClienteController::class, 'destroy'])->name('destroy');
+});
 
 // --- Alunos (CRUD) -------------------------------------------------------
 
@@ -762,10 +773,6 @@ Route::prefix('/campeonatos')->group(function () {
 
 
 // --- Outras páginas do menu ----------------------------------------------
-
-Route::get('/clientes', function () {
-    return view('pages.clientes');
-})->name('clientes');
 
 Route::get('/vendas', function () {
     return view('pages.vendas');
