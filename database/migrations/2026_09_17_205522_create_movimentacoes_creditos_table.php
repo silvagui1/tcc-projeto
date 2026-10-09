@@ -16,9 +16,9 @@ return new class extends Migration
             $table->timestamps();  
 
             $table->foreignId('campeonato_id')
+                ->nullable()
                 ->constrained('campeonatos')
-                ->nullOnDelete()
-                ->nullable();
+                ->nullOnDelete();
 
             $table->foreignId('user_id')
                 ->constrained('users')
@@ -47,4 +47,3 @@ return new class extends Migration
     }
 };
 
-//o que deve existir nessa página?

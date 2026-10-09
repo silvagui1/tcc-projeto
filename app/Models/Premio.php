@@ -13,8 +13,8 @@ class Premio extends Model
     protected $fillable = [
         'campeonato_id',
         'user_id',
-        'colocacao', 
-        'valor', 
+        'colocacao',
+        'valor',
         'descricao'
     ];
 
@@ -24,10 +24,10 @@ class Premio extends Model
     ];
 
     public function campeonato(){
-        return $this->belongsTo(Campeonatomodel::class);
+        return $this->belongsTo(Campeonato::class);
     }
 
     public function usuario(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

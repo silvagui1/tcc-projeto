@@ -11,17 +11,25 @@ class Campeonato extends Model
 
     protected $table = 'campeonatos';
 
-    protected $fillable = ['nome', 'deck', 'data', 'horario', 'valor', 'descricao', 'imagem', 'status'];
+    protected $fillable = ['nome', 'deck', 'data', 'horario', 'valor_inscricao', 'descricao', 'imagem', 'status'];
 
     protected $casts = [
         'data' => 'date',
-        'valor' => 'decimal:2',
+        'valor_inscricao' => 'decimal:2',
     ];
 
     // Usuários inscritos no campeonato
-    public function users()
+    public function participantes()
     {
-        return $this->belongsToMany(User::class, 'campeonato_user')->withTimestamps();
+        return $this->belongsToMany(User::class, 'campeonato_user')
+            ->withPivot('valor_pago', 'colocacao')
+            ->withTimestamps();
+    }
+
+    // Prêmios de cada colocação (preenchidos ao finalizar o campeonato)
+    public function premios()
+    {
+        return $this->hasMany(Premio::class);
     }
 
     public function finalizado(): bool
@@ -29,10 +37,13 @@ class Campeonato extends Model
         return $this->status === 'finalizado';
     }
 
-    // Imagem do card; sem url cadastrada usa o banner padrão
+    // Imagem do card; sem url cadastrada usa o banner padrão.
+    // Caminhos relativos (ex.: os do seeder) viram url de public/.
     public function getBannerAttribute(): string
     {
-        return $this->imagem ?: asset('images/campeonatos/banner-torneio-pokemon.png');
+        $imagem = $this->imagem ?: 'images/campeonatos/banner-torneio-pokemon.png';
+
+        return str_starts_with($imagem, 'http') ? $imagem : asset($imagem);
     }
 
     // "22 de agosto de 2026"

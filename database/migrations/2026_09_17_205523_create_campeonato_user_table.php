@@ -25,7 +25,8 @@ return new class extends Migration
             $table->decimal('valor_pago', 10, 2)->default(0);
             $table->unsignedInteger('colocacao')->nullable();
 
-            $table->unique(['campeonato-id', 'user_id']);
+            $table->unique(['campeonato_id', 'user_id']);
+            $table->timestamps();
         });
     }
 
@@ -39,4 +40,3 @@ return new class extends Migration
 };
 
 
-//o que deve existir nessa página? e qual o nome dado a tabela dela?

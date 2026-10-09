@@ -2336,6 +2336,18 @@ img {
     font-weight: 600;
 }
 
+/* aviso depois de salvar / apagar (session "success") */
+.champ-flash {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    background: #e3f4e6;
+    border: 1px solid #b7dfbf;
+    border-radius: 5px;
+    color: #24592f;
+    font-size: 13px;
+    font-weight: 600;
+}
+
 /* botão principal de rodapé (Criar / Salvar alterações / Finalizar) */
 .champ-submit {
     display: block;
@@ -2381,6 +2393,7 @@ img {
 }
 
 .prize-block__search input,
+.prize-block__search select,
 .prize-block__desc,
 .prize-amount__input {
     height: 35px;
@@ -2394,6 +2407,16 @@ img {
 
 .prize-block__search input {
     padding: 0 36px 0 8px;
+}
+
+/* o participante de cada colocação é um <select> (envia o id do usuário);
+   sem a seta nativa, a lupa do Figma fica no lugar dela */
+.prize-block__search select {
+    width: 100%;
+    padding: 0 36px 0 8px;
+    color: var(--text);
+    appearance: none;
+    cursor: pointer;
 }
 
 .prize-block__desc {

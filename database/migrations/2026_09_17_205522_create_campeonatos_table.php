@@ -17,9 +17,10 @@ return new class extends Migration
 
             $table->string('nome');
             $table->string('deck');
-            $table->datetime('data');
+            $table->date('data');
+            $table->time('horario')->nullable();
             $table->decimal('valor_inscricao', 10, 2)->default(0); 
-            $table->string('imagem')->nullable();
+            $table->string('imagem', 500)->nullable();
             $table->string('descricao', 350)->nullable();
             $table->enum('status', ['ativo', 'finalizado'])->default('ativo');
 

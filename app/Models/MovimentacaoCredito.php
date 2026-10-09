@@ -9,7 +9,7 @@ class MovimentacaoCredito extends Model
 {
     use HasFactory;
 
-    protected $table = 'movimentacoes_credito';
+    protected $table = 'movimentacoes_creditos';
     protected $fillable = [
         'user_id', 
         'campeonato_id',  
@@ -23,11 +23,11 @@ class MovimentacaoCredito extends Model
     ];
 
     public function usuario(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function campeonato(){
-        return $this->belongsTo(CampeonatoModel::class);
+        return $this->belongsTo(Campeonato::class);
     }
 }
 
