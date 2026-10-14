@@ -187,6 +187,10 @@ class VendaService
             throw ValidationException::withMessages(['itens' => 'Um dos produtos não existe mais no estoque.']);
         }
 
+        if (! $produto->comercializavel) {
+            throw ValidationException::withMessages(['itens' => "“{$produto->nome}” não é comercializável: só pode ser dado, não vendido."]);
+        }
+
         $this->garantirEstoque($produto->nome, $produto->quantidade, $quantidade);
         $this->movimentarEstoque($produto, -$quantidade, "Venda #{$venda->id}");
 

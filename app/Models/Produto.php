@@ -36,6 +36,22 @@ class Produto extends Model
     }
 
     /**
+     * Só produtos que podem ser vendidos (categoria comercializável).
+     */
+    public function scopeComercializaveis(Builder $query): Builder
+    {
+        return $query->whereHas('categoria', fn (Builder $q) => $q->where('comercializavel', true));
+    }
+
+    /**
+     * false para itens que só podem ser dados (categoria não comercializável).
+     */
+    public function getComercializavelAttribute(): bool
+    {
+        return $this->categoria?->comercializavel ?? true;
+    }
+
+    /**
      * Quantidade a partir da qual o produto entra no alerta de estoque baixo
      * (Configurações > Estoque), ou null com o alerta desligado.
      */

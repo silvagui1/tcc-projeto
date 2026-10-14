@@ -14,6 +14,11 @@ use Illuminate\View\View;
 class CartaController extends Controller
 {
     /**
+     * 3 fileiras no desktop: 3 cartas ao lado dos filtros + 4 + 4.
+     */
+    private const CARTAS_POR_PAGINA = 11;
+
+    /**
      * Catálogo de cartas de um jogo, com busca por nome e os filtros
      * laterais (estado, raridade, idioma, foil, faixa de preço, ordenação).
      */
@@ -67,7 +72,8 @@ class CartaController extends Controller
         return view('pages.estoque.cartas', [
             'jogosDisponiveis' => JogoCarta::opcoes(),
             'jogoAtual' => $jogoAtual,
-            'cartas' => $cartas->get(),
+            // a paginação mantém jogo, busca e filtros na url
+            'cartas' => $cartas->paginate(self::CARTAS_POR_PAGINA)->withQueryString(),
             'opcoes' => $opcoes,
             'filtros' => $filtros,
             'filtrosAtivos' => $filtrosAtivos,

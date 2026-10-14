@@ -32,7 +32,7 @@
     </div>
 
     <div class="cartas-header" style="margin-top: 24px;">
-        <h2>{{ $cartas->count() }} {{ $cartas->count() === 1 ? 'carta' : 'cartas' }} de {{ $jogosDisponiveis[$jogoAtual] ?? ucfirst($jogoAtual) }}</h2>
+        <h2>{{ $cartas->total() }} {{ $cartas->total() === 1 ? 'carta' : 'cartas' }} de {{ $jogosDisponiveis[$jogoAtual] ?? ucfirst($jogoAtual) }}</h2>
         @include('pages.estoque.partials.adicionar-carta-botao')
     </div>
 
@@ -57,10 +57,16 @@
                     <p style="margin: 0 0 4px;"><strong>Coleção:</strong> {{ $carta->colecao ?? '—' }}</p>
                     <p style="margin: 0 0 4px;"><strong>Raridade:</strong> {{ $carta->raridade ?? '—' }}</p>
                     <p style="margin: 0 0 4px;"><strong>Idioma:</strong> {{ $carta->idioma }}</p>
-                    <p style="margin: 0 0 12px;"><strong>Quantidade:</strong> {{ $carta->quantidade }}</p>
-                    <p style="font-size: 16.5px; font-weight: 600;">
-                        Preço: <span style="color: var(--text-accent);">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
-                    </p>
+                    {{-- preço e quantidade juntos no rodapé da carta --}}
+                    <div class="trading-card__rodape">
+                        <p style="font-size: 16.5px; font-weight: 600;">
+                            Preço: <span style="color: var(--text-accent);">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
+                        </p>
+                        <p class="trading-card__estoque">
+                            <i class="bi bi-box-seam" aria-hidden="true"></i>
+                            {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
+                        </p>
+                    </div>
                 </div>
             </article>
         @empty
@@ -69,6 +75,8 @@
             </p>
         @endforelse
     </div>
+
+    @include('pages.estoque.partials.paginacao-cartas')
 
     @include('pages.estoque.partials.apagar-popup')
 

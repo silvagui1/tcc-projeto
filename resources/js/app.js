@@ -201,6 +201,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (editando) {
                 preencher(dados);
             }
+            // valores trocados via código não disparam "change"
+            form.dispatchEvent(new Event('form-preenchido'));
 
             form.action = editando
                 ? dialog.dataset.actionEditar.replace('__ID__', dados.id)
@@ -239,6 +241,64 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dialog.hasAttribute('data-open-on-load')) {
             dialog.showModal();
         }
+    });
+});
+
+// Estoque — pop-up de carta: "Coleção" e "Raridade" sugerem os valores do
+// jogo escolhido (um <datalist> por jogo, id = prefixo-jogo). Ao abrir o
+// pop-up o jogo é preenchido sem disparar "change", por isso o campo também
+// se ajusta ao receber foco.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-sugestoes-por-jogo]').forEach((campo) => {
+        const jogo = campo.form.elements.namedItem('jogo');
+        if (!jogo) {
+            return;
+        }
+
+        const ajustar = () => campo.setAttribute('list', `${campo.dataset.sugestoesPorJogo}-${jogo.value}`);
+
+        jogo.addEventListener('change', ajustar);
+        campo.addEventListener('focus', ajustar);
+    });
+});
+
+// Estoque — pop-up de produto: categoria não comercializável (item que só
+// pode ser dado) desativa o preço. O servidor também salva esses itens com
+// preço zero, já que um campo desativado não é enviado.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-preco-campo]').forEach((preco) => {
+        const form = preco.form;
+        const categoria = form.elements.namedItem('categoria_id');
+        const aviso = form.querySelector('[data-preco-aviso]');
+        if (!categoria) {
+            return;
+        }
+
+        const ajustar = () => {
+            const naoVende = Boolean(categoria.selectedOptions[0]?.hasAttribute('data-nao-comercializavel'));
+
+            if (naoVende && !preco.disabled) {
+                // guarda o preço digitado para devolver se a categoria mudar de novo
+                preco.dataset.valorAnterior = preco.value;
+                preco.value = '0';
+            } else if (!naoVende && preco.disabled) {
+                preco.value = preco.dataset.valorAnterior ?? '';
+            }
+
+            preco.disabled = naoVende;
+            if (aviso) {
+                aviso.hidden = !naoVende;
+            }
+        };
+
+        categoria.addEventListener('change', ajustar);
+        form.addEventListener('form-preenchido', () => {
+            // ao abrir o pop-up o valor vem do produto (ou vazio), não do guardado
+            delete preco.dataset.valorAnterior;
+            preco.disabled = false;
+            ajustar();
+        });
+        ajustar();
     });
 });
 

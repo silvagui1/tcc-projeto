@@ -43,7 +43,7 @@
         })();
     </script>
 
-    @vite(['resources/css/app.css', 'resources/css/clientes.css', 'resources/css/vendas.css', 'resources/css/configuracoes.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/estoque.css', 'resources/css/campeonatos.css', 'resources/css/clientes.css', 'resources/css/vendas.css', 'resources/css/configuracoes.css', 'resources/js/app.js'])
 </head>
 <body>
     <div class="app-shell">

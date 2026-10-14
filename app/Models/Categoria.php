@@ -9,6 +9,12 @@ class Categoria extends Model
     protected $fillable = [
         'nome',
         'descricao',
+        'comercializavel',
+    ];
+
+    // false = os produtos só podem ser dados (brindes), não vendidos
+    protected $casts = [
+        'comercializavel' => 'boolean',
     ];
 
     public function produtos()

@@ -348,6 +348,7 @@ class VendaController extends Controller
     private function catalogoProdutos(string $termo): array
     {
         return Produto::with('categoria')
+            ->comercializaveis()
             ->when($termo !== '', fn (Builder $q) => $q->where('nome', 'like', "%{$termo}%"))
             ->orderByRaw('quantidade = 0')
             ->orderBy('nome')

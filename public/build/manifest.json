@@ -280,9 +280,14 @@
     "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-82505257.css",
+    "file": "assets/app-b8ca8906.css",
     "isEntry": true,
     "src": "resources/css/app.css"
+  },
+  "resources/css/campeonatos.css": {
+    "file": "assets/campeonatos-9df64843.css",
+    "isEntry": true,
+    "src": "resources/css/campeonatos.css"
   },
   "resources/css/clientes.css": {
     "file": "assets/clientes-a60171b7.css",
@@ -294,13 +299,18 @@
     "isEntry": true,
     "src": "resources/css/configuracoes.css"
   },
+  "resources/css/estoque.css": {
+    "file": "assets/estoque-f06a1d07.css",
+    "isEntry": true,
+    "src": "resources/css/estoque.css"
+  },
   "resources/css/vendas.css": {
     "file": "assets/vendas-9dd396cf.css",
     "isEntry": true,
     "src": "resources/css/vendas.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-82b5d9e1.js",
+    "file": "assets/app-bf6234d9.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   }

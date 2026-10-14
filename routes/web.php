@@ -11,6 +11,7 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\VendaController;
+use App\Models\Aluguel;
 use App\Models\JogoCarta;
 use App\Models\Produto;
 use App\Models\Venda;
@@ -60,8 +61,15 @@ Route::get('/inicio', function () {
     $ontem = Venda::resumoDoDia(today()->subDay());
     // alerta de estoque baixo (Configurações > Estoque)
     $estoqueBaixo = Produto::estoqueBaixo()->count();
+    // mesas reservadas para hoje (inclui as que começaram ontem e passam da meia-noite)
+    $alugueisHoje = Aluguel::ativos()
+        ->with(['mesa', 'cliente'])
+        ->where('inicio', '<', today()->addDay())
+        ->where('fim', '>', today())
+        ->orderBy('inicio')
+        ->get();
 
-    return view('pages.home', compact('hoje', 'ontem', 'estoqueBaixo'));
+    return view('pages.home', compact('hoje', 'ontem', 'estoqueBaixo', 'alugueisHoje'));
 })->name('home');
 
 

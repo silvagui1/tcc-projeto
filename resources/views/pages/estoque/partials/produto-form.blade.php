@@ -50,7 +50,8 @@
                 <span>Categoria *</span>
                 <select name="categoria_id" required>
                     @foreach ($categorias as $categoria)
-                        <option value="{{ $categoria->id }}" @selected((int) old('categoria_id', $padrao['categoria_id']) === $categoria->id)>
+                        <option value="{{ $categoria->id }}" @selected((int) old('categoria_id', $padrao['categoria_id']) === $categoria->id)
+                                @unless ($categoria->comercializavel) data-nao-comercializavel @endunless>
                             {{ $categoria->nome }}
                         </option>
                     @endforeach
@@ -63,10 +64,13 @@
                        value="{{ old('quantidade', 1) }}">
             </label>
 
+            {{-- desativado quando a categoria é não comercializável (o item só
+                 pode ser dado); o app.js liga/desliga ao trocar a categoria --}}
             <label class="card-field">
                 <span>Preço unitário (R$) *</span>
                 <input type="number" name="preco" required min="0" step="0.01" inputmode="decimal"
-                       placeholder="0,00" value="{{ old('preco') }}">
+                       placeholder="0,00" value="{{ old('preco') }}" data-preco-campo>
+                <small class="card-field__aviso" data-preco-aviso hidden>Não comercializável: só pode ser dado.</small>
             </label>
 
             <label class="card-field card-field--full">

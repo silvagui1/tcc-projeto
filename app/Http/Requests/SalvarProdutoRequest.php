@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\TrataImagemDoEstoque;
+use App\Models\Categoria;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -22,6 +23,16 @@ class SalvarProdutoRequest extends FormRequest
     {
         // Sem sistema de autenticação implementado ainda.
         return true;
+    }
+
+    /**
+     * Itens de categoria não comercializável não são vendidos: preço zerado.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (Categoria::whereKey($this->input('categoria_id'))->where('comercializavel', false)->exists()) {
+            $this->merge(['preco' => 0]);
+        }
     }
 
     /**

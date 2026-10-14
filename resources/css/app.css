@@ -302,20 +302,260 @@ img {
     }
 }
 
+/* diferença de vendas para ontem (sobre o cartão azul escuro, nos dois temas) */
+.home-diferenca {
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--blue-200);
+}
+
+.home-diferenca small {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.home-diferenca--positiva {
+    background: rgba(111, 209, 147, 0.16);
+    color: #a9e5bd;
+}
+
+.home-diferenca--negativa {
+    background: rgba(240, 128, 128, 0.16);
+    color: #f5b5b5;
+}
+
+/* cartão de ontem: valores à esquerda, dois atalhos do mesmo tamanho à direita */
+.home-ontem {
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+/* "Nova venda" / "Ver vendas": quadrados iguais, translúcidos sobre o
+   cartão azul; o principal (Nova venda) vem preenchido */
+.home-atalho {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 84px;
+    height: 72px;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--on-accent);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.home-atalho i {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.home-atalho:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.home-atalho--principal {
+    background: var(--blue-200);
+    border-color: var(--blue-200);
+    color: var(--blue-900);
+}
+
+.home-atalho--principal:hover {
+    background: var(--white);
+    border-color: var(--white);
+}
+
+.home-atalho:focus-visible {
+    outline: 2px solid var(--blue-200);
+    outline-offset: 2px;
+}
+
+/* celulares estreitos: atalhos menores para sobrar espaço ao valor de ontem */
+@media (max-width: 400px) {
+    .home-ontem {
+        gap: 8px;
+    }
+
+    .home-atalho {
+        width: 70px;
+        height: 64px;
+        font-size: 11px;
+    }
+}
+
+/* --- Mesas de hoje -------------------------------------------------------- */
+
+.home-mesas {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+}
+
+.home-mesas__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.home-mesas__header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.home-mesas__header a {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-accent);
+}
+
+.home-mesas__vazio {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.home-mesa {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+}
+
+.home-mesa:first-of-type {
+    border-top: none;
+}
+
+.home-mesa__horario {
+    display: flex;
+    flex-direction: column;
+    min-width: 52px;
+}
+
+.home-mesa__horario strong {
+    font-size: 16px;
+}
+
+.home-mesa__horario small,
+.home-mesa__corpo .jogo-chip {
+    font-size: 11px;
+}
+
+.home-mesa__horario small {
+    color: var(--text-muted);
+}
+
+.home-mesa__corpo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.home-mesa__corpo strong {
+    max-width: 100%;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.home-mesa__selo {
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(111, 209, 147, 0.2);
+    color: #2f7a4a;
+}
+
+.home-mesa__selo--fim {
+    background: var(--bg);
+    color: var(--text-muted);
+}
+
+:root[data-theme="dark"] .home-mesa__selo:not(.home-mesa__selo--fim) {
+    color: #a9e5bd;
+}
+
+/* reservas que já acabaram ficam apagadas */
+.home-mesa--encerrado .home-mesa__horario,
+.home-mesa--encerrado .home-mesa__corpo {
+    opacity: 0.55;
+}
+
+@media (min-width: 992px) {
+    /* no desktop as reservas viram uma grade de 2 colunas */
+    .home-mesas {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 32px;
+    }
+
+    .home-mesas__header,
+    .home-mesas__vazio {
+        grid-column: 1 / -1;
+    }
+
+    .home-mesa:nth-of-type(2) {
+        border-top: none;
+    }
+}
+
 .action-card {
     display: flex;
     align-items: center;
     gap: 16px;
+    min-height: 72px;
     background: var(--surface);
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-md);
     padding: 12px 16px;
+    color: var(--text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.action-card:hover {
+    border-color: var(--purple-300);
+    box-shadow: 0 4px 14px var(--shadow);
+    transform: translateY(-1px);
+}
+
+.action-card:hover .action-card__arrow {
+    color: var(--text);
+}
+
+.action-card:focus-visible {
+    outline: 2px solid var(--purple-500);
+    outline-offset: 2px;
 }
 
 .action-card__icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -330,7 +570,8 @@ img {
 
 .action-card__text strong {
     display: block;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .action-card__text span {
@@ -340,10 +581,11 @@ img {
 }
 
 .action-card__arrow {
-    font-size: 20px;
+    font-size: 18px;
     color: var(--text-muted-2);
     border-left: 1px solid var(--line);
     padding-left: 12px;
+    transition: color 0.15s ease;
 }
 
 /* ==========================================================================
@@ -482,1000 +724,7 @@ a.chip {
     border-color: var(--purple-light-800);
 }
 
-.divider {
-    height: 1px;
-    background: var(--line);
-    border: none;
-    margin: 16px 0;
-}
-
-/* ==========================================================================
-   Grade de produtos
-   ========================================================================== */
-
-.product-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-.product-card {
-    background: var(--field);
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid var(--surface-border);
-}
-
-.product-card__image {
-    height: 110px;
-    background-color: var(--placeholder); /* aparece quando o produto não tem imagem */
-    background-size: cover;
-    background-position: center;
-    position: relative;
-}
-
-.product-card__tag {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: var(--purple-light-800);
-    color: var(--white);
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 12px;
-}
-
-.product-card__delete {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: rgba(0, 0, 0, 0.35);
-    color: var(--white);
-    width: 22px;
-    height: 22px;
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-}
-
-/* editar + apagar lado a lado no canto da imagem */
-.product-card__actions {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    display: flex;
-    gap: 6px;
-}
-
-.product-card__actions .product-card__delete {
-    position: static;
-}
-
-.product-card__body {
-    padding: 10px 12px 14px;
-}
-
-.product-card__body .name-price {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 6px;
-}
-
-.product-card__body strong {
-    font-size: 14px;
-    line-height: 1.2;
-}
-
-.product-card__body .price {
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.product-card__body p {
-    font-size: 10px;
-    color: var(--text-muted);
-    margin: 4px 0 0;
-}
-
-.add-product-card {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 32px 0;
-    color: var(--text);
-    background: transparent;
-    border: 2px dashed var(--surface-border);
-    border-radius: 20px;
-}
-
-.add-product-card .plus-circle {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: var(--purple-light-300);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    color: var(--purple-light-800);
-}
-
-/* ==========================================================================
-   Página de estoque (pages/estoque/index.blade.php)
-
-   No mobile tudo continua empilhado. No desktop a página usa uma área mais
-   larga (.app-content--wide) para economizar espaço vertical: resumo numa
-   fileira só, abas + busca lado a lado, filtros numa coluna à esquerda e
-   4 produtos por fileira.
-   ========================================================================== */
-
-.estoque-resumo {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.estoque-resumo .stat-grid {
-    margin-bottom: 0;
-}
-
-@media (min-width: 992px) {
-    .app-content--wide {
-        max-width: 1200px;
-    }
-
-    .estoque-resumo {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr;
-        gap: 16px;
-    }
-
-    /* os dois cartões do .stat-grid entram direto na fileira do resumo */
-    .estoque-resumo .stat-grid {
-        display: contents;
-    }
-
-    .estoque-toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 16px;
-        align-items: center;
-        margin-bottom: 24px;
-    }
-
-    .estoque-toolbar > * {
-        margin-bottom: 0;
-    }
-
-    .estoque-layout {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr);
-        gap: 32px;
-        align-items: start;
-    }
-
-    /* filtros viram um painel fixo à esquerda enquanto a lista rola */
-    .estoque-layout .filters {
-        position: sticky;
-        top: calc(var(--topbar-height) + 24px);
-        margin: 0;
-        padding: 16px 18px;
-        background: var(--surface);
-        border: 1px solid var(--surface-border);
-        border-radius: var(--radius-md);
-    }
-
-    .estoque-layout__divider {
-        display: none;
-    }
-
-    .estoque-layout__produtos h2 {
-        margin-top: 0;
-    }
-
-    .estoque-layout .product-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .estoque-layout .product-card__image {
-        height: 140px;
-    }
-
-    /* no desktop o "adicionar" ocupa só uma célula, como um produto */
-    .estoque-layout .add-product-card {
-        grid-column: auto;
-        justify-content: center;
-        padding: 24px 0;
-    }
-
-    /* prévia de cartas: fileira de 4 na largura toda — cada carta fica
-       maior que um card de produto (que divide o espaço com os filtros) */
-    .estoque-cartas-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 24px;
-    }
-
-    .estoque-cartas-preview__all {
-        width: fit-content;
-        gap: 16px;
-        margin-left: auto;
-    }
-}
-
-/* no mobile a prévia vira um carrossel lateral (arrasta para o lado),
-   com a próxima carta "espiando" pela direita */
-@media (max-width: 991.98px) {
-    .estoque-cartas-grid {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-    }
-
-    .estoque-cartas-grid::-webkit-scrollbar {
-        display: none;
-    }
-
-    .estoque-cartas-grid > .trading-card {
-        flex: 0 0 85%;
-        scroll-snap-align: start;
-    }
-}
-
-/* ==========================================================================
-   Cartas colecionáveis (estoque/cartas)
-   ========================================================================== */
-
-.card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-}
-
-.trading-card {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    padding: 16px;
-}
-
-.trading-card__image {
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    background: var(--placeholder);
-    background-size: cover;
-    background-position: center;
-    border-radius: 12px;
-    margin-bottom: 12px;
-}
-
-.trading-card__title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 10px;
-}
-
-.trading-card__title-row strong {
-    font-size: 18px;
-}
-
-.trading-card__title-row {
-    gap: 12px;
-}
-
-.trading-card__title-row .price {
-    font-weight: 600;
-    color: var(--text);
-    white-space: nowrap;
-}
-
-.trading-card__meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.trading-card__meta span {
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 6px 12px;
-    font-size: 12px;
-}
-
-/* --- Carta clicável + botões de editar / apagar -------------------------- */
-
-/* um link invisível cobre a carta toda (abre os detalhes); os botões de
-   ação ficam por cima dele para continuarem clicáveis */
-.trading-card--link {
-    position: relative;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.trading-card--link:hover {
-    transform: translateY(-2px);
-}
-
-.trading-card.trading-card--link:hover,
-.trading-card--link:hover .trading-card {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.trading-card__link {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    border-radius: var(--radius-md);
-}
-
-.trading-card__link:focus-visible {
-    outline: 2px solid var(--purple-500);
-    outline-offset: 2px;
-}
-
-.card-actions {
-    position: absolute;
-    top: 24px;
-    right: 24px;
-    z-index: 2;
-    display: flex;
-    gap: 6px;
-}
-
-.card-actions__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
-    color: var(--purple-500);
-    font-size: 14px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.card-actions__btn:hover {
-    background: var(--purple-500);
-    color: var(--white);
-}
-
-.card-actions__btn--danger:hover {
-    background: #d9534f;
-}
-
-/* --- Detalhes de uma carta (estoque/cartas/{jogo}/{id}) ------------------ */
-
-.card-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.card-detail__image {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 4;
-    background: var(--placeholder);
-    background-size: cover;
-    background-position: center;
-    border-radius: var(--radius-md);
-}
-
-.card-detail__foil {
-    position: absolute;
-    top: 14px;
-    left: 14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    background: var(--yellow-300);
-    border-radius: 20px;
-    color: var(--yellow-900);
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.card-detail__game {
-    display: inline-block;
-    padding: 4px 12px;
-    background: var(--purple-light-300);
-    border-radius: 20px;
-    color: var(--purple-500);
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.card-detail__info h1 {
-    margin: 12px 0 6px;
-    font-size: 26px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-}
-
-.card-detail__price {
-    margin: 0 0 16px;
-    color: var(--text-accent);
-    font-size: 28px;
-    font-weight: 700;
-}
-
-.card-detail__price span {
-    color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.card-detail__specs {
-    margin: 20px 0 0;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-.card-detail__specs > div {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--surface-border);
-    font-size: 15px;
-}
-
-.card-detail__specs > div:last-child {
-    border-bottom: none;
-}
-
-.card-detail__specs dt {
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-.card-detail__specs dd {
-    margin: 0;
-    font-weight: 600;
-    text-align: right;
-}
-
-.card-detail__total {
-    background: var(--field);
-}
-
-.card-detail__total dd {
-    color: var(--text-accent);
-}
-
-.card-detail__actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-.card-detail__btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 46px;
-    padding: 0 20px;
-    border-radius: 12px;
-    background: var(--purple-500);
-    color: var(--white);
-    font-size: 15px;
-    font-weight: 600;
-    transition: background-color 0.15s ease;
-}
-
-.card-detail__btn:hover {
-    background: var(--purple-light-800);
-}
-
-.card-detail__btn--danger {
-    background: transparent;
-    border: 1px solid #d9534f;
-    color: #c0392b;
-}
-
-.card-detail__btn--danger:hover {
-    background: #d9534f;
-    color: var(--white);
-}
-
-@media (max-width: 991.98px) {
-    .card-detail__btn {
-        flex: 1;
-    }
-}
-
-@media (min-width: 992px) {
-    .card-detail {
-        display: grid;
-        grid-template-columns: 420px minmax(0, 1fr);
-        gap: 48px;
-        align-items: start;
-    }
-
-    .card-detail__info h1 {
-        font-size: 32px;
-    }
-}
-
-/* --- Adicionar carta (botão, aviso e pop-up com o formulário) ------------ */
-
-/* título da lista + botão "Adicionar carta", logo acima das cartas */
-.cartas-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.cartas-header h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.add-card-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-    height: 44px;
-    padding: 0 18px 0 8px;
-    background: var(--purple-500);
-    border-radius: 12px;
-    color: var(--white);
-    font-size: 15px;
-    font-weight: 600;
-    box-shadow: 0 3px 8px rgba(83, 87, 125, 0.35);
-    transition: background-color 0.15s ease, transform 0.15s ease;
-}
-
-.add-card-btn:hover {
-    background: var(--purple-light-800);
-    transform: translateY(-1px);
-}
-
-.add-card-btn__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    background: var(--purple-light-300);
-    color: var(--purple-500);
-    font-size: 16px;
-}
-
-.card-added-alert {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 16px;
-    padding: 12px 14px;
-    background: #e3f4e6;
-    border: 1px solid #b7dfbf;
-    border-radius: var(--radius-sm);
-    color: #25623a;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.card-dialog {
-    width: 640px;
-    max-width: calc(100% - 24px);
-    max-height: calc(100vh - 40px);
-    padding: 0;
-    border: none;
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-}
-
-.card-dialog::backdrop {
-    background: rgba(20, 21, 32, 0.6);
-}
-
-.card-form {
-    padding: 22px 24px 24px;
-}
-
-.card-form__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-}
-
-.card-form__header h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 700;
-}
-
-.card-form h3 {
-    margin: 20px 0 10px;
-    color: var(--purple-500);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.card-form__grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-}
-
-.card-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-}
-
-.card-field > span {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.card-field input:not([type="checkbox"]),
-.card-field select {
-    width: 100%;
-    height: 42px;
-    padding: 0 12px;
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-sm);
-    background: var(--field);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.card-field input:focus,
-.card-field select:focus {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.card-field input::placeholder {
-    color: var(--text-muted-2);
-}
-
-/* checkbox "foil": alinhado com a base dos campos ao lado */
-.card-field--check {
-    flex-direction: row;
-    align-items: center;
-    align-self: end;
-    height: 42px;
-    gap: 10px;
-    cursor: pointer;
-}
-
-.card-field--check input {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--purple-500);
-}
-
-.card-field--check > span {
-    font-weight: 400;
-}
-
-/* Campo de imagem dos pop-ups do estoque (partials/imagem-campo) */
-.imagem-campo {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.imagem-campo__area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 170px;
-    border: 2px dashed var(--surface-border);
-    border-radius: var(--radius-sm);
-    background: var(--field);
-    overflow: hidden;
-    cursor: pointer;
-    transition: border-color 0.15s, background-color 0.15s;
-}
-
-.imagem-campo__area:hover,
-.imagem-campo__area.is-arrastando {
-    border-color: var(--purple-light-800);
-}
-
-.imagem-campo__area.is-arrastando {
-    background: var(--purple-light-300);
-}
-
-.imagem-campo__preview {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.imagem-campo__vazio {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 0 12px;
-    color: var(--text-muted-2);
-    font-size: 13px;
-    text-align: center;
-}
-
-.imagem-campo__vazio i {
-    font-size: 28px;
-}
-
-.imagem-campo__acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.imagem-campo__btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border: 1px solid var(--purple-light-800);
-    border-radius: 12px;
-    background: transparent;
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.imagem-campo__btn--remover {
-    border-color: #d9534f;
-    color: #d9534f;
-}
-
-.imagem-campo__btn[hidden],
-.imagem-campo__preview[hidden],
-.imagem-campo__vazio[hidden] {
-    display: none;
-}
-
-.card-form__errors {
-    margin: 12px 0 0;
-    padding: 12px 14px;
-    background: #fbe5e5;
-    border: 1px solid #efb9b9;
-    border-radius: var(--radius-sm);
-    color: #8a2424;
-    font-size: 13px;
-}
-
-.card-form__errors ul {
-    margin: 6px 0 0;
-    padding-left: 18px;
-}
-
-.card-form__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-}
-
-.card-form__cancel,
-.card-form__submit {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    height: 44px;
-    padding: 0 18px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.card-form__cancel {
-    background: var(--bg);
-    color: var(--text);
-}
-
-.card-form__submit {
-    background: var(--purple-500);
-    color: var(--white);
-}
-
-.card-form__submit:hover {
-    background: var(--purple-light-800);
-}
-
-@media (min-width: 600px) {
-    .card-form__grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .card-field--full {
-        grid-column: 1 / -1;
-    }
-}
-
-/* --- Catálogo de cartas no desktop ---------------------------------------
-   Mesma largura do estoque; busca e filtro por jogo lado a lado e as cartas
-   em grade de 4 — cada carta fica maior que um card de produto. */
-
-@media (min-width: 992px) {
-    .cartas-toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 16px;
-        align-items: center;
-    }
-
-    .cartas-toolbar > * {
-        margin-bottom: 0;
-    }
-
-    .card-list {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 24px;
-    }
-
-    .card-list > article {
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-
-    .card-list > article h3 {
-        font-size: 17px !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .card-list > article .trading-card {
-        flex: 1;
-    }
-
-    /* mensagem de "nenhuma carta" ocupa a linha toda */
-    .card-list > p {
-        grid-column: 1 / -1;
-    }
-
-    /* com filtros: eles ocupam o lugar de uma carta (1ª coluna da primeira
-       fileira, 3 cartas ao lado); da segunda fileira em diante as cartas usam
-       as 4 colunas. O app.js mede uma carta e passa o alinhamento do topo
-       (--filtros-topo, abaixo do título) e a altura (--filtros-altura). */
-    .card-list--com-filtros > .cartas-filtros {
-        grid-column: 1;
-        grid-row: 1;
-        align-self: start;
-        margin-top: var(--filtros-topo, 0);
-        height: var(--filtros-altura, auto);
-        /* se o conteúdo não couber (tela mais estreita), rola por dentro */
-        overflow-y: auto;
-        scrollbar-width: thin;
-        padding: 14px 16px 0;
-    }
-
-    /* Limpar/Aplicar ficam sempre visíveis no pé do painel */
-    .card-list--com-filtros .cartas-filtros__acoes {
-        position: sticky;
-        bottom: 0;
-        margin-top: 12px;
-        padding: 10px 0 14px;
-        background: var(--surface);
-    }
-
-    .card-list--com-filtros > p {
-        grid-column: 2 / -1;
-    }
-
-    /* no desktop o painel fica sempre aberto: o título não recolhe */
-    .cartas-filtros__summary {
-        pointer-events: none;
-    }
-
-    .cartas-filtros__summary::after {
-        display: none;
-    }
-}
-
-/* --- Filtros laterais do catálogo de cartas ------------------------------ */
-
-.cartas-filtros {
-    min-width: 0;
-    padding: 16px 18px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-}
-
-.cartas-filtros__summary {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    list-style: none;
-}
-
-.cartas-filtros__summary::-webkit-details-marker {
-    display: none;
-}
-
-/* setinha de abrir/fechar (só no mobile) */
-.cartas-filtros__summary::after {
-    content: "\F282"; /* bi-chevron-down */
-    font-family: "bootstrap-icons";
-    margin-left: auto;
-    font-size: 14px;
-    transition: transform 0.2s ease;
-}
-
-.cartas-filtros[open] .cartas-filtros__summary::after {
-    transform: rotate(180deg);
-}
-
-.cartas-filtros__badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    border-radius: 10px;
-    background: var(--purple-500);
-    color: var(--white);
-    font-size: 11px;
-}
-
-.cartas-filtros__form {
-    margin-top: 6px;
-}
-
-.cartas-filtros__grupo {
-    margin: 0;
-    padding: 0;
-    border: none;
-    min-width: 0;
-}
-
-/* float faz a legend seguir o fluxo normal (senão o margin é ignorado) */
-.cartas-filtros__grupo legend {
-    float: left;
-    width: 100%;
-    padding: 0;
-    margin: 10px 0 5px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text);
-}
-
-/* chip clicável: o checkbox fica escondido e o chip muda de cor */
+/* chip clicável (filtros de cartas e de campeonatos): o checkbox fica escondido e o chip muda de cor */
 .chip--check {
     cursor: pointer;
     user-select: none;
@@ -1503,83 +752,16 @@ a.chip {
     outline-offset: 2px;
 }
 
-.cartas-filtros__grupo > :not(legend) {
-    clear: both;
-}
 
-/* chips do painel um pouco mais justos, para caber na altura de uma carta */
-.cartas-filtros .chip-row {
-    gap: 6px;
-}
-
-.cartas-filtros .chip {
-    padding: 3px 10px;
-}
-
-.cartas-filtros__preco {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.cartas-filtros__preco input,
-.cartas-filtros__select {
-    width: 100%;
-    min-width: 0;
-    height: 34px;
-    padding: 0 10px;
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-sm);
-    background: var(--field);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-}
-
-.cartas-filtros__preco input:focus,
-.cartas-filtros__select:focus {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.cartas-filtros__acoes {
-    display: flex;
-    gap: 8px;
-    margin-top: 18px;
-}
-
-.cartas-filtros__limpar,
-.cartas-filtros__aplicar {
-    flex: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 38px;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.cartas-filtros__limpar {
-    background: var(--bg);
-    color: var(--text);
-}
-
-.cartas-filtros__aplicar {
+.divider {
+    height: 1px;
+    background: var(--line);
     border: none;
-    background: var(--purple-500);
-    color: var(--white);
-    font-family: inherit;
-    cursor: pointer;
-}
-
-.cartas-filtros__aplicar:hover {
-    background: var(--purple-light-800);
+    margin: 16px 0;
 }
 
 /* ==========================================================================
-   Campeonatos
+   Faixa de destaque e botão principal (campeonatos, estoque)
    ========================================================================== */
 
 .hero-band {
@@ -1909,927 +1091,7 @@ a.chip {
     }
 }
 
-/* ==========================================================================
-   Campeonatos (Figma: "seção de campeonato")
-   Telas: campeonatos (lista), acessar_camp_ativo / acessar_camp_finalizado,
-   criar_campeonato, editar_campeonato, premiações e pop up apagar.
-   Ícones e imagens ficam em public/images/campeonatos/.
-   ========================================================================== */
-
-/* --- Lista: botão "Criar campeonato" ------------------------------------- */
-
-.champ-create {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 74px;
-    padding: 0 22px 0 24px;
-    margin-bottom: 26px;
-    background: var(--pink-400);
-    border-radius: var(--radius-md);
-    color: var(--pink-900);
-    font-size: 24px;
-    font-weight: 600;
-}
-
-/* --- Lista: card do campeonato ativo (+ carrossel) ----------------------- */
-
-.champ-carousel {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-}
-
-.champ-carousel::-webkit-scrollbar {
-    display: none;
-}
-
-.champ-carousel > .champ-active {
-    flex: 0 0 100%;
-    scroll-snap-align: center;
-}
-
-/* com mais de um ativo, o próximo card "espia" pela direita */
-.champ-carousel--multi > .champ-active {
-    flex-basis: 90%;
-}
-
-.champ-active {
-    background: var(--pink-400);
-    border-radius: var(--radius-lg);
-    padding: 9px 12px 12px;
-}
-
-.champ-active__top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.champ-active__date {
-    color: var(--on-accent);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.champ-active__banner {
-    width: 100%;
-    height: 259px;
-    margin-top: 6px;
-    object-fit: cover;
-    background: #504c4c;
-    border: 1px solid var(--pink-700);
-    border-radius: var(--radius-sm);
-}
-
-.champ-active__bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 10px;
-}
-
-.champ-active__access {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 52px;
-    padding: 0 14px;
-    background: var(--bg);
-    border-radius: var(--radius-md);
-    color: var(--pink-700);
-    font-size: 16px;
-    font-weight: 600;
-}
-
-/* chip de status ("ativo" / "Finalizado") com a bolinha depois do texto */
-.champ-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    height: 19px;
-    padding: 0 3px 0 9px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.champ-status--sm {
-    height: 17px;
-    padding: 0 3px 0 6px;
-    gap: 6px;
-}
-
-/* lápis + lixeira */
-.champ-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.champ-actions--lg {
-    gap: 4px;
-}
-
-.champ-actions a,
-.champ-actions button {
-    display: inline-flex;
-    padding: 0;
-}
-
-/* --- Lista: "Outras competições" ----------------------------------------- */
-
-.champ-section-title {
-    margin: 24px 0 10px 6px;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-.champ-other {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    padding: 14px 12px 13px 11px;
-    margin-bottom: 29px;
-}
-
-.champ-other__banner {
-    display: block;
-    height: 170px;
-    background: #504c4c;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.champ-other__banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.champ-other__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 8px 0 12px;
-}
-
-.champ-other__header h3 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-}
-
-.champ-other p {
-    margin: 0;
-    font-size: 16px;
-}
-
-.champ-other__prizes {
-    margin-top: 20px !important;
-}
-
-.champ-other__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 10px;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* --- Lista: cabeçalho da página ------------------------------------------ */
-
-/* título e "Em andamento" só existem no desktop; no mobile a lista
-   continua começando direto pelo botão "Criar campeonato" */
-.champ-page-header__text,
-.champ-section-title--desktop {
-    display: none;
-}
-
-/* --- Lista no desktop ------------------------------------------------------
-
-   Usa a mesma largura do estoque (.app-content--wide): cabeçalho com título
-   e botão compacto, ativos em destaque ocupando a largura toda (dois por vez
-   quando há mais de um) e "Outras competições" numa grade de 3 colunas. */
-
-@media (min-width: 992px) {
-    .champ-page-header {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 24px;
-        padding-bottom: 24px;
-        margin-bottom: 32px;
-        border-bottom: 1px solid var(--surface-border);
-    }
-
-    .champ-page-header__text {
-        display: block;
-    }
-
-    .champ-page-header__text h1 {
-        margin: 0 0 6px;
-        font-size: 32px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-
-    .champ-page-header__text p {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 15px;
-    }
-
-    .champ-create {
-        flex-shrink: 0;
-        gap: 14px;
-        min-height: 52px;
-        padding: 0 10px 0 22px;
-        margin: 0;
-        font-size: 16px;
-        transition: background-color 0.15s ease, transform 0.15s ease;
-    }
-
-    .champ-create img {
-        width: 36px;
-        height: 36px;
-    }
-
-    .champ-create:hover {
-        background: var(--pink-300);
-        transform: translateY(-1px);
-    }
-
-    .champ-section-title,
-    .champ-section-title--desktop {
-        display: block;
-        margin: 0 0 16px;
-        font-size: 22px;
-    }
-
-    .champ-section-title {
-        margin-top: 48px;
-    }
-
-    .champ-section-title--desktop {
-        margin-top: 0;
-    }
-
-    .champ-carousel {
-        gap: 24px;
-    }
-
-    .champ-carousel--multi > .champ-active {
-        flex-basis: calc(50% - 12px);
-    }
-
-    .champ-active {
-        padding: 14px 18px 18px;
-    }
-
-    .champ-active__banner {
-        height: 380px;
-        margin-top: 10px;
-    }
-
-    .champ-carousel--multi .champ-active__banner {
-        height: 300px;
-    }
-
-    .champ-active__bottom {
-        margin-top: 14px;
-    }
-
-    .champ-active__access {
-        transition: background-color 0.15s ease;
-    }
-
-    .champ-active__access:hover {
-        background: var(--field);
-    }
-
-    .champ-other-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 24px;
-    }
-
-    .champ-other {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 0;
-        padding: 12px 12px 14px;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .champ-other:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .champ-other__banner {
-        height: 180px;
-    }
-
-    .champ-other__header h3 {
-        font-size: 20px;
-    }
-
-    .champ-other p {
-        font-size: 14px;
-    }
-
-    .champ-other__prizes {
-        margin-top: 14px !important;
-        color: var(--text-soft);
-    }
-
-    /* o rodapé (data + ações) fica sempre no fim do card, alinhando a grade */
-    .champ-other__footer {
-        margin-top: auto;
-        padding-top: 16px;
-    }
-
-    .champ-actions a,
-    .champ-actions button {
-        opacity: 0.8;
-        transition: opacity 0.15s ease;
-    }
-
-    .champ-actions a:hover,
-    .champ-actions button:hover {
-        opacity: 1;
-    }
-}
-
-/* --- Acessar campeonato (ativo / finalizado) ----------------------------- */
-
-.champ-detail {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-}
-
-/* bolinha de status "saindo" do canto superior esquerdo do card. O SVG do
-   Figma tem 256.5px de largura (sobra do frame), por isso o recorte 30×30. */
-.champ-detail__status {
-    position: absolute;
-    top: -7px;
-    left: -11px;
-    width: 30px;
-    height: 30px;
-    overflow: hidden;
-    z-index: 1;
-}
-
-.champ-detail__status img {
-    max-width: none;
-}
-
-.champ-detail__banner {
-    width: 100%;
-    height: 268.6px;
-    object-fit: cover;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    background: #504c4c;
-}
-
-.champ-detail__body {
-    padding: 14px 13px 0;
-}
-
-.champ-detail__body h2 {
-    margin: 0 0 15px;
-    font-size: 24px;
-    font-weight: 600;
-}
-
-.champ-detail__info {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 3px 12px;
-    font-size: clamp(16px, 5.4vw, 20px);
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.champ-detail__info span:nth-child(even) {
-    text-align: right;
-}
-
-.champ-detail__desc {
-    margin: 21px 13px 17px;
-    padding-top: 15px;
-    border-top: 0.5px solid var(--text);
-    text-align: center;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-/* seções que abrem/fecham: "participantes cadastrados" e "vencedores" */
-.champ-accordion {
-    margin: 0 -1px;
-}
-
-.champ-accordion summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-    padding: 0 12px 0 13px;
-    background: var(--placeholder);
-    border: 0.5px solid var(--text-muted-2);
-    font-size: 16px;
-    font-weight: 600;
-    list-style: none;
-    cursor: pointer;
-}
-
-.champ-accordion summary::-webkit-details-marker {
-    display: none;
-}
-
-/* a seta do Figma aponta para a direita; girada fica para baixo */
-.champ-accordion summary img {
-    transform: rotate(90deg);
-    transition: transform .2s;
-}
-
-.champ-accordion[open] summary img {
-    transform: rotate(-90deg);
-}
-
-.champ-accordion__content {
-    padding: 8px 13px;
-}
-
-.champ-detail__prize {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 270px;
-    max-width: calc(100% - 26px);
-    height: 47px;
-    margin: 16px auto 24px;
-    background: var(--pink-300);
-    border-radius: var(--radius-md);
-    color: var(--white);
-    font-size: 20px;
-    font-weight: 600;
-}
-
-/* --- Criar / editar campeonato ------------------------------------------- */
-
-.champ-form {
-    margin: 0;
-    min-width: 0;
-    border: 0;
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 15px 14px 20px;
-}
-
-.champ-form h3 {
-    margin: 15px 0 8px;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.champ-form h3:first-child {
-    margin: 0 0 11px;
-}
-
-.champ-form__row {
-    display: flex;
-    gap: 16px;
-}
-
-.champ-form__row > * {
-    flex: 1;
-    min-width: 0;
-}
-
-.champ-input,
-.champ-input--icon input {
-    width: 100%;
-    height: 35px;
-    padding: 0 7px;
-    border: none;
-    border-radius: 5px;
-    background: var(--placeholder);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.champ-form > .champ-input,
-.champ-form__row {
-    margin-bottom: 13px;
-}
-
-.champ-input::placeholder,
-.champ-input--icon input::placeholder,
-.champ-search__field input::placeholder,
-.prize-block__desc::placeholder,
-.prize-amount__input input::placeholder {
-    color: var(--text-muted);
-    font-weight: 600;
-    opacity: 1;
-}
-
-.champ-input--area {
-    height: 76px;
-    padding: 8px 7px;
-    resize: vertical;
-}
-
-/* campo com ícone (data / horário): o ícone do Figma fica por cima do
-   seletor nativo, que continua clicável mas invisível */
-.champ-input--icon {
-    position: relative;
-    display: block;
-    padding: 0;
-}
-
-.champ-input--icon input {
-    padding-right: 34px;
-}
-
-.champ-input--icon img {
-    position: absolute;
-    top: 50%;
-    right: 9px;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-.champ-input--icon input::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0;
-    width: 34px;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-/* Status: radios escondidos, o <label> é o chip */
-.champ-status-chips {
-    display: flex;
-    gap: 16px;
-}
-
-.champ-status-chips input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.champ-status-chips label {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    height: 29px;
-    padding: 0 12px 0 7px;
-    background: var(--placeholder);
-    border: 0.5px solid transparent;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-status-chips input:checked + label {
-    background: var(--text-muted-2);
-    border-color: var(--text-muted);
-}
-
-.champ-status-chips input:focus-visible + label {
-    outline: 2px solid var(--pink-500);
-    outline-offset: 2px;
-}
-
-/* busca de participantes */
-.champ-search__field {
-    position: relative;
-}
-
-.champ-search__field input {
-    width: 100%;
-    height: 40px;
-    padding: 0 36px 0 12px;
-    border: none;
-    border-radius: 5px;
-    background: var(--placeholder);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.champ-search__field img {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-/* resultados da busca (criar): painel que "sai" de baixo do campo */
-.champ-search__results {
-    position: relative;
-    margin-top: -6px;
-    padding: 13px 16px 13px 14px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: 5px;
-}
-
-.champ-search__results:empty,
-.champ-search__results:not(:has(.participant-row:not([hidden]))) {
-    display: none;
-}
-
-.champ-form__count {
-    margin: 16px 0 4px;
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-/* linha de participante (avatar + nome + nascimento) */
-.participant-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 11px 0;
-}
-
-.champ-participants .participant-row + .participant-row,
-.champ-accordion .participant-row + .participant-row {
-    border-top: 0.5px solid var(--line);
-}
-
-.participant-row__avatar {
-    width: 32.5px;
-    height: 32.5px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #ff2828;
-    flex-shrink: 0;
-}
-
-.participant-row__info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.participant-row__info strong {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.participant-row__info span {
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.participant-row__remove {
-    display: inline-flex;
-    padding: 0;
-    margin-right: 20px;
-}
-
-.participant-row[hidden] {
-    display: none;
-}
-
-/* resultado da busca com "+": o checkbox fica escondido e o "+" gira em x
-   quando o cliente já foi adicionado */
-.participant-row--pick {
-    padding: 4px 0;
-    cursor: pointer;
-}
-
-.participant-row--pick + .participant-row--pick {
-    margin-top: 11px;
-}
-
-.participant-row--pick input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.participant-row__add {
-    transition: transform .2s;
-}
-
-.participant-row--pick input:checked + .participant-row__add {
-    transform: rotate(45deg);
-}
-
-.participant-row--pick input:focus-visible + .participant-row__add {
-    outline: 2px solid var(--pink-500);
-    border-radius: 50%;
-}
-
-/* vencedores */
-.winner-row {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    height: 50px;
-    padding-left: 3px;
-    margin-bottom: 7px;
-    background: var(--placeholder);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.winner-row__avatar {
-    width: 32.5px;
-    height: 32.5px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #ff2828;
-    flex-shrink: 0;
-}
-
-.winner-row__info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    padding-left: 2px;
-}
-
-.winner-row__info strong {
-    font-size: 16px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.winner-row__info span {
-    color: var(--text-soft);
-    font-size: 12px;
-}
-
-.winner-row__value {
-    align-self: flex-start;
-    margin: 6px auto 0 8px;
-    padding: 4px;
-    background: #6bac68;
-    border-radius: 12px;
-    color: #344d33;
-    font-size: 8px;
-    white-space: nowrap;
-}
-
-.winner-row__action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 100%;
-    margin-left: auto;
-    background: var(--pink-200);
-    flex-shrink: 0;
-}
-
-.champ-empty {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.champ-locked {
-    margin: 0 0 12px;
-    padding: 10px 12px;
-    background: var(--pink-200);
-    border-radius: 5px;
-    color: var(--pink-900);
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* botão principal de rodapé (Criar / Salvar alterações / Finalizar) */
-.champ-submit {
-    display: block;
-    width: 100%;
-    height: 46px;
-    margin-top: 24px;
-    background: var(--pink-300);
-    border-radius: var(--radius-md);
-    color: var(--on-accent);
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.champ-submit--bottom {
-    margin-top: 110px;
-}
-
-/* --- Premiações (um bloco por colocação) --------------------------------- */
-
-.prize-block {
-    margin-bottom: 21px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.prize-block__header {
-    height: 38px;
-    line-height: 38px;
-    margin: -1px -1px 0;
-    background: var(--pink-200);
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.prize-block--2 .prize-block__header { background: var(--pink-300); }
-.prize-block--3 .prize-block__header { background: var(--pink-400); }
-
-.prize-block__body {
-    padding: 14px 14px 12px;
-}
-
-.prize-block__search input,
-.prize-block__desc,
-.prize-amount__input {
-    height: 35px;
-    background: var(--bg);
-    border: 0.5px solid var(--placeholder);
-    border-radius: 5px;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.prize-block__search input {
-    padding: 0 36px 0 8px;
-}
-
-.prize-block__desc {
-    width: 100%;
-    padding: 0 8px;
-    color: var(--text);
-}
-
-.prize-amount {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 5px 0;
-}
-
-.prize-amount__input {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 123px;
-    padding: 0 8px;
-}
-
-.prize-amount__input input {
-    width: 100%;
-    min-width: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-    font: inherit;
-    color: var(--text);
-}
-
-/* o SVG do Figma tem 49px porque inclui a sombra; o botão tem 29px */
-.prize-amount__step {
-    position: relative;
-    width: 29px;
-    height: 29px;
-    padding: 0;
-}
-
-.prize-amount__step img {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    max-width: none;
-}
-
-/* --- Pop-up "apagar campeonato" ------------------------------------------ */
+/* --- Pop-up de confirmação para apagar (estoque e campeonatos) ----------- */
 
 .confirm-popup {
     width: 298px;
@@ -2873,233 +1135,6 @@ a.chip {
     margin: 9px 0 0;
     color: var(--text-soft);
     font-size: 12px;
-}
-
-/* usado pelo app.js só durante a medição da altura natural das cartas */
-.card-list.is-medindo > article {
-    align-self: start;
-}
-
-/* --- Filtros da lista de campeonatos --------------------------------------
-   Painel em duas faixas: em cima busca + ordenação; embaixo (separado por
-   uma linha) os chips de jogo e status, com o total e o "limpar" à direita.
-   No mobile tudo empilha. Os chips reaproveitam o .chip--check das cartas. */
-
-.champ-filtros {
-    margin-bottom: 20px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-}
-
-.champ-filtros__topo,
-.champ-filtros__base {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 14px 16px;
-}
-
-.champ-filtros__base {
-    border-top: 1px solid var(--surface-border);
-}
-
-/* busca: ícone + campo + botão "Buscar" numa pílula só */
-.champ-filtros__busca {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 42px;
-    padding: 0 4px 0 14px;
-    background: var(--field);
-    border: 1px solid var(--surface-border);
-    border-radius: 21px;
-    color: var(--text-muted);
-}
-
-.champ-filtros__busca:focus-within {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.champ-filtros__busca input {
-    flex: 1;
-    width: 0; /* sem isso o campo impõe a largura padrão (~20 letras) */
-    min-width: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.champ-filtros__busca button {
-    height: 34px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 17px;
-    background: var(--purple-500);
-    color: var(--white);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-filtros__busca button:hover {
-    background: var(--purple-light-800);
-}
-
-.champ-filtros__ordenar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text-muted);
-    white-space: nowrap;
-}
-
-.champ-filtros__ordenar select {
-    flex: 1;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-sm);
-    background: var(--field);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-filtros__ordenar select:focus {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.champ-filtros__grupo {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-}
-
-/* rótulo em letras maiúsculas pequenas, igual nos dois grupos */
-.champ-filtros__rotulo {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--purple-500);
-}
-
-.champ-filtros .chip-row {
-    gap: 6px;
-}
-
-.champ-filtros .chip {
-    gap: 6px;
-    padding: 5px 12px;
-    font-size: 12.5px;
-}
-
-/* bolinha de status (mesmas cores do selo ativo/finalizado dos cards) */
-.champ-filtros__dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.champ-filtros__dot--ativo {
-    background: #3cc15c;
-}
-
-.champ-filtros__dot--finalizado {
-    background: #e2463f;
-}
-
-.chip--check:has(input:checked) .champ-filtros__dot {
-    box-shadow: 0 0 0 2px var(--white);
-}
-
-.champ-filtros__resumo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-.champ-filtros__limpar {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    height: 32px;
-    padding: 0 12px;
-    border-radius: var(--radius-sm);
-    color: var(--purple-500);
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.champ-filtros__limpar:hover {
-    background: var(--purple-light-300);
-}
-
-.champ-vazio {
-    margin: 32px 0;
-    text-align: center;
-    color: var(--text-muted-2);
-}
-
-@media (min-width: 992px) {
-    .champ-filtros {
-        margin-bottom: 32px;
-    }
-
-    .champ-filtros__topo {
-        flex-direction: row;
-        align-items: center;
-        gap: 24px;
-        padding: 16px 20px;
-    }
-
-    .champ-filtros__busca {
-        flex: 1;
-    }
-
-    .champ-filtros__ordenar select {
-        width: 160px;
-    }
-
-    /* jogo e status lado a lado, separados por um traço; total à direita */
-    .champ-filtros__base {
-        flex-direction: row;
-        align-items: center;
-        gap: 28px;
-        padding: 14px 20px;
-    }
-
-    .champ-filtros__grupo {
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .champ-filtros__grupo + .champ-filtros__grupo {
-        padding-left: 28px;
-        border-left: 1px solid var(--surface-border);
-    }
-
-    .champ-filtros__resumo {
-        margin-left: auto;
-    }
 }
 
 /* --- Configurações > Aparência: seletor de tema ---------------------------- */
@@ -3163,15 +1198,6 @@ body,
    O grosso do tema vem dos tokens em :root[data-theme="dark"]; aqui ficam só
    os casos que usam cores próprias. */
 
-/* botão claro sobre o card rosa do campeonato ativo: mantém o visual claro */
-:root[data-theme="dark"] .champ-active__access {
-    background: var(--on-accent);
-}
-
-:root[data-theme="dark"] .champ-active__access:hover {
-    background: var(--white);
-}
-
 /* textos em rosa-escuro sobre fundo escuro */
 :root[data-theme="dark"] .btn-primary {
     color: var(--pink-200);
@@ -3181,22 +1207,4 @@ body,
 :root[data-theme="dark"] img[src$="/x.svg"],
 :root[data-theme="dark"] img[src$="/trash-dark.svg"] {
     filter: brightness(0) invert(0.88);
-}
-
-/* "+" do botão Adicionar carta */
-:root[data-theme="dark"] .add-card-btn__icon {
-    color: var(--white);
-}
-
-/* avisos de sucesso/erro com fundo claro próprio */
-:root[data-theme="dark"] .card-added-alert {
-    background: #1d3526;
-    border-color: #2f5a3d;
-    color: #a9dfb7;
-}
-
-:root[data-theme="dark"] .card-form__errors {
-    background: #3a1f24;
-    border-color: #6b2f37;
-    color: #f2b8bd;
 }

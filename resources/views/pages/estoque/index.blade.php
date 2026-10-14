@@ -90,19 +90,19 @@
             <aside class="filters">
                 <h3>Filtros</h3>
 
-                <span class="filters__group-label">categorias</span>
+                <span class="filters__group-label">Categorias</span>
                 <div class="chip-row">
                     <a href="{{ route('estoque.index', ['tab' => 'produtos', 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
-                       class="chip {{ ! $filtros['categoria'] ? 'is-active' : '' }}">todas</a>
+                       class="chip {{ ! $filtros['categoria'] ? 'is-active' : '' }}">Todas</a>
                     @foreach ($categorias as $categoria)
                         <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $categoria->id, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
-                           class="chip {{ $filtros['categoria'] === $categoria->id ? 'is-active' : '' }}">{{ mb_strtolower($categoria->nome) }}</a>
+                           class="chip {{ $filtros['categoria'] === $categoria->id ? 'is-active' : '' }}">{{ Str::ucfirst(mb_strtolower($categoria->nome)) }}</a>
                     @endforeach
                 </div>
 
-                <span class="filters__group-label">ordenar</span>
+                <span class="filters__group-label">Ordenar</span>
                 <div class="chip-row">
-                    @foreach (['antigos' => 'primeiros adicionados', 'recentes' => 'ultimos adicionados'] as $valor => $rotulo)
+                    @foreach (['antigos' => 'Primeiros adicionados', 'recentes' => 'Últimos adicionados'] as $valor => $rotulo)
                         <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $filtros['categoria'] ?: null, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $valor]) }}"
                            class="chip {{ $filtros['ordenar'] === $valor ? 'is-active' : '' }}">{{ $rotulo }}</a>
                     @endforeach
@@ -142,7 +142,12 @@
                             <div class="product-card__body">
                                 <div class="name-price">
                                     <strong>{{ $produto->nome }}</strong>
-                                    <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
+                                    @if ($produto->comercializavel)
+                                        <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
+                                    @else
+                                        {{-- categoria não comercializável: só pode ser dado --}}
+                                        <span class="price price--brinde" title="Não comercializável: só pode ser dado">Brinde</span>
+                                    @endif
                                 </div>
                                 <p>{{ $produto->descricao }}</p>
                                 <p>
@@ -191,6 +196,10 @@
                             <strong>{{ $carta->nome }}</strong>
                             <span class="price">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
                         </div>
+                        <p class="trading-card__estoque">
+                            <i class="bi bi-box-seam" aria-hidden="true"></i>
+                            {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
+                        </p>
                         <div class="trading-card__meta">
                             @foreach ($carta->tags as $tag)
                                 <span>{{ $tag }}</span>

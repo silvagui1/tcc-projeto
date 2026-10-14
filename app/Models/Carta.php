@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\TemImagemDeEstoque;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Carta extends Model
 {
@@ -53,20 +54,21 @@ class Carta extends Model
     }
 
     /**
-     * Etiquetas curtas mostradas embaixo da carta (estado, raridade, idioma,
-     * quantidade e foil).
+     * Etiquetas curtas mostradas embaixo da carta (estado, raridade, idioma
+     * e foil).
      *
      * @return array<int, string>
      */
     public function getTagsAttribute(): array
     {
-        return array_values(array_filter([
-            mb_strtolower($this->estado),
-            $this->raridade ? mb_strtolower($this->raridade) : null,
-            mb_strtolower($this->idioma),
-            'qtd '.$this->quantidade,
-            $this->foil ? 'foil' : null,
-        ]));
+        // só a 1ª letra maiúscula (mantém siglas como "SAR"); quantidade e
+        // preço aparecem fora das etiquetas
+        return array_values(array_map(Str::ucfirst(...), array_filter([
+            $this->estado,
+            $this->raridade,
+            $this->idioma,
+            $this->foil ? 'Foil' : null,
+        ])));
     }
 
     /**

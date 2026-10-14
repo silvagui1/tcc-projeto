@@ -60,7 +60,7 @@ class VendasTest extends TestCase
         $this->get('/vendas')->assertOk()->assertSee('Nova venda');
         $this->get('/vendas?aba=alugueis')->assertOk()->assertSee('Novo aluguel');
         $this->get('/vendas/listar?periodo=hoje')->assertOk();
-        $this->get('/inicio')->assertOk()->assertSee('vendido hoje');
+        $this->get('/inicio')->assertOk()->assertSee('Vendido hoje');
         $this->getJson('/vendas/catalogo?tipo=produto&q=coca')->assertOk()->assertJsonPath('0.nome', 'Coca-Cola');
     }
 
@@ -283,5 +283,37 @@ class VendasTest extends TestCase
         $aluguel = Aluguel::sole();
         $this->assertSame(180, $aluguel->duracao_minutos);
         $this->assertTrue($aluguel->fim->isSameDay(Carbon::parse($aluguel->inicio)->addDay()));
+    }
+
+    public function test_produto_nao_comercializavel_nao_aparece_nem_e_vendido(): void
+    {
+        $brinde = Produto::create([
+            'nome' => 'Carta Promo Pokémon (brinde)',
+            'preco' => 0,
+            'quantidade' => 10,
+            'categoria_id' => Categoria::where('nome', 'Não comercializável')->value('id'),
+        ]);
+        $this->produto();
+
+        $this->getJson('/vendas/catalogo?tipo=produto')->assertOk()->assertJsonCount(1)->assertJsonPath('0.nome', 'Coca-Cola');
+
+        $this->postJson('/vendas', [
+            'itens' => [['tipo' => 'produto', 'id' => $brinde->id, 'quantidade' => 1]],
+            'forma_pagamento' => 'pix',
+        ])->assertUnprocessable()->assertJsonValidationErrors('itens');
+
+        $this->assertSame(10, $brinde->fresh()->quantidade);
+        $this->assertSame(0, Venda::count());
+    }
+
+    public function test_produto_nao_comercializavel_salva_com_preco_zero(): void
+    {
+        $categoria = Categoria::where('nome', 'Não comercializável')->value('id');
+
+        $this->post('/estoque/produtos', ['nome' => 'Token Magic (brinde)', 'categoria_id' => $categoria, 'quantidade' => 5, 'preco' => 30])
+            ->assertSessionHasNoErrors();
+
+        $this->assertEquals(0, Produto::where('nome', 'Token Magic (brinde)')->value('preco'));
+        $this->get('/estoque')->assertSee('Brinde');
     }
 }

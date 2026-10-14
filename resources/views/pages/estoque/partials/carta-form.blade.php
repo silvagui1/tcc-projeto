@@ -66,25 +66,34 @@
                 </select>
             </label>
 
+            {{-- coleção e raridade sugerem os valores do jogo escolhido
+                 (config/cartas.php); o app.js troca o "list" quando o jogo muda --}}
             <label class="card-field">
                 <span>Coleção</span>
-                <input type="text" name="colecao" maxlength="150"
+                <input type="text" name="colecao" maxlength="150" data-sugestoes-por-jogo="card-colecoes"
+                       list="card-colecoes-{{ old('jogo', $jogoPadrao) }}"
                        placeholder="ex.: Destined Rivals" value="{{ old('colecao') }}">
+                @foreach ($jogosDisponiveis as $chave => $nomeJogo)
+                    <datalist id="card-colecoes-{{ $chave }}">
+                        @foreach (config("cartas.colecoes.{$chave}", []) as $colecao)
+                            <option value="{{ $colecao }}">
+                        @endforeach
+                    </datalist>
+                @endforeach
             </label>
 
             <label class="card-field">
                 <span>Raridade</span>
-                <input type="text" name="raridade" maxlength="100" list="card-raridades"
-                       placeholder="ex.: Rara Secreta" value="{{ old('raridade') }}">
-                <datalist id="card-raridades">
-                    <option value="Comum">
-                    <option value="Incomum">
-                    <option value="Rara">
-                    <option value="Rara Comum">
-                    <option value="Rara Holo">
-                    <option value="Ultra Rara">
-                    <option value="Rara Secreta">
-                </datalist>
+                <input type="text" name="raridade" maxlength="100" data-sugestoes-por-jogo="card-raridades"
+                       list="card-raridades-{{ old('jogo', $jogoPadrao) }}"
+                       placeholder="ex.: Ilustração Rara Especial (SAR)" value="{{ old('raridade') }}">
+                @foreach ($jogosDisponiveis as $chave => $nomeJogo)
+                    <datalist id="card-raridades-{{ $chave }}">
+                        @foreach (config("cartas.raridades.{$chave}", config('cartas.raridades.padrao')) as $raridade)
+                            <option value="{{ $raridade }}">
+                        @endforeach
+                    </datalist>
+                @endforeach
             </label>
 
             <label class="card-field">
