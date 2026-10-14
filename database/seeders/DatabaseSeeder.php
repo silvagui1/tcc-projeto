@@ -15,8 +15,9 @@ class DatabaseSeeder extends Seeder
         // FornecedorSeeder/ContatoSeeder (chamados aqui antes) não existem
         // no projeto — resíduo de outra atividade, quebrava `db:seed` por
         // completo com "class not found". Removidos.
-        // clientes primeiro: o CampeonatoSeeder vem depois para poder usá-los
         $this->call(ClienteSeeder::class);
+        $this->call(EstoqueSeeder::class);
+        $this->call(VendaSeeder::class);
         $this->call(CampeonatoSeeder::class);
     }
 }

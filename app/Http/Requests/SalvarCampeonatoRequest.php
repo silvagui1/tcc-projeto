@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\JogoCarta;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -34,7 +35,7 @@ class SalvarCampeonatoRequest extends FormRequest
     {
         return [
             'nome' => ['required', 'string', 'max:255'],
-            'jogo' => ['required', Rule::in(jogosDeCartas())],
+            'jogo' => ['required', Rule::in(JogoCarta::chaves())],
             'deck' => ['required', 'string', 'max:255'],
             'data' => ['required', 'date'],
             'horario' => ['nullable', 'date_format:H:i'],

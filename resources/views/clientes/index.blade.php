@@ -133,7 +133,7 @@
                 <i class="bi bi-download" aria-hidden="true"></i>
                 Exportar
             </button>
-            <button type="button" class="botao botao--perigo" data-confirmar-exclusao>Excluir selecionados</button>
+            <button type="button" class="botao botao--perigo" data-confirmar-exclusao>Excluir</button>
         </div>
     </div>
 </div>

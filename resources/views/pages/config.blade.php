@@ -6,79 +6,53 @@
 @section('main_class', 'app-content--wide')
 
 @section('content')
+@php
+    $secoes = [
+        'aparencia' => ['Aparência', 'bi-circle-half'],
+        'loja' => ['Loja', 'bi-shop'],
+        'vendas' => ['Vendas', 'bi-receipt'],
+        'alugueis' => ['Mesas e aluguéis', 'bi-calendar-week'],
+        'estoque' => ['Estoque', 'bi-box-seam'],
+        'clientes' => ['Clientes e créditos', 'bi-people'],
+        'dados' => ['Dados e atividades', 'bi-clock-history'],
+    ];
 
+    // "3h", "1h30"
+    $textoDuracao = fn (int $minutos) => intdiv($minutos, 60).'h'.($minutos % 60 ? sprintf('%02d', $minutos % 60) : '');
+@endphp
+
+<div class="config-page" data-config-page data-url-base="{{ url('/config') }}">
     <div class="page-topbar">
-        <a href="{{ route('home') }}" class="icon-btn"><i class="bi bi-x-lg"></i></a>
         <p class="page-topbar__title">Configurações</p>
-        <span style="width: 30px;"></span>
+        <span class="config-subtitulo">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            Valem para todos os computadores da loja
+        </span>
     </div>
 
-    <h3 style="margin-bottom: 12px;">Conta atual</h3>
+    <div class="config-layout">
+        {{-- Índice das seções: coluna fixa no desktop, faixa rolável no telefone --}}
+        <nav class="config-nav" aria-label="Seções das configurações" data-config-nav>
+            @foreach ($secoes as $id => [$rotulo, $icone])
+                <a href="#{{ $id }}" class="config-nav__item" data-config-nav-item="{{ $id }}">
+                    <i class="bi {{ $icone }}" aria-hidden="true"></i>
+                    <span>{{ $rotulo }}</span>
+                </a>
+            @endforeach
+        </nav>
 
-    <div class="settings-card">
-        <div class="settings-row">
-            <div class="settings-row__label">
-                <span class="icon"><i class="bi bi-person-fill"></i></span>
-                <div>
-                    <span>Nome de usuário</span>
-                    <strong>{{ $conta['usuario'] }}</strong>
-                </div>
-            </div>
-            <a href="#"><i class="bi bi-chevron-right"></i></a>
-        </div>
-        <div class="settings-row">
-            <div class="settings-row__label">
-                <span class="icon"><i class="bi bi-envelope-fill"></i></span>
-                <div>
-                    <span>E-mail</span>
-                    <strong>{{ $conta['email'] }}</strong>
-                </div>
-            </div>
-            <a href="#"><i class="bi bi-chevron-right"></i></a>
-        </div>
-        <div class="settings-row">
-            <div class="settings-row__label">
-                <span class="icon"><i class="bi bi-lock-fill"></i></span>
-                <div>
-                    <span>Senha</span>
-                    <strong>*********</strong>
-                </div>
-            </div>
-            <a href="#"><i class="bi bi-chevron-right"></i></a>
+        <div class="config-conteudo">
+            @include('pages.configuracoes._aparencia')
+            @include('pages.configuracoes._loja')
+            @include('pages.configuracoes._vendas')
+            @include('pages.configuracoes._alugueis')
+            @include('pages.configuracoes._estoque')
+            @include('pages.configuracoes._clientes')
+            @include('pages.configuracoes._dados')
         </div>
     </div>
 
-    {{-- Tema do site: salvo neste navegador (localStorage). O app.js aplica na
-         hora; o script no <head> do layout aplica nas próximas páginas. --}}
-    <h3 style="margin-bottom: 12px;">Aparência</h3>
-
-    <div class="settings-card">
-        <div class="settings-row settings-row--tema">
-            <div class="settings-row__label">
-                <span class="icon"><i class="bi bi-moon-stars-fill"></i></span>
-                <div>
-                    <span>Tema</span>
-                    <strong>Modo claro, escuro ou igual ao do seu aparelho</strong>
-                </div>
-            </div>
-
-            <div class="theme-switch" role="radiogroup" aria-label="Tema do site" data-theme-switch>
-                <label>
-                    <input type="radio" name="tema" value="claro">
-                    <i class="bi bi-sun-fill"></i> Claro
-                </label>
-                <label>
-                    <input type="radio" name="tema" value="escuro">
-                    <i class="bi bi-moon-fill"></i> Escuro
-                </label>
-                <label>
-                    <input type="radio" name="tema" value="sistema">
-                    <i class="bi bi-circle-half"></i> Automático
-                </label>
-            </div>
-        </div>
-    </div>
-
-    <h3>Todas contas cadastradas</h3>
-
+    <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
+    @include('clientes.partials._modal_confirmar')
+</div>
 @endsection

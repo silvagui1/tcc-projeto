@@ -1,6 +1,10 @@
-{{-- Avisos depois de salvar (session success/error) e erros de validação --}}
+{{-- Avisos depois de salvar (session success/error) e erros de validação.
+     Mesmo aviso verde e mesma caixa de erros do estoque. --}}
 @if (session('success'))
-    <p class="champ-flash">{{ session('success') }}</p>
+    <p class="card-added-alert" role="status">
+        <i class="bi bi-check-circle-fill"></i>
+        {{ session('success') }}
+    </p>
 @endif
 
 @if (session('error'))

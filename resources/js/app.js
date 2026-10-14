@@ -1,5 +1,7 @@
-import './bootstrap';
 import './clientes';
+import './vendas';
+import './configuracoes';
+import './bootstrap';
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).
 document.addEventListener('DOMContentLoaded', () => {
@@ -32,14 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('[data-delete-dialog]');
     const form = dialog?.querySelector('[data-delete-form]');
+    const titulo = dialog?.querySelector('[data-delete-title]');
 
     if (!dialog || !form) {
         return;
     }
 
     document.querySelectorAll('[data-delete-open]').forEach((botao) => {
-        botao.addEventListener('click', () => {
+        botao.addEventListener('click', (event) => {
+            // no estoque os botões ficam por cima do link que cobre a carta
+            event.preventDefault();
+            event.stopPropagation();
             form.action = botao.dataset.deleteOpen;
+            if (titulo && botao.dataset.deleteTitle) {
+                titulo.textContent = botao.dataset.deleteTitle;
+            }
             dialog.showModal();
         });
     });
@@ -54,17 +63,171 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Estoque — pop-ups "Adicionar carta" e "Adicionar produto". Cada <dialog
-// data-card-dialog="nome"> abre pelos botões com data-card-dialog-open="nome";
-// se o form voltou com erros de validação, o pop-up já abre sozinho
-// (data-open-on-load).
+// Estoque — campo de imagem dos pop-ups (partials/imagem-campo). A imagem
+// pode vir de um arquivo do aparelho, de Ctrl+V (print, imagem copiada do
+// navegador...), de arrastar e soltar ou de um link. Colar/arrastar coloca o
+// arquivo dentro do próprio <input type="file">, então o envio é o mesmo de
+// "Escolher imagem". Expõe campo.imagemDoEstoque.reiniciar(url) para o
+// pop-up limpar/preencher o campo ao abrir.
+const iniciarCampoDeImagem = (campo) => {
+    const dialog = campo.closest('dialog');
+    const area = campo.querySelector('[data-imagem-area]');
+    const preview = campo.querySelector('[data-imagem-preview]');
+    const vazio = campo.querySelector('[data-imagem-vazio]');
+    const arquivo = campo.querySelector('[data-imagem-arquivo]');
+    const url = campo.querySelector('[data-imagem-url]');
+    const remover = campo.querySelector('[data-imagem-remover]');
+    const removerInput = campo.querySelector('[data-imagem-remover-input]');
+    let urlTemporaria = null;
+
+    const mostrar = (src) => {
+        if (urlTemporaria && src !== urlTemporaria) {
+            URL.revokeObjectURL(urlTemporaria);
+            urlTemporaria = null;
+        }
+        preview.hidden = !src;
+        vazio.hidden = Boolean(src);
+        remover.hidden = !src;
+        if (src) {
+            preview.src = src;
+        } else {
+            preview.removeAttribute('src');
+        }
+    };
+
+    const usarArquivo = (file) => {
+        if (!file || !file.type.startsWith('image/')) {
+            return;
+        }
+        const transferencia = new DataTransfer();
+        transferencia.items.add(file);
+        arquivo.files = transferencia.files;
+        url.value = '';
+        removerInput.value = '0';
+        mostrar(urlTemporaria = URL.createObjectURL(file));
+    };
+
+    arquivo.addEventListener('change', () => usarArquivo(arquivo.files[0]));
+
+    url.addEventListener('input', () => {
+        arquivo.value = '';
+        removerInput.value = url.value.trim() ? '0' : removerInput.value;
+        mostrar(url.value.trim());
+    });
+
+    // link quebrado: volta para o quadro vazio em vez de mostrar ícone quebrado
+    preview.addEventListener('error', () => mostrar(''));
+
+    remover.addEventListener('click', () => {
+        arquivo.value = '';
+        url.value = '';
+        removerInput.value = '1';
+        mostrar('');
+    });
+
+    // Ctrl+V em qualquer lugar do pop-up (se o que foi copiado for imagem;
+    // texto colado num campo continua funcionando normalmente)
+    dialog.addEventListener('paste', (event) => {
+        const imagem = [...(event.clipboardData?.files ?? [])].find((file) => file.type.startsWith('image/'));
+        if (imagem) {
+            event.preventDefault();
+            usarArquivo(imagem);
+        }
+    });
+
+    ['dragenter', 'dragover'].forEach((tipo) => area.addEventListener(tipo, (event) => {
+        event.preventDefault();
+        area.classList.add('is-arrastando');
+    }));
+    ['dragleave', 'drop'].forEach((tipo) => area.addEventListener(tipo, () => area.classList.remove('is-arrastando')));
+    area.addEventListener('drop', (event) => {
+        event.preventDefault();
+        usarArquivo(event.dataTransfer.files[0]);
+    });
+    area.addEventListener('click', () => arquivo.click());
+
+    campo.imagemDoEstoque = {
+        reiniciar: (src) => {
+            arquivo.value = '';
+            removerInput.value = '0';
+            mostrar(src || '');
+        },
+    };
+
+    // estado inicial (ex.: pop-up reaberto por erro de validação)
+    mostrar(url.value.trim() || campo.dataset.imagemInicial || '');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-card-dialog]').forEach((dialog) => {
-        document.querySelectorAll(`[data-card-dialog-open="${dialog.dataset.cardDialog}"]`).forEach((botao) => {
-            botao.addEventListener('click', () => dialog.showModal());
+    document.querySelectorAll('[data-imagem-campo]').forEach(iniciarCampoDeImagem);
+});
+
+// Estoque — pop-ups de carta e de produto (adicionar / editar). Cada
+// <dialog data-form-dialog="nome"> abre com os botões data-form-open="nome":
+// sem data-form-dados o form vem vazio (valores de data-form-padrao) e
+// cadastra; com data-form-dados (json do item) vem preenchido e envia um PUT
+// para a url de edição. Se o form voltou com erros de validação, o pop-up já
+// abre sozinho (data-open-on-load), no modo em que estava.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-form-dialog]').forEach((dialog) => {
+        const form = dialog.querySelector('form');
+        const metodo = form.querySelector('[data-form-metodo]');
+        const editar = form.querySelector('[name="_editar"]');
+        const titulo = form.querySelector('[data-form-titulo]');
+
+        const preencher = (dados) => {
+            Object.entries(dados).forEach(([campo, valor]) => {
+                const input = form.elements.namedItem(campo);
+                if (!input) {
+                    return;
+                }
+                if (input.type === 'checkbox') {
+                    input.checked = Boolean(valor);
+                } else if (input.tagName === 'SELECT' && valor && !Array.from(input.options).some((o) => o.value === String(valor))) {
+                    // valor que saiu da lista em Configurações (ex.: um estado
+                    // de carta removido): entra como opção para não trocar o
+                    // valor da carta sem a pessoa perceber
+                    input.add(new Option(`${valor} (fora da lista)`, valor, true, true));
+                } else {
+                    input.value = valor ?? '';
+                }
+            });
+        };
+
+        const abrir = (dados) => {
+            const editando = Boolean(dados);
+
+            preencher(JSON.parse(dialog.dataset.formPadrao));
+            if (editando) {
+                preencher(dados);
+            }
+            // valores trocados via código não disparam "change"
+            form.dispatchEvent(new Event('form-preenchido'));
+
+            form.action = editando
+                ? dialog.dataset.actionEditar.replace('__ID__', dados.id)
+                : dialog.dataset.actionCriar;
+            metodo.disabled = !editando;
+            editar.value = editando ? dados.id : '';
+            titulo.textContent = editando ? titulo.dataset.tituloEditar : titulo.dataset.tituloCriar;
+            form.querySelector('[data-imagem-campo]')?.imagemDoEstoque?.reiniciar(editando ? dados.imagem_preview : '');
+
+            // erros de uma tentativa anterior não valem para o novo item
+            form.querySelector('[data-form-erros]')?.remove();
+
+            dialog.showModal();
+        };
+
+        document.querySelectorAll(`[data-form-open="${dialog.dataset.formDialog}"]`).forEach((botao) => {
+            botao.addEventListener('click', (event) => {
+                // os botões ficam por cima do link que cobre a carta
+                event.preventDefault();
+                event.stopPropagation();
+                abrir(botao.dataset.formDados ? JSON.parse(botao.dataset.formDados) : null);
+            });
         });
 
-        dialog.querySelectorAll('[data-card-dialog-close]').forEach((botao) => {
+        dialog.querySelectorAll('[data-form-close]').forEach((botao) => {
             botao.addEventListener('click', () => dialog.close());
         });
 
@@ -81,121 +244,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Campeonatos — carrossel dos ativos (mobile). Ao arrastar, a bolinha do card
-// mais próximo do centro fica marcada; tocar numa bolinha rola até o card.
+// Estoque — pop-up de carta: "Coleção" e "Raridade" sugerem os valores do
+// jogo escolhido (um <datalist> por jogo, id = prefixo-jogo). Ao abrir o
+// pop-up o jogo é preenchido sem disparar "change", por isso o campo também
+// se ajusta ao receber foco.
 document.addEventListener('DOMContentLoaded', () => {
-    const carrossel = document.querySelector('[data-carousel]');
-    const bolinhas = [...(document.querySelectorAll('[data-carousel-dots] button'))];
+    document.querySelectorAll('[data-sugestoes-por-jogo]').forEach((campo) => {
+        const jogo = campo.form.elements.namedItem('jogo');
+        if (!jogo) {
+            return;
+        }
 
-    if (!carrossel || !bolinhas.length) {
-        return;
-    }
+        const ajustar = () => campo.setAttribute('list', `${campo.dataset.sugestoesPorJogo}-${jogo.value}`);
 
-    const cards = [...carrossel.querySelectorAll('[data-carousel-item]')];
-
-    const marcar = (indice) => {
-        bolinhas.forEach((bolinha, i) => {
-            bolinha.classList.toggle('is-active', i === indice);
-            bolinha.toggleAttribute('aria-current', i === indice);
-        });
-    };
-
-    carrossel.addEventListener('scroll', () => {
-        const centro = carrossel.scrollLeft + carrossel.clientWidth / 2;
-        const distancias = cards.map((card) => Math.abs(card.offsetLeft - carrossel.offsetLeft + card.offsetWidth / 2 - centro));
-        marcar(distancias.indexOf(Math.min(...distancias)));
-    }, { passive: true });
-
-    bolinhas.forEach((bolinha, i) => {
-        bolinha.addEventListener('click', () => {
-            cards[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        });
+        jogo.addEventListener('change', ajustar);
+        campo.addEventListener('focus', ajustar);
     });
 });
 
-// Estoque — campo de imagem ([data-image-drop]): arrastar um arquivo para a
-// zona, colar (Ctrl+V) uma imagem copiada com o formulário aberto ou clicar
-// para escolher. O arquivo vai para o <input type="file"> e aparece a prévia.
+// Estoque — pop-up de produto: categoria não comercializável (item que só
+// pode ser dado) desativa o preço. O servidor também salva esses itens com
+// preço zero, já que um campo desativado não é enviado.
 document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-image-drop]').forEach((campo) => {
-        const zona = campo.querySelector('[data-image-drop-zona]');
-        const input = campo.querySelector('[data-image-drop-input]');
-        const previa = campo.querySelector('[data-image-drop-previa]');
-        const nome = campo.querySelector('[data-image-drop-nome]');
-        const remover = campo.querySelector('[data-image-drop-remover]');
-        const vazio = zona.querySelector('.image-drop__vazio');
-        const dialog = campo.closest('dialog');
+    document.querySelectorAll('[data-preco-campo]').forEach((preco) => {
+        const form = preco.form;
+        const categoria = form.elements.namedItem('categoria_id');
+        const aviso = form.querySelector('[data-preco-aviso]');
+        if (!categoria) {
+            return;
+        }
 
-        const mostrar = () => {
-            const arquivo = input.files[0];
-            if (previa.src.startsWith('blob:')) {
-                URL.revokeObjectURL(previa.src);
+        const ajustar = () => {
+            const naoVende = Boolean(categoria.selectedOptions[0]?.hasAttribute('data-nao-comercializavel'));
+
+            if (naoVende && !preco.disabled) {
+                // guarda o preço digitado para devolver se a categoria mudar de novo
+                preco.dataset.valorAnterior = preco.value;
+                preco.value = '0';
+            } else if (!naoVende && preco.disabled) {
+                preco.value = preco.dataset.valorAnterior ?? '';
             }
 
-            vazio.hidden = !!arquivo;
-            previa.parentElement.hidden = !arquivo;
-            remover.hidden = !arquivo;
-
-            if (arquivo) {
-                previa.src = URL.createObjectURL(arquivo);
-                nome.textContent = arquivo.name;
-            } else {
-                previa.removeAttribute('src');
+            preco.disabled = naoVende;
+            if (aviso) {
+                aviso.hidden = !naoVende;
             }
         };
 
-        // coloca o arquivo no input (arrastar e colar não passam pelo seletor)
-        const usar = (arquivo) => {
-            if (!arquivo || !arquivo.type.startsWith('image/')) {
-                return false;
-            }
-            const lista = new DataTransfer();
-            lista.items.add(arquivo);
-            input.files = lista.files;
-            mostrar();
-            return true;
-        };
-
-        input.addEventListener('change', mostrar);
-
-        remover.addEventListener('click', () => {
-            input.value = '';
-            mostrar();
+        categoria.addEventListener('change', ajustar);
+        form.addEventListener('form-preenchido', () => {
+            // ao abrir o pop-up o valor vem do produto (ou vazio), não do guardado
+            delete preco.dataset.valorAnterior;
+            preco.disabled = false;
+            ajustar();
         });
-
-        ['dragenter', 'dragover'].forEach((tipo) => zona.addEventListener(tipo, (event) => {
-            event.preventDefault();
-            zona.classList.add('is-arrastando');
-        }));
-
-        ['dragleave', 'drop'].forEach((tipo) => zona.addEventListener(tipo, () => {
-            zona.classList.remove('is-arrastando');
-        }));
-
-        zona.addEventListener('drop', (event) => {
-            event.preventDefault();
-            usar([...event.dataTransfer.files].find((arquivo) => arquivo.type.startsWith('image/')));
-        });
-
-        // colar: só com o pop-up aberto. Se a área de transferência também tem
-        // texto e o cursor está num campo de texto, deixa colar o texto normal.
-        document.addEventListener('paste', (event) => {
-            if (dialog && !dialog.open) {
-                return;
-            }
-
-            const imagem = [...event.clipboardData.files].find((arquivo) => arquivo.type.startsWith('image/'));
-            const emCampoDeTexto = event.target.matches?.('input:not([type="file"]), textarea');
-            if (!imagem || (emCampoDeTexto && event.clipboardData.getData('text/plain'))) {
-                return;
-            }
-
-            event.preventDefault();
-            usar(imagem);
-        });
-
-        // o "Cancelar" limpa o form: a prévia some junto
-        campo.closest('form')?.addEventListener('reset', () => setTimeout(mostrar));
+        ajustar();
     });
 });
 
@@ -360,40 +463,5 @@ document.addEventListener('DOMContentLoaded', () => {
             // navegador sem armazenamento: o tema vale só até recarregar
         }
         aplicarTema(tema);
-    });
-});
-
-// Formulários de criar/editar (data-envio-unico): ao enviar, o botão final
-// fica desabilitado, mais escuro e com um ícone de carregando até a próxima
-// página abrir — assim um clique duplo não cria a mesma coisa duas vezes.
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('form[data-envio-unico]').forEach((form) => {
-        form.addEventListener('submit', (event) => {
-            if (form.dataset.enviando) {
-                event.preventDefault();
-                return;
-            }
-            form.dataset.enviando = 'sim';
-
-            form.querySelectorAll('button[type="submit"]').forEach((botao) => {
-                botao.disabled = true;
-                botao.classList.add('is-enviando');
-                botao.setAttribute('aria-busy', 'true');
-                botao.insertAdjacentHTML('afterbegin', '<span class="botao-carregando" aria-hidden="true"></span>');
-            });
-        });
-    });
-
-    // ao voltar com o botão "voltar" do navegador, o botão volta ao normal
-    window.addEventListener('pageshow', () => {
-        document.querySelectorAll('form[data-envio-unico]').forEach((form) => {
-            delete form.dataset.enviando;
-            form.querySelectorAll('button.is-enviando').forEach((botao) => {
-                botao.disabled = false;
-                botao.classList.remove('is-enviando');
-                botao.removeAttribute('aria-busy');
-                botao.querySelector('.botao-carregando')?.remove();
-            });
-        });
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Configuracoes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,6 +62,11 @@ class Cliente extends Model
         return $this->hasMany(ClienteCreditoHistorico::class)->latest('id');
     }
 
+    public function vendas()
+    {
+        return $this->hasMany(Venda::class);
+    }
+
     public function campeonatos()
     {
         return $this->belongsToMany(Campeonato::class, 'campeonato_cliente')
@@ -113,6 +119,25 @@ class Cliente extends Model
             'nome' => $this->nome,
             'nascimento' => $this->data_nascimento?->format('d/m/Y') ?? '',
             'avatar' => $this->avatar_url,
+        ];
+    }
+
+    /**
+     * Dados curtos do cliente (avatar, nome e saldo) usados pela tela de
+     * Vendas — busca de cliente, detalhes da venda e do aluguel.
+     *
+     * @return array<string, mixed>
+     */
+    public function dadosResumidos(): array
+    {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'iniciais' => $this->iniciais,
+            'cor_avatar' => $this->cor_avatar,
+            'foto_url' => $this->foto_url,
+            'creditos' => (float) $this->creditos,
+            'inativo' => $this->status === 'inativo',
         ];
     }
 
@@ -210,8 +235,8 @@ class Cliente extends Model
 
     /**
      * Link "wa.me" pronto para abrir uma conversa com o cliente, ou null
-     * quando ele não tem WhatsApp cadastrado. Assume DDI 55 (Brasil), já
-     * que `whatsapp` é armazenado só com DDD + número (ver migration).
+     * quando ele não tem WhatsApp cadastrado. `whatsapp` é armazenado só com
+     * DDD + número (ver migration); o DDI vem de Configurações > Clientes.
      */
     public function getWhatsappUrlAttribute(): ?string
     {
@@ -219,6 +244,8 @@ class Cliente extends Model
             return null;
         }
 
-        return 'https://wa.me/55'.preg_replace('/\D/', '', $this->whatsapp);
+        $ddi = preg_replace('/\D/', '', (string) Configuracoes::valor('clientes.whatsapp_ddi'));
+
+        return 'https://wa.me/'.$ddi.preg_replace('/\D/', '', $this->whatsapp);
     }
 }

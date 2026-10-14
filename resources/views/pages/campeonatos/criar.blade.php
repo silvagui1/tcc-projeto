@@ -14,7 +14,7 @@
 
     @include('pages.campeonatos.partials.mensagens')
 
-    <form method="POST" action="{{ route('campeonatos.store') }}" data-envio-unico>
+    <form method="POST" action="{{ route('campeonatos.store') }}">
         @csrf
 
         <div class="champ-form">

@@ -16,8 +16,9 @@
 
 <select class="champ-input" name="jogo" aria-label="jogo" required>
     <option value="" disabled {{ $jogoAtual === '' ? 'selected' : '' }}>jogo</option>
-    @foreach (jogosDeCartas() as $jogo)
-        <option value="{{ $jogo }}" {{ $jogoAtual === $jogo ? 'selected' : '' }}>{{ nomeDoJogo($jogo) }}</option>
+    {{-- jogos cadastrados em Configurações > Estoque --}}
+    @foreach (\App\Models\JogoCarta::opcoes() as $jogo => $nomeJogo)
+        <option value="{{ $jogo }}" {{ $jogoAtual === $jogo ? 'selected' : '' }}>{{ $nomeJogo }}</option>
     @endforeach
 </select>
 

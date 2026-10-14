@@ -14,7 +14,7 @@
         <a href="{{ route('estoque.index') }}" class="{{ request()->routeIs('estoque.*') ? 'is-current' : '' }}" title="Estoque">
             <i class="bi bi-box-seam-fill"></i>
         </a>
-        <a href="{{ route('vendas') }}" class="{{ request()->routeIs('vendas') ? 'is-current' : '' }}" title="Vendas">
+        <a href="{{ route('vendas.index') }}" class="{{ request()->routeIs('vendas.*') ? 'is-current' : '' }}" title="Vendas">
             <i class="bi bi-credit-card-fill"></i>
         </a>
         <a href="{{ route('config') }}" class="{{ request()->routeIs('config') ? 'is-current' : '' }}" title="Configurações">

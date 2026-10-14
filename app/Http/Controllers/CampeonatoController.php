@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SalvarCampeonatoRequest;
+use App\Models\Atividade;
 use App\Models\Campeonato;
 use App\Models\Cliente;
+use App\Models\JogoCarta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +25,7 @@ class CampeonatoController extends Controller
         // filtros da barra acima da lista (vêm na url, ex.: ?jogo=magic&status=finalizado)
         $filtros = [
             'busca' => trim((string) $request->query('busca', '')),
-            'jogo' => in_array($request->query('jogo'), jogosDeCartas(), true) ? $request->query('jogo') : '',
+            'jogo' => in_array($request->query('jogo'), JogoCarta::chaves(), true) ? $request->query('jogo') : '',
             'status' => in_array($request->query('status'), ['ativo', 'finalizado'], true) ? $request->query('status') : '',
             'ordenar' => $request->query('ordenar') === 'antigos' ? 'antigos' : 'recentes',
         ];
@@ -42,7 +44,7 @@ class CampeonatoController extends Controller
         $ativos = $todos->where('status', 'ativo')->values()->all();
         $outras = $todos->where('status', '!=', 'ativo')->values()->all();
 
-        $jogosDisponiveis = jogosDeCartas();
+        $jogosDisponiveis = JogoCarta::opcoes();
 
         return view('pages.campeonatos.index', compact('ativos', 'outras', 'filtros', 'filtrosAtivos', 'jogosDisponiveis'));
     }
@@ -59,6 +61,7 @@ class CampeonatoController extends Controller
         DB::transaction(function () use ($request) {
             $campeonato = Campeonato::create($request->dadosCampeonato());
             $campeonato->participantes()->sync($request->validated('participantes', []));
+            Atividade::registrar('campeonatos', "Campeonato criado: {$campeonato->nome}");
         });
 
         return redirect()->route('campeonatos.index')->with('success', 'Campeonato criado.');
@@ -93,6 +96,7 @@ class CampeonatoController extends Controller
             // os marcados na busca somam aos que já existem; para tirar alguém
             // usa-se a lixeira (campeonatos.participantes.destroy)
             $campeonato->participantes()->syncWithoutDetaching($request->validated('participantes', []));
+            Atividade::registrar('campeonatos', "Campeonato editado: {$campeonato->nome}");
         });
 
         return redirect()->route('campeonatos.index')->with('success', "{$campeonato->nome} atualizado.");
@@ -106,6 +110,7 @@ class CampeonatoController extends Controller
     {
         $nome = $campeonato->nome;
         $campeonato->delete();
+        Atividade::registrar('campeonatos', "Campeonato apagado: {$nome}");
 
         return redirect()->route('campeonatos.index')->with('success', "{$nome} apagado.");
     }
@@ -212,6 +217,7 @@ class CampeonatoController extends Controller
             }
 
             $campeonato->update(['status' => 'finalizado']);
+            Atividade::registrar('campeonatos', "Premiação salva: {$campeonato->nome}");
         });
 
         return redirect()->route('campeonatos.show', $campeonato)->with('success', 'Campeonato finalizado.');

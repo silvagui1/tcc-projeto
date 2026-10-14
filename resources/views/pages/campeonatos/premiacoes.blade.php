@@ -16,7 +16,7 @@
          dos participantes do campeonato), quanto de crédito recebe e uma
          descrição. Ao enviar, o crédito vai para o saldo de cada cliente e o
          campeonato vira "finalizado". --}}
-    <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}" data-envio-unico>
+    <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}">
         @csrf
 
         <datalist id="participantes-campeonato">

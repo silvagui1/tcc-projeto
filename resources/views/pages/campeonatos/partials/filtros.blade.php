@@ -33,10 +33,10 @@
                     <input type="radio" name="jogo" value="" {{ $filtros['jogo'] === '' ? 'checked' : '' }}>
                     Todos
                 </label>
-                @foreach ($jogosDisponiveis as $jogo)
+                @foreach ($jogosDisponiveis as $jogo => $nomeJogo)
                     <label class="chip chip--check">
                         <input type="radio" name="jogo" value="{{ $jogo }}" {{ $filtros['jogo'] === $jogo ? 'checked' : '' }}>
-                        {{ nomeDoJogo($jogo) }}
+                        {{ $nomeJogo }}
                     </label>
                 @endforeach
             </div>

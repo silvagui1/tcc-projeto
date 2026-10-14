@@ -13,13 +13,15 @@
 
     {{-- Logo (images/logo-navbar.svg, versão de logofinal.svg com fundo transparente e traços brancos, preparada para
          o fundo escuro da navbar). Clicar na logo leva para a página inicial. --}}
-    <a href="{{ route('home') }}" class="topbar__logo" title="Página inicial">
-        <img src="{{ asset('images/logo-navbar.svg') }}" alt="ArtPlay">
+    {{-- Logo enviada em Configurações > Loja substitui a padrão. --}}
+    @php $logoLoja = \App\Services\Configuracoes::logoUrl(); @endphp
+    <a href="{{ route('home') }}" class="topbar__logo {{ $logoLoja ? 'topbar__logo--personalizada' : '' }}" title="Página inicial">
+        <img src="{{ $logoLoja ?? asset('images/logo-navbar.svg') }}" alt="{{ \App\Services\Configuracoes::valor('loja.nome') }}">
     </a>
 
     <nav class="topbar__nav topbar__nav--right">
         <a href="{{ route('clientes.index') }}" class="topbar__link--clientes {{ request()->routeIs('clientes.*') ? 'is-current' : '' }}">Clientes</a>
-        <a href="{{ route('vendas') }}" class="topbar__link--vendas {{ request()->routeIs('vendas') ? 'is-current' : '' }}">Vendas</a>
+        <a href="{{ route('vendas.index') }}" class="topbar__link--vendas {{ request()->routeIs('vendas.*') ? 'is-current' : '' }}">Vendas</a>
     </nav>
 
     {{-- Ícone de engrenagem fixado na ponta direita da navbar, fora do grid

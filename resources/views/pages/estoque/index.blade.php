@@ -32,96 +32,80 @@
         </div>
     </div>
 
+    {{-- Alerta de estoque baixo (Configurações > Estoque) --}}
+    @if ($estoqueBaixo->isNotEmpty())
+        <div class="alerta-estoque" role="status">
+            <i class="bi bi-exclamation-triangle-fill alerta-estoque__icone" aria-hidden="true"></i>
+            <div class="alerta-estoque__texto">
+                <strong>
+                    {{ $estoqueBaixo->count() }} {{ $estoqueBaixo->count() === 1 ? 'produto está' : 'produtos estão' }}
+                    com estoque baixo
+                </strong>
+                <span>
+                    {{ $estoqueBaixo->take(4)->map(fn ($p) => "{$p->nome} ({$p->quantidade})")->implode(' · ') }}{{ $estoqueBaixo->count() > 4 ? ' · e mais '.($estoqueBaixo->count() - 4) : '' }}
+                </span>
+            </div>
+            <a href="{{ route('config') }}#estoque" class="alerta-estoque__link" title="Alerta a partir de {{ $alertaMinimo }} unidades — mudar em Configurações">
+                até {{ $alertaMinimo }} un.
+            </a>
+        </div>
+    @endif
+
     <hr class="divider">
 
-    {{-- busca + abas, no mesmo painel da lista de campeonatos (.champ-filtros):
-         em cima a busca; embaixo a troca entre estoque produtos / cartas --}}
-    @php
-        $totalResultados = $tab === 'produtos' ? count($produtos) : count($cartasDestaque);
-    @endphp
+    {{-- abas + busca: empilhadas no mobile, lado a lado no desktop --}}
+    <div class="estoque-toolbar">
+        {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
+        <div class="tabs">
+            <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="{{ $tab === 'produtos' ? 'is-active' : '' }}">estoque produtos</a>
+            <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="{{ $tab === 'cartas' ? 'is-active' : '' }}">estoque cartas</a>
+        </div>
 
-    <form method="GET" action="{{ route('estoque.index') }}" class="champ-filtros">
-        <input type="hidden" name="tab" value="{{ $tab }}">
-        {{-- a busca mantém a categoria e a ordem escolhidas --}}
+        {{-- na aba de produtos filtra a lista abaixo; na de cartas leva para o catálogo --}}
         @if ($tab === 'produtos')
-            @if ($categoriaAtual !== '')
-                <input type="hidden" name="categoria" value="{{ $categoriaAtual }}">
-            @endif
-            <input type="hidden" name="ordem" value="{{ $ordemAtual }}">
-        @endif
-
-        <div class="champ-filtros__topo">
-            <div class="champ-filtros__busca">
-                <i class="bi bi-search" aria-hidden="true"></i>
-                <input type="search" name="busca" value="{{ $busca }}"
-                       placeholder="{{ $tab === 'produtos' ? 'Buscar produto' : 'Buscar carta' }}"
-                       aria-label="{{ $tab === 'produtos' ? 'Buscar produto pelo nome' : 'Buscar carta pelo nome' }}">
-                <button type="submit">Buscar</button>
-            </div>
-        </div>
-
-        <div class="champ-filtros__base">
-            {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
-            <div class="champ-filtros__grupo" role="group" aria-labelledby="filtro-estoque">
-                <span class="champ-filtros__rotulo" id="filtro-estoque">Estoque</span>
-                <div class="chip-row">
-                    <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="chip {{ $tab === 'produtos' ? 'is-active' : '' }}">
-                        <i class="bi bi-box-seam" aria-hidden="true"></i> Produtos
-                    </a>
-                    <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="chip {{ $tab === 'cartas' ? 'is-active' : '' }}">
-                        <i class="bi bi-collection" aria-hidden="true"></i> Cartas
-                    </a>
-                </div>
-            </div>
-
-            <div class="champ-filtros__resumo">
-                <span>
-                    {{ $totalResultados }}
-                    @if ($tab === 'produtos')
-                        {{ $totalResultados === 1 ? 'produto' : 'produtos' }}
-                    @else
-                        {{ $totalResultados === 1 ? 'carta' : 'cartas' }}
-                    @endif
-                </span>
-                @if ($busca !== '')
-                    <a href="{{ route('estoque.index', ['tab' => $tab]) }}" class="champ-filtros__limpar">
-                        <i class="bi bi-x-lg"></i> Limpar busca
-                    </a>
+            <form method="GET" action="{{ route('estoque.index') }}" class="search-bar" role="search">
+                <input type="hidden" name="tab" value="produtos">
+                @if ($filtros['categoria'])
+                    <input type="hidden" name="categoria" value="{{ $filtros['categoria'] }}">
                 @endif
-            </div>
-        </div>
-    </form>
+                <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="buscar produto" aria-label="Buscar produto">
+                <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            </form>
+        @else
+            <form method="GET" action="{{ route('estoque.cartas') }}" class="search-bar" role="search">
+                <input type="search" name="busca" placeholder="buscar carta" aria-label="Buscar carta">
+                <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+            </form>
+        @endif
+    </div>
+
+    @include('pages.estoque.partials.mensagem')
 
     @if ($tab === 'produtos')
+
+        @include('pages.estoque.partials.produto-form')
 
         {{-- no desktop: filtros numa coluna à esquerda, produtos à direita --}}
         <div class="estoque-layout">
             <aside class="filters">
                 <h3>Filtros</h3>
 
-                {{-- os chips são links: trocam um filtro e mantêm a busca e o outro filtro --}}
-                @php
-                    $filtroUrl = fn ($mudancas) => route('estoque.index', array_filter(array_merge([
-                        'tab' => 'produtos',
-                        'busca' => $busca,
-                        'categoria' => $categoriaAtual,
-                        'ordem' => $ordemAtual,
-                    ], $mudancas), fn ($valor) => $valor !== ''));
-                @endphp
-
                 <span class="filters__group-label">Categorias</span>
                 <div class="chip-row">
-                    <a href="{{ $filtroUrl(['categoria' => '']) }}" class="chip {{ $categoriaAtual === '' ? 'is-active' : '' }}">Todas</a>
+                    <a href="{{ route('estoque.index', ['tab' => 'produtos', 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
+                       class="chip {{ ! $filtros['categoria'] ? 'is-active' : '' }}">Todas</a>
                     @foreach ($categorias as $categoria)
-                        <a href="{{ $filtroUrl(['categoria' => $categoria]) }}"
-                           class="chip {{ mb_strtolower($categoriaAtual) === mb_strtolower($categoria) ? 'is-active' : '' }}">{{ Str::ucfirst($categoria) }}</a>
+                        <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $categoria->id, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
+                           class="chip {{ $filtros['categoria'] === $categoria->id ? 'is-active' : '' }}">{{ Str::ucfirst(mb_strtolower($categoria->nome)) }}</a>
                     @endforeach
                 </div>
 
                 <span class="filters__group-label">Ordenar</span>
                 <div class="chip-row">
-                    <a href="{{ $filtroUrl(['ordem' => 'primeiros']) }}" class="chip {{ $ordemAtual === 'primeiros' ? 'is-active' : '' }}">Primeiros adicionados</a>
-                    <a href="{{ $filtroUrl(['ordem' => 'ultimos']) }}" class="chip {{ $ordemAtual === 'ultimos' ? 'is-active' : '' }}">Últimos adicionados</a>
+                    @foreach (['antigos' => 'Primeiros adicionados', 'recentes' => 'Últimos adicionados'] as $valor => $rotulo)
+                        <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $filtros['categoria'] ?: null, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $valor]) }}"
+                           class="chip {{ $filtros['ordenar'] === $valor ? 'is-active' : '' }}">{{ $rotulo }}</a>
+                    @endforeach
                 </div>
             </aside>
 
@@ -130,35 +114,53 @@
             <section class="estoque-layout__produtos">
                 <h2 style="font-size: 20px;">Produtos</h2>
 
-                @include('pages.estoque.partials.adicionar-produto')
-                @include('pages.estoque.partials.editar-produto')
+                @if ($produtos->isEmpty())
+                    <p style="color: var(--text-muted-2);">
+                        {{ $filtros['busca'] !== '' || $filtros['categoria'] ? 'Nenhum produto encontrado com esses filtros.' : 'Nenhum produto cadastrado ainda.' }}
+                    </p>
+                @endif
 
                 <div class="product-grid">
                     @foreach ($produtos as $produto)
                         <div class="product-card">
-                            <div class="product-card__image" style="background-image: url('{{ $produto['imagem'] }}'), url('{{ $produto['imagemPadrao'] }}');">
-                                <span class="product-card__tag">{{ $produto['categoria'] }}</span>
-                                <span class="product-card__acoes">
-                                    <button type="button" class="product-card__acao" data-card-dialog-open="produto-editar-{{ $produto['id'] }}"
-                                            aria-label="Editar {{ $produto['nome'] }}" title="Editar">
+                            <div class="product-card__image" style="background-image: url('{{ $produto->imagem_url }}'), url('{{ $produto->imagem_padrao }}');">
+                                <span class="product-card__tag">{{ mb_strtolower($produto->categoria->nome) }}</span>
+                                <span class="product-card__actions">
+                                    <button type="button" class="product-card__delete" data-form-open="produto"
+                                            data-form-dados='@json($produto->dadosFormulario())'
+                                            aria-label="Editar {{ $produto->nome }}" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button type="button" class="product-card__acao" aria-label="Apagar {{ $produto['nome'] }}" title="Apagar">
+                                    <button type="button" class="product-card__delete"
+                                            data-delete-open="{{ route('estoque.produtos.destroy', $produto) }}"
+                                            data-delete-title="Deseja apagar o produto &quot;{{ $produto->nome }}&quot;?"
+                                            aria-label="Apagar {{ $produto->nome }}" title="Apagar">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </span>
                             </div>
                             <div class="product-card__body">
                                 <div class="name-price">
-                                    <strong>{{ $produto['nome'] }}</strong>
-                                    <span class="price">R$ {{ number_format($produto['preco'], 2, ',', '.') }}</span>
+                                    <strong>{{ $produto->nome }}</strong>
+                                    @if ($produto->comercializavel)
+                                        <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
+                                    @else
+                                        {{-- categoria não comercializável: só pode ser dado --}}
+                                        <span class="price price--brinde" title="Não comercializável: só pode ser dado">Brinde</span>
+                                    @endif
                                 </div>
-                                <p>{{ $produto['descricao'] }}</p>
+                                <p>{{ $produto->descricao }}</p>
+                                <p>
+                                    <strong>qtd {{ $produto->quantidade }}</strong>
+                                    @if ($produto->estoque_baixo)
+                                        <span class="selo-estoque-baixo">estoque baixo</span>
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     @endforeach
 
-                    <button type="button" class="add-product-card" data-card-dialog-open="produto">
+                    <button type="button" class="add-product-card" data-form-open="produto">
                         <span class="plus-circle"><i class="bi bi-plus-lg"></i></span>
                         Adicionar produto
                     </button>
@@ -174,24 +176,32 @@
                 @include('pages.estoque.partials.adicionar-carta-botao')
             </div>
 
-            @include('pages.estoque.partials.adicionar-carta', ['jogoPadrao' => 'pokemon'])
+            @include('pages.estoque.partials.carta-form', ['jogoPadrao' => array_key_first($jogosDisponiveis)])
 
-            {{-- prévia de algumas cartas, com link para o catálogo completo.
+            @if ($cartasDestaque->isEmpty())
+                <p style="color: var(--text-muted-2);">Nenhuma carta cadastrada ainda.</p>
+            @endif
+
+            {{-- prévia das últimas cartas, com link para o catálogo completo.
                  No mobile vira um carrossel lateral; no desktop, uma fileira de 4. --}}
             <div class="estoque-cartas-grid">
                 @foreach ($cartasDestaque as $carta)
                     <div class="trading-card trading-card--link">
                         {{-- o link cobre a carta inteira; os botões ficam por cima dele --}}
-                        <a href="{{ route('estoque.cartas.show', [$carta['jogo'], $carta['id']]) }}" class="trading-card__link"
-                           aria-label="Ver detalhes de {{ $carta['nome'] }}"></a>
+                        <a href="{{ route('estoque.cartas.show', $carta) }}" class="trading-card__link"
+                           aria-label="Ver detalhes de {{ $carta->nome }}"></a>
                         @include('pages.estoque.partials.carta-acoes')
-                        <div class="trading-card__image" style="background-image: url('{{ $carta['imagem'] }}'), url('{{ $carta['imagemPadrao'] }}');"></div>
+                        <div class="trading-card__image" style="background-image: url('{{ $carta->imagem_url }}'), url('{{ $carta->imagem_padrao }}');"></div>
                         <div class="trading-card__title-row">
-                            <strong>{{ $carta['nome'] }}</strong>
-                            <span class="price">R$ {{ number_format($carta['preco'], 2, ',', '.') }}</span>
+                            <strong>{{ $carta->nome }}</strong>
+                            <span class="price">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
                         </div>
+                        <p class="trading-card__estoque">
+                            <i class="bi bi-box-seam" aria-hidden="true"></i>
+                            {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
+                        </p>
                         <div class="trading-card__meta">
-                            @foreach ($carta['tags'] as $tag)
+                            @foreach ($carta->tags as $tag)
                                 <span>{{ $tag }}</span>
                             @endforeach
                         </div>
@@ -206,5 +216,7 @@
         </div>
 
     @endif
+
+    @include('pages.estoque.partials.apagar-popup')
 
 @endsection

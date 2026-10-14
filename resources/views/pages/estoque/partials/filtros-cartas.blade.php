@@ -12,6 +12,9 @@
 
     <form method="GET" action="{{ route('estoque.cartas') }}" class="cartas-filtros__form">
         <input type="hidden" name="jogo" value="{{ $jogoAtual }}">
+        @if ($filtros['busca'] !== '')
+            <input type="hidden" name="busca" value="{{ $filtros['busca'] }}">
+        @endif
 
         @foreach (['estado' => 'Estado', 'raridade' => 'Raridade', 'idioma' => 'Idioma'] as $campo => $titulo)
             @if ($opcoes[$campo])
@@ -22,7 +25,7 @@
                             <label class="chip chip--check">
                                 <input type="checkbox" name="{{ $campo }}[]" value="{{ $valor }}"
                                        {{ in_array($valor, $filtros[$campo]) ? 'checked' : '' }}>
-                                {{ mb_convert_case($valor, MB_CASE_TITLE) }}
+                                {{ Str::ucfirst($valor) }}
                             </label>
                         @endforeach
                     </div>

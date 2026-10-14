@@ -23,7 +23,7 @@
         <p class="champ-locked">Este campeonato já foi finalizado e não pode mais ser alterado.</p>
     @endif
 
-    <form method="POST" action="{{ route('campeonatos.update', $campeonato['id']) }}" data-envio-unico>
+    <form method="POST" action="{{ route('campeonatos.update', $campeonato['id']) }}">
         @csrf
         @method('PUT')
 
