@@ -10,9 +10,12 @@
         </a>
     </div>
 
+    @include('pages.campeonatos.partials.mensagens')
+
     {{-- Um bloco por colocação: pesquisa quem ficou no lugar (sugestões vêm
          dos participantes do campeonato), quanto de crédito recebe e uma
-         descrição. Somente frontend por enquanto. --}}
+         descrição. Ao enviar, o crédito vai para o saldo de cada cliente e o
+         campeonato vira "finalizado". --}}
     <form method="POST" action="{{ route('campeonatos.premiacoes.salvar', $campeonatoId) }}" data-envio-unico>
         @csrf
 
@@ -29,7 +32,8 @@
                 <div class="prize-block__body">
                     <div class="champ-search__field prize-block__search">
                         <input type="search" name="premiacoes[{{ $indice }}][participante]" list="participantes-campeonato"
-                               placeholder="pesquisar" aria-label="Participante do {{ $colocacao['posicao'] }}">
+                               placeholder="pesquisar" aria-label="Participante do {{ $colocacao['posicao'] }}"
+                               value="{{ old("premiacoes.$indice.participante", $colocacao['participante']) }}">
                         <img src="{{ asset('images/campeonatos/search.svg') }}" alt="" width="14.6409" height="14.6409">
                     </div>
 
@@ -39,7 +43,7 @@
                             <input type="text" inputmode="decimal"
                                    name="premiacoes[{{ $indice }}][valor]"
                                    placeholder="0,00"
-                                   value="{{ $colocacao['valor'] > 0 ? number_format($colocacao['valor'], 2, ',', '.') : '' }}"
+                                   value="{{ old("premiacoes.$indice.valor", $colocacao['valor'] > 0 ? number_format($colocacao['valor'], 2, ',', '.') : '') }}"
                                    aria-label="Crédito do {{ $colocacao['posicao'] }}"
                                    data-stepper-input>
                         </label>
@@ -53,14 +57,16 @@
 
                     <input type="text" class="prize-block__desc"
                            name="premiacoes[{{ $indice }}][descricao]"
-                           placeholder="descrição"
-                           value="{{ $colocacao['descricao'] }}"
+                           placeholder="descrição" maxlength="250"
+                           value="{{ old("premiacoes.$indice.descricao", $colocacao['descricao']) }}"
                            aria-label="Descrição do prêmio do {{ $colocacao['posicao'] }}">
                 </div>
             </div>
         @endforeach
 
-        <button type="submit" class="champ-submit champ-submit--bottom">Finalizar campeonato</button>
+        <button type="submit" class="champ-submit champ-submit--bottom">
+            {{ $finalizado ? 'Salvar premiações' : 'Finalizar campeonato' }}
+        </button>
     </form>
 
 @endsection

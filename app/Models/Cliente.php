@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class Cliente extends Model
 {
@@ -57,6 +59,61 @@ class Cliente extends Model
     public function historicoCreditos()
     {
         return $this->hasMany(ClienteCreditoHistorico::class)->latest('id');
+    }
+
+    public function campeonatos()
+    {
+        return $this->belongsToMany(Campeonato::class, 'campeonato_cliente')
+            ->withPivot('valor_pago', 'colocacao')
+            ->withTimestamps();
+    }
+
+    /**
+     * Soma (valor positivo) ou desconta (negativo) créditos do saldo e
+     * registra o lançamento no histórico — usado pela premiação dos
+     * campeonatos. Chamar dentro de uma DB::transaction: a linha é travada
+     * para dois lançamentos simultâneos não calcularem sobre o mesmo saldo.
+     *
+     * @throws ValidationException quando o saldo ficaria negativo
+     */
+    public function lancarCredito(float $valor, string $motivo): void
+    {
+        $atual = self::query()->whereKey($this->id)->lockForUpdate()->firstOrFail();
+        $saldoAnterior = (float) $atual->creditos;
+        $saldoNovo = round($saldoAnterior + $valor, 2);
+
+        if ($saldoNovo < 0) {
+            throw ValidationException::withMessages([
+                'creditos' => "{$atual->nome} já usou parte desses créditos (saldo atual: R$ ".number_format($saldoAnterior, 2, ',', '.').').',
+            ]);
+        }
+
+        $atual->update(['creditos' => $saldoNovo]);
+        $this->creditos = $saldoNovo;
+
+        $atual->historicoCreditos()->create([
+            'tipo' => $valor >= 0 ? 'adicionar' : 'descontar',
+            'valor' => abs($valor),
+            'saldo_anterior' => $saldoAnterior,
+            'saldo_novo' => $saldoNovo,
+            'motivo' => Str::limit($motivo, 120, ''),
+        ]);
+    }
+
+    /**
+     * Dados curtos do cliente (avatar, nome e nascimento) usados nas telas
+     * de campeonato — lista de participantes e busca para inscrever.
+     *
+     * @return array<string, mixed>
+     */
+    public function dadosParticipante(): array
+    {
+        return [
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'nascimento' => $this->data_nascimento?->format('d/m/Y') ?? '',
+            'avatar' => $this->avatar_url,
+        ];
     }
 
     public function scopeAtivos(Builder $query): Builder
@@ -112,6 +169,25 @@ class Cliente extends Model
     public function getFotoUrlAttribute(): ?string
     {
         return $this->foto ? asset('storage/'.$this->foto) : null;
+    }
+
+    /**
+     * Imagem pronta para um <img>: a foto do cliente ou, sem foto, um SVG
+     * com as iniciais na cor do avatar (o mesmo avatar padrão da tela de
+     * Clientes, só que como imagem — as telas de campeonato usam <img>).
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        if ($this->foto_url) {
+            return $this->foto_url;
+        }
+
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">'
+            .'<rect width="40" height="40" rx="20" fill="'.$this->cor_avatar.'"/>'
+            .'<text x="20" y="20" dy=".35em" text-anchor="middle" fill="#fff" font-family="Inter, sans-serif" font-size="15" font-weight="600">'
+            .e($this->iniciais).'</text></svg>';
+
+        return 'data:image/svg+xml;base64,'.base64_encode($svg);
     }
 
     /**

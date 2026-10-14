@@ -22,6 +22,7 @@ class ClienteCreditoHistorico extends Model
         'valor',
         'saldo_anterior',
         'saldo_novo',
+        'motivo',
     ];
 
     protected $casts = [

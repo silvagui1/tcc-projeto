@@ -5,7 +5,6 @@ use Illuminate\Support\Str;
 use App\Http\Middleware\LogAcessoMiddleware;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\CampeonatoController;
-use App\Http\Controllers\PremioController;
 use App\Http\Controllers\ClienteController;
 /*
 |--------------------------------------------------------------------------
@@ -715,60 +714,23 @@ Route::get('/estoque/cartas/{jogo}/{id}', function ($jogo, $id) {
 
 // --- Campeonatos ---------------------------------------------------------
 
-Route::prefix('/campeonatos')->group(function () {
+// Mesmos caminhos e nomes de rota das telas da integracao-ui
+// (resources/views/pages/campeonatos), agora ligados ao banco.
+Route::prefix('campeonatos')->name('campeonatos.')->group(function () {
+    Route::get('/', [CampeonatoController::class, 'index'])->name('index');
+    Route::get('/criar', [CampeonatoController::class, 'create'])->name('criar');
+    Route::post('/', [CampeonatoController::class, 'store'])->name('store');
+    Route::get('/{campeonato}', [CampeonatoController::class, 'show'])->name('show');
+    Route::delete('/{campeonato}', [CampeonatoController::class, 'destroy'])->name('apagar');
+    Route::get('/{campeonato}/editar', [CampeonatoController::class, 'edit'])->name('editar');
+    Route::put('/{campeonato}/editar', [CampeonatoController::class, 'update'])->name('update');
 
-    // Listar campeonatos
-    Route::get('/', [CampeonatoController::class, 'index'])
-        ->name('campeonatos.index');
+    // premiação (1°, 2° e 3° lugar) — salvar também finaliza o campeonato
+    Route::get('/{campeonato}/premiacoes', [CampeonatoController::class, 'premiacoes'])->name('premiacoes');
+    Route::post('/{campeonato}/premiacoes', [CampeonatoController::class, 'finalizar'])->name('premiacoes.salvar');
 
-    // Formulário para criar campeonato
-    Route::get('/criar', [CampeonatoController::class, 'create'])
-        ->name('campeonatos.create');
-
-    // Salvar campeonato
-    Route::post('/', [CampeonatoController::class, 'store'])
-        ->name('campeonatos.store');
-
-    // Visualizar campeonato
-    Route::get('/{campeonato}', [CampeonatoController::class, 'show'])
-        ->name('campeonatos.show');
-
-    // Formulário para editar campeonato
-    Route::get('/{campeonato}/editar', [CampeonatoController::class, 'edit'])
-        ->name('campeonatos.edit');
-
-    // Atualizar campeonato
-    Route::put('/{campeonato}', [CampeonatoController::class, 'update'])
-        ->name('campeonatos.update');
-
-    // Excluir campeonato
-    Route::delete('/{campeonato}', [CampeonatoController::class, 'destroy'])
-        ->name('campeonatos.destroy');
-
-
-
-    // Tela de premiações (1°, 2° e 3° lugar)
-    Route::get('/{campeonato}/premios', [PremioController::class, 'index'])
-        ->name('campeonatos.premios.index');
-
-    // Salvar as premiações da tela acima (também finaliza o campeonato)
-    Route::post('/{campeonato}/premios', [CampeonatoController::class, 'finalizar'])
-        ->name('campeonatos.premios.store');
-
-
-
-    // Ver participantes
-    Route::get('/{campeonato}/participantes', [CampeonatoController::class, 'participantes'])
-        ->name('campeonatos.participantes.index');
-
-    // Adicionar User ao campeonato
-    Route::post('/{campeonato}/participantes', [CampeonatoController::class, 'adicionarParticipante'])
-        ->name('campeonatos.participantes.store');
-
-    // Remover User do campeonato
-    Route::delete('/{campeonato}/participantes/{user}', [CampeonatoController::class, 'removerParticipante'])
-        ->name('campeonatos.participantes.destroy');
-
+    Route::post('/{campeonato}/participantes', [CampeonatoController::class, 'adicionarParticipante'])->name('participantes.store');
+    Route::delete('/{campeonato}/participantes/{cliente}', [CampeonatoController::class, 'removerParticipante'])->name('participantes.destroy');
 });
 
 

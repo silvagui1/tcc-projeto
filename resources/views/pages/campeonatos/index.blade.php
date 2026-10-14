@@ -7,6 +7,8 @@
 
 @section('content')
 
+    @include('pages.campeonatos.partials.mensagens')
+
     {{-- cabeçalho: no mobile só o botão aparece; no desktop entra o título
          à esquerda e o botão fica compacto à direita --}}
     <div class="champ-page-header">

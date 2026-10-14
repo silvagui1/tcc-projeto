@@ -6,6 +6,8 @@
 
     @php($finalizado = $campeonato['status'] === 'finalizado')
 
+    @include('pages.campeonatos.partials.mensagens')
+
     {{-- Figma: acessar_camp_ativo / acessar_camp_finalizado. A bolinha no
          canto mostra o status (verde = ativo, vermelha = finalizado). --}}
     <div class="champ-detail">

@@ -17,11 +17,13 @@
         <span style="width: 30px;"></span>
     </div>
 
-    @if ($bloqueado)
+    @include('pages.campeonatos.partials.mensagens')
+
+    @if ($bloqueado && ! session('error'))
         <p class="champ-locked">Este campeonato já foi finalizado e não pode mais ser alterado.</p>
     @endif
 
-    <form method="POST" action="{{ route('campeonatos.editar', $campeonato['id']) }}" data-envio-unico>
+    <form method="POST" action="{{ route('campeonatos.update', $campeonato['id']) }}" data-envio-unico>
         @csrf
         @method('PUT')
 
@@ -30,12 +32,9 @@
 
             <h3>Participantes</h3>
 
-            <div class="champ-search">
-                <div class="champ-search__field">
-                    <input type="search" placeholder="Pesquisar" aria-label="Pesquisar participantes">
-                    <img src="{{ asset('images/campeonatos/search.svg') }}" alt="" width="14.6409" height="14.6409">
-                </div>
-            </div>
+            @unless ($bloqueado)
+                @include('pages.campeonatos.partials.busca-clientes')
+            @endunless
 
             <p class="champ-form__count">{{ count($campeonato['participantesLista']) }} cadastrados</p>
 
@@ -47,7 +46,10 @@
                             <strong>{{ $participante['nome'] }}</strong>
                             <span>{{ $participante['nascimento'] }}</span>
                         </span>
-                        <button type="button" class="participant-row__remove" aria-label="Remover {{ $participante['nome'] }}">
+                        {{-- form="..." envia o form de remoção que fica fora deste
+                             (não dá para ter um <form> dentro de outro) --}}
+                        <button type="submit" class="participant-row__remove" form="remover-participante-{{ $participante['id'] }}"
+                                aria-label="Remover {{ $participante['nome'] }}">
                             <img src="{{ asset('images/campeonatos/trash-dark.svg') }}" alt="" width="24" height="24">
                         </button>
                     </div>
@@ -67,5 +69,15 @@
             <button type="submit" class="champ-submit">Salvar alterações</button>
         @endunless
     </form>
+
+    @unless ($bloqueado)
+        @foreach ($campeonato['participantesLista'] as $participante)
+            <form id="remover-participante-{{ $participante['id'] }}" method="POST" hidden
+                  action="{{ route('campeonatos.participantes.destroy', [$campeonato['id'], $participante['id']]) }}">
+                @csrf
+                @method('DELETE')
+            </form>
+        @endforeach
+    @endunless
 
 @endsection

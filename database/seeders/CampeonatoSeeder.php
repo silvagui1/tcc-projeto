@@ -3,66 +3,76 @@
 namespace Database\Seeders;
 
 use App\Models\Campeonato;
-use App\Models\MovimentacaoCredito;
-use App\Models\User;
+use App\Models\Cliente;
 use Illuminate\Database\Seeder;
 
-// Mesmos dados de exemplo que as telas usavam enquanto eram só frontend
+/**
+ * Mesmos campeonatos de exemplo que as telas usavam enquanto eram só
+ * frontend. Os participantes são clientes, e a premiação dos finalizados
+ * entra no saldo deles (com o lançamento no histórico de créditos).
+ */
 class CampeonatoSeeder extends Seeder
 {
     public function run(): void
     {
-        $img = fn ($arquivo) => 'images/campeonatos/' . $arquivo;
+        $img = fn ($arquivo) => 'images/campeonatos/'.$arquivo;
 
         $clientes = collect([
-            ['name' => 'Guilherme Soares', 'nascimento' => '2009-06-20', 'avatar' => $img('avatar-guilherme.jpg')],
-            ['name' => 'Maria Garcez', 'nascimento' => '2008-07-29', 'avatar' => $img('avatar-maria.jpg')],
-            ['name' => 'Leonardo Pietro', 'nascimento' => '2009-06-24', 'avatar' => $img('avatar-leonardo.jpg')],
-            ['name' => 'Elielso Pedroso', 'nascimento' => '1979-06-22', 'avatar' => $img('avatar-elielso.jpg')],
-            ['name' => 'Rogério Cartinhas', 'nascimento' => '2009-06-20', 'avatar' => $img('avatar-rogerio.jpg')],
-        ])->map(fn ($cliente) => User::factory()->create($cliente));
+            ['nome' => 'Guilherme Soares', 'data_nascimento' => '2009-06-20'],
+            ['nome' => 'Maria Garcez', 'data_nascimento' => '2008-07-29'],
+            ['nome' => 'Leonardo Pietro', 'data_nascimento' => '2009-06-24'],
+            ['nome' => 'Elielso Pedroso', 'data_nascimento' => '1979-06-22'],
+            ['nome' => 'Rogério Cartinhas', 'data_nascimento' => '2009-06-20'],
+        ])->map(fn ($cliente) => Cliente::factory()->create($cliente + ['status' => 'ativo', 'creditos' => 0]));
 
         $inscritos = $clientes->take(4)->pluck('id');
 
         $premios = "1° lugar ganha carta e 200 créditos\n2° lugar ganha 100 créditos\n3° lugar ganha 50 créditos";
 
-        Campeonato::create([
-            'nome' => 'Torneio Pokemon',
-            'status' => 'ativo',
-            'data' => '2026-08-22',
-            'horario' => '10:30',
-            'deck' => 'deck base',
-            'valor_inscricao' => 15,
-            'descricao' => 'terá prêmios e cartas, dando quantias de crédito para cada ganhador',
-            'imagem' => $img('banner-torneio-pokemon.png'),
-        ])->participantes()->sync($inscritos);
+        $ativos = [
+            ['Torneio Pokemon', 'pokemon', '2026-08-22', '10:30', 'deck base', 15, 'terá prêmios e cartas, dando quantias de crédito para cada ganhador', $img('banner-torneio-pokemon.png'), $inscritos],
+            ['Liga One Piece', 'onepiece', '2026-09-05', '14:00', 'deck livre', 20, 'liga mensal com premiação em booster para os 3 primeiros', null, $inscritos->take(3)],
+        ];
 
-        foreach (['Pokemon' => 'banner-pokemon.png', 'Magic' => 'banner-magic.png'] as $nome => $banner) {
+        foreach ($ativos as [$nome, $jogo, $data, $horario, $deck, $inscricao, $descricao, $imagem, $participantes]) {
+            Campeonato::create([
+                'nome' => $nome,
+                'jogo' => $jogo,
+                'status' => 'ativo',
+                'data' => $data,
+                'horario' => $horario,
+                'deck' => $deck,
+                'valor_inscricao' => $inscricao,
+                'descricao' => $descricao,
+                'imagem' => $imagem,
+            ])->participantes()->sync($participantes);
+        }
+
+        $finalizados = [
+            ['Pokemon', 'pokemon', '2026-08-21', '10:00', 'deck ultra max', 15],
+            ['Magic', 'magic', '2026-08-21', '10:00', 'deck ultra max', 15],
+            ['Magic Commander', 'magic', '2026-07-12', '15:00', 'commander', 25],
+        ];
+
+        foreach ($finalizados as [$nome, $jogo, $data, $horario, $deck, $inscricao]) {
             $campeonato = Campeonato::create([
                 'nome' => $nome,
+                'jogo' => $jogo,
                 'status' => 'finalizado',
-                'data' => '2026-08-21',
-                'horario' => '10:00',
-                'deck' => 'deck ultra max',
-                'valor_inscricao' => 15,
+                'data' => $data,
+                'horario' => $horario,
+                'deck' => $deck,
+                'valor_inscricao' => $inscricao,
                 'descricao' => $premios,
-                'imagem' => $img($banner),
             ]);
             $campeonato->participantes()->sync($inscritos);
 
             foreach ([1, 2, 3] as $colocacao) {
-                $userId = $inscritos[$colocacao - 1];
+                $cliente = $clientes[$colocacao - 1];
 
-                $campeonato->premios()->create(['user_id' => $userId, 'colocacao' => $colocacao, 'valor' => 10]);
-                $campeonato->participantes()->updateExistingPivot($userId, ['colocacao' => $colocacao]);
-
-                MovimentacaoCredito::create([
-                    'user_id' => $userId,
-                    'campeonato_id' => $campeonato->id,
-                    'tipo' => 'PREMIO',
-                    'valor' => 10,
-                    'descricao' => "{$colocacao}° lugar - {$nome}",
-                ]);
+                $campeonato->premios()->create(['cliente_id' => $cliente->id, 'colocacao' => $colocacao, 'valor' => 10]);
+                $campeonato->participantes()->updateExistingPivot($cliente->id, ['colocacao' => $colocacao]);
+                $cliente->lancarCredito(10, "{$colocacao}° lugar - {$nome}");
             }
         }
     }

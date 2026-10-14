@@ -13,17 +13,19 @@ return new class extends Migration
     {
         Schema::create('campeonatos', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
-
             $table->string('nome');
+            // chave do jogo ("pokemon", "magic"...), a mesma usada no estoque
+            // de cartas — é o filtro "Jogo" da lista de campeonatos
+            $table->string('jogo', 40);
             $table->string('deck');
             $table->date('data');
             $table->time('horario')->nullable();
-            $table->decimal('valor_inscricao', 10, 2)->default(0); 
+            $table->decimal('valor_inscricao', 10, 2)->default(0);
             $table->string('imagem', 500)->nullable();
             $table->string('descricao', 350)->nullable();
-            $table->enum('status', ['ativo', 'finalizado'])->default('ativo');
-
+            // 'ativo' | 'finalizado' — finalizado fica só para leitura
+            $table->string('status', 10)->default('ativo');
+            $table->timestamps();
         });
     }
 
