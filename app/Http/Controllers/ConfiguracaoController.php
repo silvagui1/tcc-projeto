@@ -9,6 +9,7 @@ use App\Models\Categoria;
 use App\Models\JogoCarta;
 use App\Models\Mesa;
 use App\Models\Produto;
+use App\Models\User;
 use App\Models\Venda;
 use App\Models\VendaItem;
 use App\Services\Configuracoes;
@@ -25,9 +26,9 @@ use Illuminate\View\View;
 /**
  * Tela de Configurações. Cada seção (Loja, Vendas, Mesas e aluguéis,
  * Estoque, Clientes) é salva separadamente; categorias e jogos de carta são
- * cadastros à parte, salvos na hora. Tudo vale para a loja inteira — ainda
- * não há login, então não existe configuração por pessoa (o tema claro/escuro
- * é a exceção: fica no navegador de cada aparelho).
+ * cadastros à parte, salvos na hora. Tudo vale para a loja inteira — não
+ * existe configuração por pessoa (o tema claro/escuro é a exceção: fica no
+ * navegador de cada aparelho).
  */
 class ConfiguracaoController extends Controller
 {
@@ -41,9 +42,18 @@ class ConfiguracaoController extends Controller
     {
     }
 
-    public function index(): View
+    /**
+     * A página abre para todos; o intermediário só vê "Sua conta" e
+     * "Aparência", então os dados das outras seções nem são carregados.
+     */
+    public function index(Request $request): View
     {
+        if (! $request->user()->can('admin')) {
+            return view('pages.config');
+        }
+
         return view('pages.config', [
+            'usuarios' => User::query()->orderByDesc('ativo')->orderBy('nome')->get()->map(fn (User $u) => $u->dadosJson())->all(),
             'config' => $this->configuracoes->todas(),
             'logoUrl' => Configuracoes::logoUrl(),
             'formasPagamento' => Venda::FORMAS_PAGAMENTO,
@@ -601,6 +611,7 @@ class ConfiguracaoController extends Controller
     private function paginaAtividades(?string $area, ?int $antes): array
     {
         $itens = Atividade::query()
+            ->with('usuario:id,nome')
             ->when($area, fn ($q) => $q->where('area', $area))
             ->when($antes, fn ($q) => $q->where('id', '<', $antes))
             ->latest('id')

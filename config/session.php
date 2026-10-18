@@ -31,7 +31,10 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    // 12h sem uso derruba a sessão. Quem marca "Manter conectado" no login
+    // continua entrando pelo cookie de lembrar (30 dias, config/auth.php) —
+    // é o caso de quem acessa de casa depois do expediente.
+    'lifetime' => env('SESSION_LIFETIME', 720),
 
     'expire_on_close' => false,
 
@@ -46,7 +49,7 @@ return [
     |
     */
 
-    'encrypt' => false,
+    'encrypt' => true,
 
     /*
     |--------------------------------------------------------------------------

@@ -7,15 +7,23 @@
 
 @section('content')
 @php
+    // o intermediário vê só a própria conta e a aparência; o resto é do admin
+    $ehAdmin = auth()->user()->can('admin');
     $secoes = [
+        'conta' => ['Sua conta', 'bi-person-circle'],
         'aparencia' => ['Aparência', 'bi-circle-half'],
-        'loja' => ['Loja', 'bi-shop'],
-        'vendas' => ['Vendas', 'bi-receipt'],
-        'alugueis' => ['Mesas e aluguéis', 'bi-calendar-week'],
-        'estoque' => ['Estoque', 'bi-box-seam'],
-        'clientes' => ['Clientes e créditos', 'bi-people'],
-        'dados' => ['Dados e atividades', 'bi-clock-history'],
     ];
+    if ($ehAdmin) {
+        $secoes += [
+            'usuarios' => ['Usuários', 'bi-person-gear'],
+            'loja' => ['Loja', 'bi-shop'],
+            'vendas' => ['Vendas', 'bi-receipt'],
+            'alugueis' => ['Mesas e aluguéis', 'bi-calendar-week'],
+            'estoque' => ['Estoque', 'bi-box-seam'],
+            'clientes' => ['Clientes e créditos', 'bi-people'],
+            'dados' => ['Dados e atividades', 'bi-clock-history'],
+        ];
+    }
 
     // "3h", "1h30"
     $textoDuracao = fn (int $minutos) => intdiv($minutos, 60).'h'.($minutos % 60 ? sprintf('%02d', $minutos % 60) : '');
@@ -26,7 +34,11 @@
         <p class="page-topbar__title">Configurações</p>
         <span class="config-subtitulo">
             <i class="bi bi-info-circle" aria-hidden="true"></i>
-            Valem para todos os computadores da loja
+            @if ($ehAdmin)
+                Valem para todos os computadores da loja
+            @else
+                As configurações da loja ficam com o administrador
+            @endif
         </span>
     </div>
 
@@ -42,13 +54,17 @@
         </nav>
 
         <div class="config-conteudo">
+            @include('pages.configuracoes._conta')
             @include('pages.configuracoes._aparencia')
-            @include('pages.configuracoes._loja')
-            @include('pages.configuracoes._vendas')
-            @include('pages.configuracoes._alugueis')
-            @include('pages.configuracoes._estoque')
-            @include('pages.configuracoes._clientes')
-            @include('pages.configuracoes._dados')
+            @if ($ehAdmin)
+                @include('pages.configuracoes._usuarios')
+                @include('pages.configuracoes._loja')
+                @include('pages.configuracoes._vendas')
+                @include('pages.configuracoes._alugueis')
+                @include('pages.configuracoes._estoque')
+                @include('pages.configuracoes._clientes')
+                @include('pages.configuracoes._dados')
+            @endif
         </div>
     </div>
 

@@ -1,29 +1,29 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\LogAcessoMiddleware;
 use App\Http\Controllers\AluguelController;
-use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\CampeonatoController;
 use App\Http\Controllers\CartaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ConfiguracaoController;
+use App\Http\Controllers\ContaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ProdutoController;
+use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendaController;
 use App\Models\Aluguel;
-use App\Models\JogoCarta;
 use App\Models\Produto;
 use App\Models\Venda;
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Rotas do sistema
 |--------------------------------------------------------------------------
 |
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
+| Todas exigem login: o RouteServiceProvider carrega este arquivo com os
+| middlewares "auth" e "usuario.ativo". Quem não está conectado vai para
+| a tela de login (routes/login.php), a única parte aberta do sistema.
 |
 */
 
@@ -31,30 +31,7 @@ Route::get('/', function () {
     return redirect()->route('home');
 });
 
-
-// --- Alunos (CRUD) -------------------------------------------------------
-
-Route::prefix('aluno')->name('aluno.')->group(function () {
-    Route::get('/', [AlunoController::class, 'index'])->name('index');
-    Route::get('/list', [AlunoController::class, 'list'])->name('list');
-    Route::post('/add', [AlunoController::class, 'add'])->name('add');
-    Route::post('/edit', [AlunoController::class, 'edit'])->name('edit');
-    Route::post('/remove', [AlunoController::class, 'remove'])->name('remove');
-});
-
-
-/*
-|--------------------------------------------------------------------------
-| Rotas do protótipo TCC (frontend)
-|--------------------------------------------------------------------------
-|
-| Telas criadas a partir do protótipo "Protótipo TCC" no Figma.
-| Por enquanto é só o frontend: os dados abaixo são só exemplos (mock)
-| para as telas terem algo pra mostrar, sem nenhuma ligação com banco
-| de dados ainda. Quando o backend for feito, essas rotas passam a
-| chamar controllers/models de verdade.
-|
-*/
+Route::post('/logout', [LoginController::class, 'sair'])->name('logout');
 
 Route::get('/inicio', function () {
     // cartões do topo: vendido hoje x ontem (vendas concluídas)
@@ -166,27 +143,50 @@ Route::prefix('vendas')->name('vendas.')->group(function () {
     Route::post('/{venda}/cancelar', [VendaController::class, 'cancelar'])->whereNumber('venda')->name('cancelar');
 });
 
-// --- Configurações (valem para a loja inteira; ainda sem login) ------------------
+// --- Sua conta (qualquer pessoa conectada) ------------------------------------
 
-Route::prefix('config')->name('config')->controller(ConfiguracaoController::class)->group(function () {
-    Route::get('/', 'index')->name('');
+Route::prefix('conta')->name('conta.')->controller(ContaController::class)->group(function () {
+    Route::put('/email', 'salvarEmail')->name('email');
+    Route::put('/senha', 'trocarSenha')->name('senha');
+    // obrigatória depois de entrar com senha provisória (middleware senha.trocada)
+    Route::get('/criar-senha', 'formCriarSenha')->name('criar-senha');
+    Route::put('/criar-senha', 'criarSenha')->name('criar-senha.salvar');
+});
 
-    Route::put('/loja', 'salvarLoja')->name('.loja');
-    Route::post('/loja/logo', 'enviarLogo')->name('.logo');
-    Route::delete('/loja/logo', 'removerLogo')->name('.logo.remover');
-    Route::put('/vendas', 'salvarVendas')->name('.vendas');
-    Route::put('/alugueis', 'salvarAlugueis')->name('.alugueis');
-    Route::put('/estoque', 'salvarEstoque')->name('.estoque');
-    Route::put('/clientes', 'salvarClientes')->name('.clientes');
+// --- Configurações (valem para a loja inteira) ---------------------------------
+// A página abre para todos ("Sua conta" e "Aparência"); o resto é só do admin.
 
-    Route::post('/categorias', 'salvarCategoria')->name('.categorias.store');
-    Route::put('/categorias/{categoria}', 'salvarCategoria')->name('.categorias.update');
-    Route::delete('/categorias/{categoria}', 'excluirCategoria')->name('.categorias.destroy');
-    Route::post('/jogos-carta', 'salvarJogo')->name('.jogos.store');
-    Route::put('/jogos-carta/{jogoCarta}', 'salvarJogo')->name('.jogos.update');
-    Route::delete('/jogos-carta/{jogoCarta}', 'excluirJogo')->name('.jogos.destroy');
+Route::get('/config', [ConfiguracaoController::class, 'index'])->name('config');
 
-    Route::get('/atividades', 'atividades')->name('.atividades');
-    Route::get('/exportar/vendas', 'exportarVendas')->name('.exportar.vendas');
-    Route::get('/exportar/estoque', 'exportarEstoque')->name('.exportar.estoque');
+Route::prefix('config')->name('config')->middleware('can:admin')->group(function () {
+    Route::controller(ConfiguracaoController::class)->group(function () {
+        Route::put('/loja', 'salvarLoja')->name('.loja');
+        Route::post('/loja/logo', 'enviarLogo')->name('.logo');
+        Route::delete('/loja/logo', 'removerLogo')->name('.logo.remover');
+        Route::put('/vendas', 'salvarVendas')->name('.vendas');
+        Route::put('/alugueis', 'salvarAlugueis')->name('.alugueis');
+        Route::put('/estoque', 'salvarEstoque')->name('.estoque');
+        Route::put('/clientes', 'salvarClientes')->name('.clientes');
+
+        Route::post('/categorias', 'salvarCategoria')->name('.categorias.store');
+        Route::put('/categorias/{categoria}', 'salvarCategoria')->name('.categorias.update');
+        Route::delete('/categorias/{categoria}', 'excluirCategoria')->name('.categorias.destroy');
+        Route::post('/jogos-carta', 'salvarJogo')->name('.jogos.store');
+        Route::put('/jogos-carta/{jogoCarta}', 'salvarJogo')->name('.jogos.update');
+        Route::delete('/jogos-carta/{jogoCarta}', 'excluirJogo')->name('.jogos.destroy');
+
+        Route::get('/atividades', 'atividades')->name('.atividades');
+        Route::get('/exportar/vendas', 'exportarVendas')->name('.exportar.vendas');
+        Route::get('/exportar/estoque', 'exportarEstoque')->name('.exportar.estoque');
+    });
+
+    // contas da equipe
+    Route::prefix('usuarios')->name('.usuarios')->controller(UsuarioController::class)->group(function () {
+        Route::get('/', 'index')->name('');
+        Route::post('/', 'store')->name('.store');
+        Route::put('/{usuario}', 'update')->name('.update');
+        Route::put('/{usuario}/status', 'status')->name('.status');
+        Route::post('/{usuario}/senha', 'redefinirSenha')->name('.senha');
+        Route::post('/{usuario}/sessoes', 'encerrarSessoes')->name('.sessoes');
+    });
 });

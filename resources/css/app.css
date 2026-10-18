@@ -1129,17 +1129,63 @@ a.chip {
     /* Fora do grid de 3 colunas (posicionado sobre o .topbar, que já é
        fixed e por isso serve de referência), para não desalinhar a logo
        do centro da navbar. */
-    .topbar__settings {
+    .topbar__acoes {
         position: absolute;
         top: 50%;
         right: 40px;
         transform: translateY(-50%);
         display: flex;
         align-items: center;
+        gap: 18px;
+    }
+
+    .topbar__settings {
+        display: flex;
+        align-items: center;
         justify-content: center;
         color: var(--white);
         font-size: calc(20px * var(--escala-texto));
         opacity: 0.75;
+    }
+
+    /* quem está conectado + botão de sair */
+    .topbar__conta {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        padding: 3px 3px 3px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .topbar__usuario {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 140px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: var(--white);
+        font-size: calc(13px * var(--escala-texto));
+        font-weight: 600;
+        opacity: 0.85;
+    }
+
+    .topbar__sair {
+        width: 30px;
+        height: 30px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: var(--white);
+        opacity: 0.75;
+    }
+
+    .topbar__sair:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .topbar__settings:hover,

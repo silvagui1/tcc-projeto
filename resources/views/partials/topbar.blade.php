@@ -34,9 +34,23 @@
         </a>
     </nav>
 
-    {{-- Ícone de engrenagem fixado na ponta direita da navbar, fora do grid
-         de 3 colunas, para não desalinhar a logo do centro. --}}
-    <a href="{{ route('config') }}" class="topbar__settings {{ request()->routeIs('config') ? 'is-current' : '' }}" aria-label="Configurações" title="Configurações">
-        <i class="bi bi-gear-fill"></i>
-    </a>
+    {{-- Quem está conectado + sair, e a engrenagem, fixados na ponta direita
+         da navbar, fora do grid de 3 colunas, para não desalinhar a logo do centro. --}}
+    <div class="topbar__acoes">
+        @auth
+            <form method="POST" action="{{ route('logout') }}" class="topbar__conta">
+                @csrf
+                <span class="topbar__usuario" title="{{ auth()->user()->nome }} · {{ auth()->user()->papelRotulo() }}">
+                    <i class="bi bi-person-circle" aria-hidden="true"></i>
+                    {{ auth()->user()->primeiroNome() }}
+                </span>
+                <button type="submit" class="topbar__sair" aria-label="Sair do sistema" title="Sair do sistema">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        @endauth
+        <a href="{{ route('config') }}" class="topbar__settings {{ request()->routeIs('config') ? 'is-current' : '' }}" aria-label="Configurações" title="Configurações">
+            <i class="bi bi-gear-fill"></i>
+        </a>
+    </div>
 </header>

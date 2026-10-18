@@ -1138,3 +1138,214 @@
     height: auto;
     object-fit: contain;
 }
+
+/* ==========================================================================
+   Usuários (_usuarios.blade.php) e Sua conta (_conta.blade.php)
+   ========================================================================== */
+
+/* selo do papel: admin em roxo, intermediário em azul */
+.usuario-papel {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: calc(11px * var(--escala-texto));
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.usuario-papel--admin {
+    background: var(--purple-light-300);
+    color: var(--purple-light-800);
+}
+
+.usuario-papel--intermediario {
+    background: var(--blue-200);
+    color: var(--blue-900);
+}
+
+:root[data-theme="dark"] .usuario-papel--admin {
+    color: #d7cffa;
+}
+
+:root[data-theme="dark"] .usuario-papel--intermediario {
+    background: #2e4762;
+    color: var(--blue-200);
+}
+
+.usuarios__lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.usuarios__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--surface-border);
+}
+
+.usuarios__item--inativo .usuarios__avatar,
+.usuarios__item--inativo .usuarios__info {
+    opacity: .55;
+}
+
+.usuarios__avatar {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--navy-900);
+    color: var(--white);
+    font-size: calc(13px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.usuarios__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.usuarios__linha {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.usuarios__linha strong {
+    font-size: calc(14px * var(--escala-texto));
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.usuarios__info small {
+    font-size: calc(12px * var(--escala-texto));
+    color: var(--text-muted);
+}
+
+.usuarios__selo {
+    font-size: calc(11px * var(--escala-texto));
+    font-weight: 600;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    padding: 0 7px;
+}
+
+.usuarios__selo--alerta {
+    color: var(--yellow-700);
+    border-color: var(--yellow-400);
+}
+
+.usuarios__acoes {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.usuarios__papeis dl {
+    margin: var(--space-3) 0 0;
+    display: grid;
+    gap: var(--space-3);
+}
+
+.usuarios__papeis dl > div {
+    display: grid;
+    gap: 4px;
+}
+
+.usuarios__papeis dt {
+    margin: 0;
+}
+
+.usuarios__papeis dd {
+    margin: 0;
+    font-size: calc(13px * var(--escala-texto));
+    color: var(--text-soft);
+    line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+    .usuarios__papeis dl > div {
+        grid-template-columns: 120px 1fr;
+        align-items: baseline;
+    }
+}
+
+/* modal de criar/editar usuário e da senha provisória */
+.modal-usuario {
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border-radius: var(--radius-modal);
+    padding: var(--space-5);
+}
+
+.modal-usuario[role="alertdialog"] {
+    text-align: center;
+}
+
+.modal-usuario__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.modal-usuario h2 {
+    margin: 0 0 var(--space-2);
+    font-size: calc(17px * var(--escala-texto));
+    font-weight: 800;
+}
+
+.modal-usuario__topo h2 {
+    margin: 0;
+}
+
+.modal-usuario > p {
+    margin: 0 0 var(--space-4);
+    font-size: calc(13px * var(--escala-texto));
+    color: var(--text-soft);
+    line-height: 1.5;
+}
+
+.modal-usuario .modal-confirmar__acoes {
+    margin-top: var(--space-4);
+}
+
+.modal-usuario__icone-senha {
+    color: var(--yellow-500);
+}
+
+.senha-provisoria {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 2px dashed var(--yellow-400);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.senha-provisoria code {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: calc(22px * var(--escala-texto));
+    font-weight: 700;
+    letter-spacing: .08em;
+    color: var(--text);
+    user-select: all;
+}
+
+.senha-provisoria__aviso {
+    margin-top: var(--space-3) !important;
+}

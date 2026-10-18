@@ -39,6 +39,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            // "Manter conectado" vale por 30 dias (em minutos)
+            'remember' => 43200,
         ],
     ],
 

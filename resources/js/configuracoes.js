@@ -636,7 +636,7 @@ function iniciarPaginaConfiguracoes() {
                 marca.title = item.area_rotulo;
                 marca.append(icone(item.icone));
                 const texto = criar('span', 'atividades__texto');
-                texto.append(criar('span', '', item.descricao), criar('small', '', `${item.hora} · ${item.area_rotulo}`));
+                texto.append(criar('span', '', item.descricao), criar('small', '', [item.hora, item.area_rotulo, item.usuario].filter(Boolean).join(' · ')));
                 li.append(marca, texto);
                 listaAtividades.append(li);
                 ultimoId = item.id;
@@ -665,6 +665,232 @@ function iniciarPaginaConfiguracoes() {
         desenhar(JSON.parse(listaAtividades.dataset.inicial || '{"itens":[],"tem_mais":false}'), true);
         mais.addEventListener('click', () => carregar(false));
         filtro.addEventListener('change', () => carregar(true));
+    }
+
+    // =========================================================================
+    // Sua conta: trocar senha (os campos são limpos depois de salvar)
+    // =========================================================================
+
+    const formSenha = pagina.querySelector('[data-conta-senha]');
+    if (formSenha) {
+        const salvar = formSenha.querySelector('[data-conta-senha-salvar]');
+        formSenha.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            salvar.disabled = true;
+            const corpo = Object.fromEntries(new FormData(formSenha));
+            const { ok, dados } = await requisicao(formSenha.getAttribute('action'), { metodo: 'PUT', corpo });
+            salvar.disabled = false;
+            if (ok) {
+                formSenha.reset();
+                exibirErros(formSenha, {});
+                mostrarMensagem(dados.message);
+            } else {
+                exibirErros(formSenha, dados.errors || {});
+                mostrarMensagem(mensagemDeErro(dados), 'erro');
+            }
+        });
+    }
+
+    // =========================================================================
+    // Usuários (só admin): lista, criar/editar, ativar/desativar, redefinir
+    // senha e desconectar. Tudo salvo na hora.
+    // =========================================================================
+
+    const blocoUsuarios = pagina.querySelector('[data-usuarios]');
+    if (blocoUsuarios) {
+        const url = blocoUsuarios.dataset.url;
+        const lista = blocoUsuarios.querySelector('[data-usuarios-lista]');
+        const resumo = blocoUsuarios.querySelector('[data-usuarios-resumo]');
+        const modal = pagina.querySelector('[data-usuario-modal]');
+        const form = modal.querySelector('[data-usuario-form]');
+        const modalSenha = pagina.querySelector('[data-senha-modal]');
+        let usuarios = JSON.parse(blocoUsuarios.dataset.itens || '[]');
+        let editando = null;
+        let focoAnterior = null;
+
+        const iniciais = (nome) => nome.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+
+        function abrir(overlay, focar) {
+            focoAnterior = document.activeElement;
+            overlay.hidden = false;
+            document.body.style.overflow = 'hidden';
+            ativarFocusTrap(overlay.firstElementChild);
+            focar.focus();
+        }
+
+        function fechar(overlay) {
+            overlay.hidden = true;
+            document.body.style.overflow = '';
+            desativarFocusTrap(overlay.firstElementChild);
+            if (focoAnterior && focoAnterior.focus) focoAnterior.focus();
+        }
+
+        function mostrarSenha(usuario, senha) {
+            modalSenha.querySelector('[data-senha-nome]').textContent = usuario.nome;
+            modalSenha.querySelector('[data-senha-usuario]').textContent = usuario.usuario;
+            modalSenha.querySelector('[data-senha-valor]').textContent = senha;
+            abrir(modalSenha, modalSenha.querySelector('[data-senha-ok]'));
+        }
+
+        modalSenha.querySelector('[data-senha-ok]').addEventListener('click', () => {
+            modalSenha.querySelector('[data-senha-valor]').textContent = '';
+            fechar(modalSenha);
+        });
+
+        modalSenha.querySelector('[data-senha-copiar]').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(modalSenha.querySelector('[data-senha-valor]').textContent);
+                mostrarMensagem('Senha copiada.');
+            } catch (e) {
+                mostrarMensagem('Não foi possível copiar. Selecione e copie a senha.', 'erro');
+            }
+        });
+
+        function abrirFormulario(usuario = null) {
+            editando = usuario;
+            form.reset();
+            exibirErros(form, {});
+            modal.querySelector('[data-usuario-modal-titulo]').textContent = usuario ? `Editar ${usuario.nome}` : 'Novo usuário';
+            form.querySelector('[data-usuario-salvar]').textContent = usuario ? 'Salvar' : 'Criar conta';
+            form.querySelector('[data-usuario-aviso-senha]').hidden = Boolean(usuario);
+            form.elements.nome.value = usuario ? usuario.nome : '';
+            form.elements.usuario.value = usuario ? usuario.usuario : '';
+            form.elements.papel.value = usuario ? usuario.papel : 'intermediario';
+            const proprio = Boolean(usuario && usuario.eu);
+            form.elements.papel.disabled = proprio;
+            form.querySelector('[data-usuario-papel-aviso]').hidden = !proprio;
+            abrir(modal, form.elements.nome);
+        }
+
+        modal.querySelectorAll('[data-usuario-fechar]').forEach((b) => b.addEventListener('click', () => fechar(modal)));
+        modal.addEventListener('click', (e) => { if (e.target === modal) fechar(modal); });
+        modal.addEventListener('keydown', (e) => { if (e.key === 'Escape') fechar(modal); });
+        blocoUsuarios.querySelector('[data-usuario-novo]').addEventListener('click', () => abrirFormulario());
+
+        form.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            const salvar = form.querySelector('[data-usuario-salvar]');
+            const corpo = {
+                nome: form.elements.nome.value,
+                usuario: form.elements.usuario.value,
+                // o select fica desabilitado na própria conta: manda o papel atual
+                papel: editando && editando.eu ? editando.papel : form.elements.papel.value,
+            };
+            salvar.disabled = true;
+            const { ok, dados } = editando
+                ? await requisicao(`${url}/${editando.id}`, { metodo: 'PUT', corpo })
+                : await requisicao(url, { metodo: 'POST', corpo });
+            salvar.disabled = false;
+
+            if (!ok) {
+                exibirErros(form, dados.errors || {});
+                if (!dados.errors) mostrarMensagem(mensagemDeErro(dados), 'erro');
+                return;
+            }
+            usuarios = dados.itens;
+            desenhar();
+            fechar(modal);
+            if (dados.senha) {
+                mostrarSenha(dados.usuario, dados.senha);
+            } else {
+                mostrarMensagem(dados.message);
+            }
+        });
+
+        async function acao(usuario, tipo) {
+            const opcoes = {
+                desativar: {
+                    titulo: `Desativar ${usuario.nome}?`,
+                    texto: 'A pessoa é desconectada de todos os aparelhos e não consegue mais entrar. O histórico continua com o nome dela. Dá para reativar depois.',
+                    textoOk: 'Desativar',
+                    endereco: `${url}/${usuario.id}/status`, metodo: 'PUT', corpo: { ativo: false },
+                },
+                reativar: {
+                    endereco: `${url}/${usuario.id}/status`, metodo: 'PUT', corpo: { ativo: true },
+                },
+                senha: {
+                    titulo: `Redefinir a senha de ${usuario.nome}?`,
+                    texto: 'A senha atual deixa de valer, a pessoa é desconectada e recebe uma senha provisória para entrar e criar uma nova.',
+                    textoOk: 'Redefinir senha',
+                    endereco: `${url}/${usuario.id}/senha`, metodo: 'POST',
+                },
+                sessoes: {
+                    titulo: `Desconectar ${usuario.nome}?`,
+                    texto: 'A pessoa sai de todos os aparelhos, inclusive os que usam "Manter conectado". A senha continua a mesma.',
+                    textoOk: 'Desconectar',
+                    endereco: `${url}/${usuario.id}/sessoes`, metodo: 'POST',
+                },
+            }[tipo];
+
+            if (opcoes.titulo && !(await confirmar(opcoes))) return;
+
+            const { ok, dados } = await requisicao(opcoes.endereco, { metodo: opcoes.metodo, corpo: opcoes.corpo || {} });
+            if (!ok) {
+                mostrarMensagem(mensagemDeErro(dados), 'erro');
+                return;
+            }
+            usuarios = dados.itens;
+            desenhar();
+            if (dados.senha) {
+                mostrarSenha(dados.usuario, dados.senha);
+            } else {
+                mostrarMensagem(dados.message);
+            }
+        }
+
+        function botaoAcao(iconeClasse, titulo, aoClicar, perigo = false) {
+            const botao = criar('button', `config-icone-botao${perigo ? ' config-icone-botao--perigo' : ''}`);
+            botao.type = 'button';
+            botao.title = titulo;
+            botao.setAttribute('aria-label', titulo);
+            botao.append(icone(iconeClasse));
+            botao.addEventListener('click', aoClicar);
+            return botao;
+        }
+
+        function desenhar() {
+            lista.innerHTML = '';
+            const ativos = usuarios.filter((u) => u.ativo);
+            const admins = ativos.filter((u) => u.papel === 'admin').length;
+            resumo.textContent = `${ativos.length} ${ativos.length === 1 ? 'conta ativa' : 'contas ativas'} · ${admins} ${admins === 1 ? 'administrador' : 'administradores'}`;
+
+            usuarios.forEach((u) => {
+                const li = criar('li', `usuarios__item${u.ativo ? '' : ' usuarios__item--inativo'}`);
+                const avatar = criar('span', 'usuarios__avatar', iniciais(u.nome));
+                avatar.setAttribute('aria-hidden', 'true');
+
+                const info = criar('span', 'usuarios__info');
+                const linha = criar('span', 'usuarios__linha');
+                linha.append(criar('strong', '', u.nome), criar('span', `usuario-papel usuario-papel--${u.papel}`, u.papel_rotulo));
+                if (u.eu) linha.append(criar('span', 'usuarios__selo', 'você'));
+                if (!u.ativo) linha.append(criar('span', 'usuarios__selo', 'desativado'));
+                if (u.ativo && u.deve_trocar_senha) linha.append(criar('span', 'usuarios__selo usuarios__selo--alerta', 'senha provisória'));
+
+                const detalhes = [`@${u.usuario}`];
+                detalhes.push(u.ultimo_login ? `último acesso ${u.ultimo_login}` : 'nunca entrou');
+                if (u.sessoes > 0) detalhes.push(`${u.sessoes} ${u.sessoes === 1 ? 'sessão aberta' : 'sessões abertas'}`);
+                info.append(linha, criar('small', '', detalhes.join(' · ')));
+
+                const acoes = criar('span', 'usuarios__acoes');
+                acoes.append(botaoAcao('bi-pencil', `Editar ${u.nome}`, () => abrirFormulario(u)));
+                if (!u.eu) {
+                    if (u.ativo) {
+                        acoes.append(
+                            botaoAcao('bi-key', `Redefinir senha de ${u.nome}`, () => acao(u, 'senha')),
+                            botaoAcao('bi-box-arrow-right', `Desconectar ${u.nome} de todos os aparelhos`, () => acao(u, 'sessoes')),
+                            botaoAcao('bi-person-slash', `Desativar ${u.nome}`, () => acao(u, 'desativar'), true),
+                        );
+                    } else {
+                        acoes.append(botaoAcao('bi-person-check', `Reativar ${u.nome}`, () => acao(u, 'reativar')));
+                    }
+                }
+
+                li.append(avatar, info, acoes);
+                lista.append(li);
+            });
+        }
+
+        desenhar();
     }
 
     // =========================================================================

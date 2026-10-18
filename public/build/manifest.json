@@ -280,7 +280,7 @@
     "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-dded9b02.css",
+    "file": "assets/app-fea9a6ff.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
@@ -295,7 +295,7 @@
     "src": "resources/css/clientes.css"
   },
   "resources/css/configuracoes.css": {
-    "file": "assets/configuracoes-387ecdd4.css",
+    "file": "assets/configuracoes-71c675f2.css",
     "isEntry": true,
     "src": "resources/css/configuracoes.css"
   },
@@ -304,14 +304,24 @@
     "isEntry": true,
     "src": "resources/css/estoque.css"
   },
+  "resources/css/login.css": {
+    "file": "assets/login-99ab07f9.css",
+    "isEntry": true,
+    "src": "resources/css/login.css"
+  },
   "resources/css/vendas.css": {
     "file": "assets/vendas-6dc23906.css",
     "isEntry": true,
     "src": "resources/css/vendas.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-8c5e8664.js",
+    "file": "assets/app-52f2b6f6.js",
     "isEntry": true,
     "src": "resources/js/app.js"
+  },
+  "resources/js/login.js": {
+    "file": "assets/login-7bbc057f.js",
+    "isEntry": true,
+    "src": "resources/js/login.js"
   }
 }
