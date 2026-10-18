@@ -1,23 +1,30 @@
-{{-- Avisos depois de salvar (session success/error) e erros de validação.
-     Mesmo aviso verde e mesma caixa de erros do estoque. --}}
+{{-- Avisos depois de salvar (session success/error). Erros de validação de
+     campos que aparecem na tela ($campos, aceita curingas como
+     "premiacoes.*") ficam embaixo de cada campo; os demais aparecem aqui. --}}
+@php
+    $campos = $campos ?? [];
+    $outrosErros = collect($errors->getMessages())
+        ->reject(fn ($mensagens, $chave) => \Illuminate\Support\Str::is($campos, $chave))
+        ->flatten();
+@endphp
+
 @if (session('success'))
-    <p class="card-added-alert" role="status">
-        <i class="bi bi-check-circle-fill"></i>
+    <p class="champ-aviso" role="status">
+        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
         {{ session('success') }}
     </p>
 @endif
 
 @if (session('error'))
-    <p class="champ-locked">{{ session('error') }}</p>
+    <p class="champ-aviso champ-aviso--erro" role="alert">
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        {{ session('error') }}
+    </p>
 @endif
 
-@if ($errors->any())
-    <div class="card-form__errors">
-        Confira os campos:
-        <ul>
-            @foreach ($errors->all() as $erro)
-                <li>{{ $erro }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+@foreach ($outrosErros as $erro)
+    <p class="champ-aviso champ-aviso--erro" role="alert">
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        {{ $erro }}
+    </p>
+@endforeach

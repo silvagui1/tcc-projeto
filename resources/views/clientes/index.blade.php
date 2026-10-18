@@ -49,6 +49,29 @@
         </div>
     </div>
 
+    {{-- Clientes que entraram por um campeonato (participante provisório que
+         virou cliente) e ainda não têm data de nascimento. Clicar abre o
+         perfil; "Editar" completa o cadastro. --}}
+    @if ($incompletos->isNotEmpty())
+        <div class="alerta-incompletos" role="status">
+            <i class="bi bi-person-exclamation alerta-incompletos__icone" aria-hidden="true"></i>
+            <div class="alerta-incompletos__texto">
+                <strong>
+                    {{ $incompletos->count() }}
+                    {{ $incompletos->count() === 1 ? 'cliente veio de um campeonato e precisa' : 'clientes vieram de campeonatos e precisam' }}
+                    completar o cadastro
+                </strong>
+                <span>
+                    Falta a data de nascimento:
+                    @foreach ($incompletos->take(6) as $incompleto)
+                        <button type="button" class="alerta-incompletos__nome" data-abrir-cliente="{{ $incompleto->id }}">{{ $incompleto->nome }}</button>{{ $loop->last ? '' : ',' }}
+                    @endforeach
+                    {{ $incompletos->count() > 6 ? 'e mais '.($incompletos->count() - 6) : '' }}
+                </span>
+            </div>
+        </div>
+    @endif
+
     {{-- No telefone, busca e ações ficam empilhadas (uma embaixo da outra).
          A partir do tablet (.clientes-toolbar em 768px) ficam lado a lado
          numa barra só, como a busca+abas de estoque em mobilenav_atualizado. --}}

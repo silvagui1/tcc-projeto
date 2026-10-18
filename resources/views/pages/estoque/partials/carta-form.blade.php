@@ -54,7 +54,7 @@
             <label class="card-field card-field--full">
                 <span>Nome da carta *</span>
                 <input type="text" name="nome" required maxlength="150"
-                       placeholder="ex.: Charizard ex 199/165" value="{{ old('nome') }}">
+                       placeholder="Ex.: Charizard ex 199/165" value="{{ old('nome') }}">
             </label>
 
             <label class="card-field">
@@ -72,7 +72,7 @@
                 <span>Coleção</span>
                 <input type="text" name="colecao" maxlength="150" data-sugestoes-por-jogo="card-colecoes"
                        list="card-colecoes-{{ old('jogo', $jogoPadrao) }}"
-                       placeholder="ex.: Destined Rivals" value="{{ old('colecao') }}">
+                       placeholder="Ex.: Destined Rivals" value="{{ old('colecao') }}">
                 @foreach ($jogosDisponiveis as $chave => $nomeJogo)
                     <datalist id="card-colecoes-{{ $chave }}">
                         @foreach (config("cartas.colecoes.{$chave}", []) as $colecao)
@@ -86,7 +86,7 @@
                 <span>Raridade</span>
                 <input type="text" name="raridade" maxlength="100" data-sugestoes-por-jogo="card-raridades"
                        list="card-raridades-{{ old('jogo', $jogoPadrao) }}"
-                       placeholder="ex.: Ilustração Rara Especial (SAR)" value="{{ old('raridade') }}">
+                       placeholder="Ex.: Ilustração Rara Especial (SAR)" value="{{ old('raridade') }}">
                 @foreach ($jogosDisponiveis as $chave => $nomeJogo)
                     <datalist id="card-raridades-{{ $chave }}">
                         @foreach (config("cartas.raridades.{$chave}", config('cartas.raridades.padrao')) as $raridade)

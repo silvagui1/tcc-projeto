@@ -6,9 +6,15 @@
 <header class="topbar">
     <nav class="topbar__nav topbar__nav--left">
         {{-- cada link tem a sua cor de destaque (a mesma dos ícones da página
-             inicial), usada na linha embaixo da página atual --}}
-        <a href="{{ route('estoque.index') }}" class="topbar__link--estoque {{ request()->routeIs('estoque.*') ? 'is-current' : '' }}">Estoque</a>
-        <a href="{{ route('campeonatos.index') }}" class="topbar__link--campeonatos {{ request()->routeIs('campeonatos.*') ? 'is-current' : '' }}">Campeonatos</a>
+             inicial), usada na linha embaixo da página atual. O ícone é o
+             mesmo do menu do celular (bottom-nav): aparece transparente atrás
+             do nome da página selecionada (animação em .topbar__icone). --}}
+        <a href="{{ route('estoque.index') }}" class="topbar__link--estoque {{ request()->routeIs('estoque.*') ? 'is-current' : '' }}">
+            <i class="bi bi-box-seam-fill topbar__icone" aria-hidden="true"></i><span>Estoque</span>
+        </a>
+        <a href="{{ route('campeonatos.index') }}" class="topbar__link--campeonatos {{ request()->routeIs('campeonatos.*') ? 'is-current' : '' }}">
+            <i class="bi bi-trophy-fill topbar__icone" aria-hidden="true"></i><span>Campeonatos</span>
+        </a>
     </nav>
 
     {{-- Logo (images/logo-navbar.svg, versão de logofinal.svg com fundo transparente e traços brancos, preparada para
@@ -20,8 +26,12 @@
     </a>
 
     <nav class="topbar__nav topbar__nav--right">
-        <a href="{{ route('clientes.index') }}" class="topbar__link--clientes {{ request()->routeIs('clientes.*') ? 'is-current' : '' }}">Clientes</a>
-        <a href="{{ route('vendas.index') }}" class="topbar__link--vendas {{ request()->routeIs('vendas.*') ? 'is-current' : '' }}">Vendas</a>
+        <a href="{{ route('clientes.index') }}" class="topbar__link--clientes {{ request()->routeIs('clientes.*') ? 'is-current' : '' }}">
+            <i class="bi bi-people-fill topbar__icone" aria-hidden="true"></i><span>Clientes</span>
+        </a>
+        <a href="{{ route('vendas.index') }}" class="topbar__link--vendas {{ request()->routeIs('vendas.*') ? 'is-current' : '' }}">
+            <i class="bi bi-credit-card-fill topbar__icone" aria-hidden="true"></i><span>Vendas</span>
+        </a>
     </nav>
 
     {{-- Ícone de engrenagem fixado na ponta direita da navbar, fora do grid

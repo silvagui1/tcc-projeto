@@ -35,8 +35,15 @@
                 @endif
             </span>
             <span class="cliente-linha__data">
-                {{ $cliente->data_nascimento->format('d/m/Y') }}
-                @if ($cliente->data_nascimento->month === now()->month)
+                @if ($cliente->data_nascimento === null)
+                    {{-- veio de um campeonato como provisório --}}
+                    <span class="cliente-linha__incompleto">
+                        <i class="bi bi-exclamation-circle" aria-hidden="true"></i> Completar cadastro
+                    </span>
+                @else
+                    {{ $cliente->data_nascimento->format('d/m/Y') }}
+                @endif
+                @if ($cliente->data_nascimento?->month === now()->month)
                     {{-- Conecta o número "aniversariantes no mês" do resumo a
                          QUAL cliente é — antes só dava pra saber abrindo um
                          por um. Mesma cor funcional do resumo (pink-700). --}}

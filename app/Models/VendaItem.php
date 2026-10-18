@@ -17,12 +17,22 @@ class VendaItem extends Model
 
     public const TIPOS = ['produto', 'carta', 'aluguel'];
 
+    /**
+     * Inscrição em campeonato: não entra pelo modal de nova venda (por isso
+     * fica fora de TIPOS), é lançada pela tela do campeonato ao registrar o
+     * pagamento. Aparece no histórico e no filtro de Vendas.
+     */
+    public const TIPO_INSCRICAO = 'inscricao';
+
+    public const TIPOS_HISTORICO = [...self::TIPOS, self::TIPO_INSCRICAO];
+
     protected $fillable = [
         'venda_id',
         'tipo',
         'produto_id',
         'carta_id',
         'aluguel_id',
+        'campeonato_id',
         'descricao',
         'quantidade',
         'preco_unitario',
@@ -48,6 +58,11 @@ class VendaItem extends Model
     public function carta()
     {
         return $this->belongsTo(Carta::class);
+    }
+
+    public function campeonato()
+    {
+        return $this->belongsTo(Campeonato::class);
     }
 
     public function aluguel()

@@ -135,7 +135,9 @@ class VendaController extends Controller
     {
         $termo = trim((string) $request->query('q', ''));
 
+        // provisórios de campeonato entram: podem gastar no dia os créditos que ganharam
         $clientes = Cliente::query()
+            ->whereIn('cadastro', [Cliente::CADASTRO_CLIENTE, Cliente::CADASTRO_PROVISORIO])
             ->when($termo !== '', fn (Builder $q) => $q->where('nome', 'like', "%{$termo}%"))
             ->orderByRaw("status = 'inativo'")
             ->orderBy('nome')
@@ -161,7 +163,7 @@ class VendaController extends Controller
             'busca' => trim((string) $request->query('busca', '')),
             'periodo' => in_array($request->query('periodo'), self::PERIODOS, true) ? $request->query('periodo') : 'tudo',
             'pagamento' => in_array($request->query('pagamento'), $pagamentos, true) ? $request->query('pagamento') : 'todos',
-            'tipo' => in_array($request->query('tipo'), VendaItem::TIPOS, true) ? $request->query('tipo') : 'todos',
+            'tipo' => in_array($request->query('tipo'), VendaItem::TIPOS_HISTORICO, true) ? $request->query('tipo') : 'todos',
         ];
     }
 

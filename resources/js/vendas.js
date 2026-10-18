@@ -17,7 +17,7 @@ const ICONES_MENSAGEM = {
     erro: 'bi-exclamation-circle-fill',
 };
 
-const ICONES_TIPO = { produto: 'bi-box-seam', carta: 'bi-stack', aluguel: 'bi-dice-5' };
+const ICONES_TIPO = { produto: 'bi-box-seam', carta: 'bi-stack', aluguel: 'bi-dice-5', inscricao: 'bi-trophy' };
 const PLACEHOLDER_CATALOGO = {
     produto: 'Buscar produto',
     carta: 'Buscar carta',
@@ -375,9 +375,10 @@ function iniciarPaginaVendas() {
                 preencherAvatar(avatar, cliente);
                 const info = criar('span', 'sugestoes__info');
                 info.append(criar('strong', '', cliente.nome));
+                const saldo = cliente.creditos > 0 ? `saldo ${formatarMoeda(cliente.creditos)}` : 'sem créditos';
                 const detalhe = cliente.inativo
                     ? 'inativo'
-                    : (cliente.creditos > 0 ? `saldo ${formatarMoeda(cliente.creditos)}` : 'sem créditos');
+                    : (cliente.provisorio ? `provisório de campeonato · ${saldo}` : saldo);
                 info.append(criar('small', '', detalhe));
                 li.append(avatar, info);
                 adicionarOpcao(li, () => escolher({ tipo: 'cliente', cliente }));
@@ -1043,8 +1044,9 @@ function iniciarPaginaVendas() {
         if (!dados) return;
 
         const partes = [];
-        if (dados.itens.some((i) => i.tipo !== 'aluguel')) partes.push('o estoque dos itens volta para a loja');
+        if (dados.itens.some((i) => i.tipo === 'produto' || i.tipo === 'carta')) partes.push('o estoque dos itens volta para a loja');
         if (dados.itens.some((i) => i.tipo === 'aluguel')) partes.push('o aluguel volta a ficar em aberto');
+        if (dados.itens.some((i) => i.tipo === 'inscricao')) partes.push('a inscrição volta a ficar em aberto no campeonato');
         if (dados.valor_creditos > 0 && dados.cliente) partes.push(`${formatarMoeda(dados.valor_creditos)} voltam para os créditos de ${dados.cliente.nome}`);
         const resumo = partes.length ? partes.join(', ').replace(/^./, (c) => c.toUpperCase()) + '. ' : '';
 

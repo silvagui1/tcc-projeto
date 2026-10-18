@@ -5,7 +5,9 @@
     $erros = $errors->produto;
     $editandoId = $erros->any() ? old('_editar') : null;
     $padrao = ['nome' => '', 'categoria_id' => $categorias->first()?->id, 'descricao' => '',
-               'quantidade' => 1, 'preco' => '', 'imagem' => '', 'imagem_preview' => ''];
+               'quantidade' => 1, 'estoque_minimo' => '', 'preco' => '', 'imagem' => '', 'imagem_preview' => ''];
+    // limite padrão de Configurações > Estoque (null = aviso desligado)
+    $minimoPadrao = \App\Models\Produto::alertaMinimo();
 @endphp
 
 <dialog class="card-dialog" data-form-dialog="produto" @if ($erros->any()) data-open-on-load @endif
@@ -43,7 +45,7 @@
             <label class="card-field card-field--full">
                 <span>Nome do produto *</span>
                 <input type="text" name="nome" required maxlength="150"
-                       placeholder="ex.: Booster Pokémon" value="{{ old('nome') }}">
+                       placeholder="Ex.: Booster Pokémon" value="{{ old('nome') }}">
             </label>
 
             <label class="card-field">
@@ -58,12 +60,6 @@
                 </select>
             </label>
 
-            <label class="card-field">
-                <span>Quantidade *</span>
-                <input type="number" name="quantidade" required min="0" max="99999" step="1"
-                       value="{{ old('quantidade', 1) }}">
-            </label>
-
             {{-- desativado quando a categoria é não comercializável (o item só
                  pode ser dado); o app.js liga/desliga ao trocar a categoria --}}
             <label class="card-field">
@@ -73,10 +69,31 @@
                 <small class="card-field__aviso" data-preco-aviso hidden>Não comercializável: só pode ser dado.</small>
             </label>
 
+            <label class="card-field">
+                <span>Quantidade *</span>
+                <input type="number" name="quantidade" required min="0" max="99999" step="1"
+                       value="{{ old('quantidade', 1) }}">
+            </label>
+
+            {{-- ao lado da quantidade; vazio = usa o padrão de Configurações > Estoque --}}
+            <label class="card-field">
+                <span>Estoque baixo a partir de</span>
+                <input type="number" name="estoque_minimo" min="0" max="99999" step="1" inputmode="numeric"
+                       placeholder="{{ $minimoPadrao !== null ? 'padrão: '.$minimoPadrao : 'Ex.: 5' }}"
+                       value="{{ old('estoque_minimo') }}">
+                <small class="card-field__aviso">
+                    @if ($minimoPadrao !== null)
+                        Vazio usa o padrão ({{ $minimoPadrao }} un.).
+                    @else
+                        Aviso desligado em Configurações &gt; Estoque.
+                    @endif
+                </small>
+            </label>
+
             <label class="card-field card-field--full">
                 <span>Descrição</span>
                 <input type="text" name="descricao" maxlength="1000"
-                       placeholder="ex.: lata de 350ml" value="{{ old('descricao') }}">
+                       placeholder="Ex.: lata de 350ml" value="{{ old('descricao') }}">
             </label>
 
             @include('pages.estoque.partials.imagem-campo', [

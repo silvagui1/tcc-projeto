@@ -14,6 +14,6 @@
             <button type="button" class="confirm-popup__no" data-delete-cancel>Não, manter.</button>
         </div>
 
-        <p class="confirm-popup__hint">caso o item seja apagado não terá como desfazer essa ação.</p>
+        <p class="confirm-popup__hint">Caso o item seja apagado não terá como desfazer essa ação.</p>
     </form>
 </dialog>

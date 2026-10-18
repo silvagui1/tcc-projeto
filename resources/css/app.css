@@ -56,7 +56,11 @@
     --yellow-900: #5e4217;
 
     /* layout */
-    --topbar-height: 76px;
+    --topbar-height: 84px;
+
+    /* escala de todas as letras do sistema (font-size: calc(Npx * var(--escala-texto))):
+       1 = tamanhos originais do protótipo; 1.0625 = +1px a cada 16px */
+    --escala-texto: 1.0625;
     --bottom-nav-height: 16px;
     --radius-lg: 24px;
     --radius-md: 16px;
@@ -132,6 +136,8 @@ body {
     background: var(--bg);
     color: var(--text);
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    /* texto sem tamanho próprio também segue a escala geral */
+    font-size: calc(16px * var(--escala-texto));
     -webkit-font-smoothing: antialiased;
 }
 
@@ -189,7 +195,7 @@ img {
 }
 
 .page-topbar__title {
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
     font-weight: 700;
     margin: 0;
 }
@@ -201,7 +207,7 @@ img {
     width: 30px;
     height: 30px;
     color: var(--text);
-    font-size: 20px;
+    font-size: calc(20px * var(--escala-texto));
 }
 
 /* ==========================================================================
@@ -221,19 +227,19 @@ img {
 }
 
 .stat-card__label {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
     margin: 0 0 6px;
 }
 
 .stat-card__value {
-    font-size: 24px;
+    font-size: calc(24px * var(--escala-texto));
     font-weight: 600;
     margin: 0;
 }
 
 .stat-card__value--lg {
-    font-size: 32px;
+    font-size: calc(32px * var(--escala-texto));
 }
 
 .stat-grid {
@@ -316,7 +322,7 @@ img {
 }
 
 .home-diferenca small {
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     opacity: 0.8;
 }
 
@@ -352,7 +358,7 @@ img {
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: rgba(255, 255, 255, 0.08);
     color: var(--on-accent);
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
     line-height: 1.2;
     text-align: center;
@@ -360,7 +366,7 @@ img {
 }
 
 .home-atalho i {
-    font-size: 20px;
+    font-size: calc(20px * var(--escala-texto));
     line-height: 1;
 }
 
@@ -395,7 +401,7 @@ img {
     .home-atalho {
         width: 70px;
         height: 64px;
-        font-size: 11px;
+        font-size: calc(11px * var(--escala-texto));
     }
 }
 
@@ -418,18 +424,18 @@ img {
 
 .home-mesas__header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
 }
 
 .home-mesas__header a {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     color: var(--text-accent);
 }
 
 .home-mesas__vazio {
     margin: 4px 0 0;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -452,12 +458,12 @@ img {
 }
 
 .home-mesa__horario strong {
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
 }
 
 .home-mesa__horario small,
 .home-mesa__corpo .jogo-chip {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
 }
 
 .home-mesa__horario small {
@@ -475,7 +481,7 @@ img {
 
 .home-mesa__corpo strong {
     max-width: 100%;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -485,7 +491,7 @@ img {
     flex-shrink: 0;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 700;
     background: rgba(111, 209, 147, 0.2);
     color: #2f7a4a;
@@ -559,7 +565,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: calc(22px * var(--escala-texto));
     flex-shrink: 0;
     color: var(--white);
 }
@@ -570,18 +576,18 @@ img {
 
 .action-card__text strong {
     display: block;
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
     font-weight: 600;
 }
 
 .action-card__text span {
     display: block;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted-2);
 }
 
 .action-card__arrow {
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
     color: var(--text-muted-2);
     border-left: 1px solid var(--line);
     padding-left: 12px;
@@ -604,7 +610,7 @@ img {
     flex: 1;
     text-align: center;
     padding: 12px;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
     background: var(--surface);
     color: var(--text);
@@ -650,7 +656,7 @@ img {
     padding: 12px 16px;
     margin-bottom: 20px;
     color: var(--text-muted-2);
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 /* quando a busca é um <form> de verdade (estoque) */
@@ -685,12 +691,12 @@ img {
 }
 
 .filters h3 {
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
     margin: 0 0 8px;
 }
 
 .filters .filters__group-label {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 500;
     color: var(--text);
     display: block;
@@ -708,7 +714,7 @@ img {
     align-items: center;
     padding: 4px 12px;
     border-radius: 12px;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     border: 1px solid var(--purple-light-800);
     color: var(--text);
     background: transparent;
@@ -788,7 +794,7 @@ a.chip {
     padding: 16px 20px;
     color: var(--pink-700);
     font-weight: 600;
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
     margin-bottom: 24px;
 }
 
@@ -828,18 +834,18 @@ a.chip {
     align-items: center;
     justify-content: center;
     color: var(--purple-500);
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
 }
 
 .settings-row__label div span {
     display: block;
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     color: var(--text-muted);
 }
 
 .settings-row__label div strong {
     display: block;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 400;
 }
 
@@ -854,7 +860,7 @@ a.chip {
 }
 
 .empty-state .icon {
-    font-size: 48px;
+    font-size: calc(48px * var(--escala-texto));
     margin-bottom: 16px;
     color: var(--purple-300);
 }
@@ -888,7 +894,7 @@ a.chip {
     border-radius: 50%;
     background: var(--blue-400);
     color: var(--navy-900);
-    font-size: 22px;
+    font-size: calc(22px * var(--escala-texto));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -958,7 +964,7 @@ a.chip {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: calc(20px * var(--escala-texto));
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     /* gira até o ângulo do item, anda o raio "para cima" e gira de volta
        — assim os 6 quadrados ficam à mesma distância do centro, formando
@@ -1031,7 +1037,7 @@ a.chip {
     .topbar__nav a {
         color: var(--white);
         font-weight: 600;
-        font-size: 15px;
+        font-size: calc(15px * var(--escala-texto));
         padding: 4px 2px;
         opacity: 0.75;
         border-bottom: 2px solid transparent;
@@ -1046,8 +1052,76 @@ a.chip {
         border-bottom-color: var(--nav-accent, var(--pink-400));
     }
 
+    /* Ícone do menu do celular (bottom-nav) atrás do nome da página: fica
+       escondido, aparece bem fraco no hover e, na página selecionada (ou no
+       link que acabou de ser clicado), surge transparente na cor da página,
+       subindo e crescendo. */
+    .topbar__nav a {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .topbar__nav a > span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .topbar__icone {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 0;
+        color: var(--nav-icone, var(--nav-accent, var(--pink-400)));
+        font-size: calc(34px * var(--escala-texto));
+        line-height: 1;
+        opacity: 0;
+        transform: translate(-50%, -30%) scale(.6) rotate(-8deg);
+        transition: opacity .25s ease, transform .25s ease;
+        pointer-events: none;
+    }
+
+    .topbar__nav a:hover .topbar__icone {
+        opacity: .14;
+        transform: translate(-50%, -50%) scale(.85);
+    }
+
+    .topbar__nav a.is-current .topbar__icone,
+    .topbar__nav a.is-selecionando .topbar__icone {
+        opacity: .3;
+        transform: translate(-50%, -50%) scale(1);
+        animation: topbar-icone-surge .6s cubic-bezier(.2, .9, .3, 1.25) both;
+    }
+
+    @keyframes topbar-icone-surge {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -10%) scale(.4) rotate(-12deg);
+        }
+        60% {
+            opacity: .38;
+            transform: translate(-50%, -55%) scale(1.12) rotate(3deg);
+        }
+        100% {
+            opacity: .3;
+            transform: translate(-50%, -50%) scale(1) rotate(0);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .topbar__icone {
+            transition: none;
+        }
+
+        .topbar__nav a.is-current .topbar__icone,
+        .topbar__nav a.is-selecionando .topbar__icone {
+            animation: none;
+        }
+    }
+
     /* cor da linha da página atual: a mesma dos ícones da página inicial */
-    .topbar__link--estoque     { --nav-accent: var(--purple-500); }
+    /* o roxo da linha é escuro demais para o ícone transparente sobre o
+       fundo da navbar: o ícone usa a variante clara da mesma cor */
+    .topbar__link--estoque     { --nav-accent: var(--purple-500); --nav-icone: var(--purple-300); }
     .topbar__link--campeonatos { --nav-accent: var(--pink-300); }
     .topbar__link--clientes    { --nav-accent: var(--blue-300); }
     .topbar__link--vendas      { --nav-accent: var(--yellow-300); }
@@ -1064,7 +1138,7 @@ a.chip {
         align-items: center;
         justify-content: center;
         color: var(--white);
-        font-size: 20px;
+        font-size: calc(20px * var(--escala-texto));
         opacity: 0.75;
     }
 
@@ -1086,7 +1160,7 @@ a.chip {
     }
 
     .topbar__logo img {
-        height: 56px;
+        height: 62px;
         width: auto;
     }
 }
@@ -1112,7 +1186,7 @@ a.chip {
 
 .confirm-popup__title {
     margin: 0 0 12px;
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -1125,7 +1199,7 @@ a.chip {
     padding: 8px 12px;
     border-radius: 4px;
     color: var(--text);
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
 }
 
 .confirm-popup__yes { background: #e96e70; }
@@ -1134,7 +1208,7 @@ a.chip {
 .confirm-popup__hint {
     margin: 9px 0 0;
     color: var(--text-soft);
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
 }
 
 /* --- Configurações > Aparência: seletor de tema ---------------------------- */
@@ -1160,7 +1234,7 @@ a.chip {
     gap: 6px;
     padding: 7px 12px;
     border-radius: 9px;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     color: var(--text-muted);
     cursor: pointer;

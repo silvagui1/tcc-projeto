@@ -36,7 +36,7 @@
     left: 8px;
     background: var(--purple-light-800);
     color: var(--white);
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     padding: 3px 10px;
     border-radius: 12px;
 }
@@ -53,7 +53,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
 }
 
 /* editar + apagar lado a lado no canto da imagem */
@@ -81,12 +81,12 @@
 }
 
 .product-card__body strong {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     line-height: 1.2;
 }
 
 .product-card__body .price {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
     white-space: nowrap;
 }
@@ -97,11 +97,11 @@
     border-radius: 10px;
     background: var(--purple-light-800);
     color: var(--white);
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
 }
 
 .product-card__body p {
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     color: var(--text-muted);
     margin: 4px 0 0;
 }
@@ -127,7 +127,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: calc(32px * var(--escala-texto));
     color: var(--purple-light-800);
 }
 
@@ -291,7 +291,7 @@
 }
 
 .trading-card__title-row strong {
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
 }
 
 .trading-card__title-row {
@@ -310,7 +310,7 @@
     align-items: center;
     gap: 6px;
     margin: -4px 0 12px;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -339,7 +339,7 @@
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
 }
 
 /* --- Carta clicável + botões de editar / apagar -------------------------- */
@@ -390,7 +390,7 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.92);
     color: var(--purple-500);
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
     transition: background-color 0.15s ease, color 0.15s ease;
 }
@@ -433,7 +433,7 @@
     background: var(--yellow-300);
     border-radius: 20px;
     color: var(--yellow-900);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
 }
 
@@ -443,13 +443,13 @@
     background: var(--purple-light-300);
     border-radius: 20px;
     color: var(--purple-500);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
 }
 
 .card-detail__info h1 {
     margin: 12px 0 6px;
-    font-size: 26px;
+    font-size: calc(26px * var(--escala-texto));
     font-weight: 700;
     letter-spacing: -0.01em;
 }
@@ -457,13 +457,13 @@
 .card-detail__price {
     margin: 0 0 16px;
     color: var(--text-accent);
-    font-size: 28px;
+    font-size: calc(28px * var(--escala-texto));
     font-weight: 700;
 }
 
 .card-detail__price span {
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -481,7 +481,7 @@
     gap: 16px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--surface-border);
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
 }
 
 .card-detail__specs > div:last-child {
@@ -523,7 +523,7 @@
     border-radius: 12px;
     background: var(--purple-500);
     color: var(--white);
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
     font-weight: 600;
     transition: background-color 0.15s ease;
 }
@@ -558,7 +558,7 @@
     }
 
     .card-detail__info h1 {
-        font-size: 32px;
+        font-size: calc(32px * var(--escala-texto));
     }
 }
 
@@ -575,7 +575,7 @@
 
 .cartas-header h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -589,7 +589,7 @@
     background: var(--purple-500);
     border-radius: 12px;
     color: var(--white);
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
     font-weight: 600;
     box-shadow: 0 3px 8px rgba(83, 87, 125, 0.35);
     transition: background-color 0.15s ease, transform 0.15s ease;
@@ -609,7 +609,7 @@
     border-radius: 8px;
     background: var(--purple-light-300);
     color: var(--purple-500);
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
 }
 
 .card-added-alert {
@@ -622,7 +622,7 @@
     border: 1px solid #b7dfbf;
     border-radius: var(--radius-sm);
     color: #25623a;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -655,14 +655,14 @@
 
 .card-form__header h2 {
     margin: 0;
-    font-size: 22px;
+    font-size: calc(22px * var(--escala-texto));
     font-weight: 700;
 }
 
 .card-form h3 {
     margin: 20px 0 10px;
     color: var(--purple-500);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -682,7 +682,7 @@
 }
 
 .card-field > span {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -696,7 +696,7 @@
     background: var(--field);
     color: var(--text);
     font-family: inherit;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 .card-field input:focus,
@@ -717,7 +717,7 @@
 }
 
 .card-field__aviso {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -787,12 +787,12 @@
     gap: 6px;
     padding: 0 12px;
     color: var(--text-muted-2);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     text-align: center;
 }
 
 .imagem-campo__vazio i {
-    font-size: 28px;
+    font-size: calc(28px * var(--escala-texto));
 }
 
 .imagem-campo__acoes {
@@ -810,7 +810,7 @@
     border-radius: 12px;
     background: transparent;
     color: var(--text);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     cursor: pointer;
 }
@@ -833,7 +833,7 @@
     border: 1px solid #efb9b9;
     border-radius: var(--radius-sm);
     color: #8a2424;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .card-form__errors ul {
@@ -856,7 +856,7 @@
     height: 44px;
     padding: 0 18px;
     border-radius: 12px;
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
     font-weight: 600;
 }
 
@@ -913,7 +913,7 @@
     }
 
     .card-list > article h3 {
-        font-size: 17px !important;
+        font-size: calc(17px * var(--escala-texto)) !important;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -981,7 +981,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
     font-weight: 700;
     cursor: pointer;
     list-style: none;
@@ -996,7 +996,7 @@
     content: "\F282"; /* bi-chevron-down */
     font-family: "bootstrap-icons";
     margin-left: auto;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     transition: transform 0.2s ease;
 }
 
@@ -1014,7 +1014,7 @@
     border-radius: 10px;
     background: var(--purple-500);
     color: var(--white);
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
 }
 
 .cartas-filtros__form {
@@ -1034,7 +1034,7 @@
     width: 100%;
     padding: 0;
     margin: 10px 0 5px;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 500;
     color: var(--text);
 }
@@ -1069,7 +1069,7 @@
     background: var(--field);
     color: var(--text);
     font-family: inherit;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .cartas-filtros__preco input:focus,
@@ -1093,7 +1093,7 @@
     justify-content: center;
     height: 38px;
     border-radius: var(--radius-sm);
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
 }
 

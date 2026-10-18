@@ -94,10 +94,14 @@ Route::prefix('estoque/cartas')->name('estoque.cartas')->group(function () {
 
 
 // --- Campeonatos ---------------------------------------------------------
+// Tudo acontece na lista: os GETs de criar/ver/editar/premiar devolvem o
+// conteúdo do pop-up (pedido via fetch) ou redirecionam para a lista com o
+// pop-up aberto (?abrir=ID).
 
 Route::prefix('campeonatos')->name('campeonatos.')->group(function () {
     Route::get('/', [CampeonatoController::class, 'index'])->name('index');
     Route::get('/criar', [CampeonatoController::class, 'create'])->name('criar');
+    Route::get('/banner.svg', [CampeonatoController::class, 'banner'])->name('banner');
     Route::post('/', [CampeonatoController::class, 'store'])->name('store');
     Route::get('/{campeonato}', [CampeonatoController::class, 'show'])->name('show');
     Route::delete('/{campeonato}', [CampeonatoController::class, 'destroy'])->name('apagar');
@@ -108,8 +112,18 @@ Route::prefix('campeonatos')->name('campeonatos.')->group(function () {
     Route::get('/{campeonato}/premiacoes', [CampeonatoController::class, 'premiacoes'])->name('premiacoes');
     Route::post('/{campeonato}/premiacoes', [CampeonatoController::class, 'finalizar'])->name('premiacoes.salvar');
 
-    Route::post('/{campeonato}/participantes', [CampeonatoController::class, 'adicionarParticipante'])->name('participantes.store');
-    Route::delete('/{campeonato}/participantes/{cliente}', [CampeonatoController::class, 'removerParticipante'])->name('participantes.destroy');
+    // checklist dos eventos oficiais (sanção, Player ID...)
+    Route::put('/{campeonato}/requisitos', [CampeonatoController::class, 'requisitos'])->name('requisitos');
+
+    // participantes: inscrever cliente, inscrever provisório ("fantasma"), tirar
+    Route::post('/{campeonato}/participantes', [CampeonatoController::class, 'inscrever'])->name('participantes.inscrever');
+    Route::post('/{campeonato}/participantes/provisorio', [CampeonatoController::class, 'inscreverProvisorio'])->name('participantes.provisorio');
+    Route::delete('/{campeonato}/participantes/{cliente}', [CampeonatoController::class, 'removerParticipante'])->name('participantes.remover');
+    // provisório: vira cliente ou não
+    Route::post('/{campeonato}/participantes/{cliente}/cadastro', [CampeonatoController::class, 'decidirProvisorio'])->name('participantes.cadastro');
+
+    // pagamento da inscrição — vira uma venda em Vendas (nunca com créditos)
+    Route::post('/{campeonato}/participantes/{cliente}/pagamento', [CampeonatoController::class, 'registrarPagamento'])->name('participantes.pagamento');
 });
 
 

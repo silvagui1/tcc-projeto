@@ -1,5 +1,5 @@
 @php
-    $iconesTipo = ['produto' => 'bi-box-seam', 'carta' => 'bi-stack', 'aluguel' => 'bi-dice-5'];
+    $iconesTipo = ['produto' => 'bi-box-seam', 'carta' => 'bi-stack', 'aluguel' => 'bi-dice-5', 'inscricao' => 'bi-trophy'];
 @endphp
 {{-- Uma venda. No telefone: hora | itens + (cliente · pagamento) | total.
      A partir do tablet os blocos viram colunas alinhadas com o cabeçalho

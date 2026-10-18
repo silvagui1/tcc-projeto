@@ -1,7 +1,9 @@
 import './clientes';
 import './vendas';
 import './configuracoes';
+import './campeonatos';
 import './bootstrap';
+import { iniciarCampoDeImagem } from './comum';
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,8 +31,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Campeonatos — pop-up "Deseja apagar este campeonato?". Qualquer botão com
+// Navbar do desktop — ao clicar numa página, o ícone dela (o mesmo do menu
+// do celular) já começa a surgir enquanto a próxima página carrega; lá a
+// animação de .is-current continua o efeito. Ctrl/Cmd+clique (nova aba) não
+// anima, porque a página atual não muda.
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.topbar__nav a').forEach((link) => {
+        link.addEventListener('click', (event) => {
+            if (event.ctrlKey || event.metaKey || event.shiftKey || link.classList.contains('is-current')) {
+                return;
+            }
+            document.querySelectorAll('.topbar__nav a.is-selecionando').forEach((outro) => outro.classList.remove('is-selecionando'));
+            link.classList.add('is-selecionando');
+        });
+    });
+
+    // voltando pelo "Voltar" do navegador a página pode vir do cache ainda
+    // com o link clicado marcado
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            document.querySelectorAll('.topbar__nav a.is-selecionando').forEach((link) => link.classList.remove('is-selecionando'));
+        }
+    });
+});
+
+// Estoque — pop-up "Deseja apagar...?". Qualquer botão com
 // data-delete-open="<url>" abre o <dialog> e usa a url como action do form.
+// (Campeonatos tem o próprio, em campeonatos.js.)
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('[data-delete-dialog]');
     const form = dialog?.querySelector('[data-delete-form]');
@@ -63,101 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Estoque — campo de imagem dos pop-ups (partials/imagem-campo). A imagem
-// pode vir de um arquivo do aparelho, de Ctrl+V (print, imagem copiada do
-// navegador...), de arrastar e soltar ou de um link. Colar/arrastar coloca o
-// arquivo dentro do próprio <input type="file">, então o envio é o mesmo de
-// "Escolher imagem". Expõe campo.imagemDoEstoque.reiniciar(url) para o
-// pop-up limpar/preencher o campo ao abrir.
-const iniciarCampoDeImagem = (campo) => {
-    const dialog = campo.closest('dialog');
-    const area = campo.querySelector('[data-imagem-area]');
-    const preview = campo.querySelector('[data-imagem-preview]');
-    const vazio = campo.querySelector('[data-imagem-vazio]');
-    const arquivo = campo.querySelector('[data-imagem-arquivo]');
-    const url = campo.querySelector('[data-imagem-url]');
-    const remover = campo.querySelector('[data-imagem-remover]');
-    const removerInput = campo.querySelector('[data-imagem-remover-input]');
-    let urlTemporaria = null;
-
-    const mostrar = (src) => {
-        if (urlTemporaria && src !== urlTemporaria) {
-            URL.revokeObjectURL(urlTemporaria);
-            urlTemporaria = null;
-        }
-        preview.hidden = !src;
-        vazio.hidden = Boolean(src);
-        remover.hidden = !src;
-        if (src) {
-            preview.src = src;
-        } else {
-            preview.removeAttribute('src');
-        }
-    };
-
-    const usarArquivo = (file) => {
-        if (!file || !file.type.startsWith('image/')) {
-            return;
-        }
-        const transferencia = new DataTransfer();
-        transferencia.items.add(file);
-        arquivo.files = transferencia.files;
-        url.value = '';
-        removerInput.value = '0';
-        mostrar(urlTemporaria = URL.createObjectURL(file));
-    };
-
-    arquivo.addEventListener('change', () => usarArquivo(arquivo.files[0]));
-
-    url.addEventListener('input', () => {
-        arquivo.value = '';
-        removerInput.value = url.value.trim() ? '0' : removerInput.value;
-        mostrar(url.value.trim());
-    });
-
-    // link quebrado: volta para o quadro vazio em vez de mostrar ícone quebrado
-    preview.addEventListener('error', () => mostrar(''));
-
-    remover.addEventListener('click', () => {
-        arquivo.value = '';
-        url.value = '';
-        removerInput.value = '1';
-        mostrar('');
-    });
-
-    // Ctrl+V em qualquer lugar do pop-up (se o que foi copiado for imagem;
-    // texto colado num campo continua funcionando normalmente)
-    dialog.addEventListener('paste', (event) => {
-        const imagem = [...(event.clipboardData?.files ?? [])].find((file) => file.type.startsWith('image/'));
-        if (imagem) {
-            event.preventDefault();
-            usarArquivo(imagem);
-        }
-    });
-
-    ['dragenter', 'dragover'].forEach((tipo) => area.addEventListener(tipo, (event) => {
-        event.preventDefault();
-        area.classList.add('is-arrastando');
-    }));
-    ['dragleave', 'drop'].forEach((tipo) => area.addEventListener(tipo, () => area.classList.remove('is-arrastando')));
-    area.addEventListener('drop', (event) => {
-        event.preventDefault();
-        usarArquivo(event.dataTransfer.files[0]);
-    });
-    area.addEventListener('click', () => arquivo.click());
-
-    campo.imagemDoEstoque = {
-        reiniciar: (src) => {
-            arquivo.value = '';
-            removerInput.value = '0';
-            mostrar(src || '');
-        },
-    };
-
-    // estado inicial (ex.: pop-up reaberto por erro de validação)
-    mostrar(url.value.trim() || campo.dataset.imagemInicial || '');
-};
-
+// Estoque — campo de imagem dos pop-ups (ver iniciarCampoDeImagem em comum.js).
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-imagem-campo]').forEach(iniciarCampoDeImagem);
 });
@@ -299,37 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ajustar();
         });
         ajustar();
-    });
-});
-
-// Campeonatos — busca de participantes (criar): esconde os clientes cujo
-// nome não contém o texto digitado.
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-participant-search]').forEach((busca) => {
-        const input = busca.querySelector('[data-participant-search-input]');
-        const linhas = busca.querySelectorAll('[data-participant-name]');
-
-        input?.addEventListener('input', () => {
-            const termo = input.value.trim().toLowerCase();
-            linhas.forEach((linha) => {
-                linha.hidden = !linha.dataset.participantName.toLowerCase().includes(termo);
-            });
-        });
-    });
-});
-
-// Campeonatos — setas de crédito (premiações): somam/subtraem R$ 1,00.
-document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('[data-stepper]').forEach((stepper) => {
-        const input = stepper.querySelector('[data-stepper-input]');
-
-        stepper.querySelectorAll('[data-stepper-step]').forEach((botao) => {
-            botao.addEventListener('click', () => {
-                const atual = parseFloat(input.value.replace(/\./g, '').replace(',', '.')) || 0;
-                const novo = Math.max(0, atual + Number(botao.dataset.stepperStep));
-                input.value = novo.toFixed(2).replace('.', ',');
-            });
-        });
     });
 });
 

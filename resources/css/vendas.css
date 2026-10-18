@@ -84,7 +84,7 @@
 }
 
 [data-vendas-page] .page-topbar__title {
-    font-size: 20px;
+    font-size: calc(20px * var(--escala-texto));
 }
 
 [data-vendas-page] button:focus-visible,
@@ -117,11 +117,11 @@
 
 .botao--grande {
     height: 48px;
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
 }
 
 .vendas-contador {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -161,7 +161,7 @@ a.resumo-item {
     gap: var(--space-2);
     padding: 9px var(--space-4);
     border-radius: var(--radius-chip);
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
@@ -231,7 +231,7 @@ a.resumo-item {
     }
 
     .vendas-filtros .filtro__rotulo {
-        font-size: 11px;
+        font-size: calc(11px * var(--escala-texto));
     }
 
     .vendas-filtros .filtro select {
@@ -286,12 +286,12 @@ a.resumo-item {
 
 .vendas-dia__titulo {
     margin: 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
 }
 
 .vendas-dia__total {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -336,13 +336,13 @@ a.resumo-item {
     width: 44px;
     display: flex;
     flex-direction: column;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
 .venda-linha__hora small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 500;
     color: var(--text-muted);
 }
@@ -366,13 +366,13 @@ a.resumo-item {
     flex-shrink: 0;
     display: inline-flex;
     gap: 3px;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
 .venda-linha__resumo {
     min-width: 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -384,7 +384,7 @@ a.resumo-item {
     align-items: center;
     gap: var(--space-3);
     min-width: 0;
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -416,7 +416,7 @@ a.resumo-item {
 
 .venda-linha__total {
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -446,7 +446,7 @@ a.resumo-item {
 .avatar--mini {
     width: 22px;
     height: 22px;
-    font-size: 9px;
+    font-size: calc(9px * var(--escala-texto));
 }
 
 .avatar--vazio {
@@ -469,7 +469,7 @@ a.resumo-item {
         padding: 0 var(--space-4) var(--space-2);
         margin-bottom: var(--space-3);
         border-bottom: 1px solid var(--surface-border);
-        font-size: 11px;
+        font-size: calc(11px * var(--escala-texto));
         font-weight: 700;
         color: var(--text-muted);
         text-transform: uppercase;
@@ -488,7 +488,7 @@ a.resumo-item {
 
     .venda-linha__cliente,
     .venda-linha__pagamento {
-        font-size: 13px;
+        font-size: calc(13px * var(--escala-texto));
     }
 
     .vendas-dia__cabecalho {
@@ -550,13 +550,13 @@ a.resumo-item {
 }
 
 .agenda-dia__semana {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 600;
     color: var(--text-muted);
 }
 
 .agenda-dia__numero {
-    font-size: 17px;
+    font-size: calc(17px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -567,7 +567,7 @@ a.resumo-item {
     height: 16px;
     padding: 0 5px;
     border-radius: var(--radius-full);
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     font-weight: 700;
     line-height: 16px;
     text-align: center;
@@ -613,12 +613,12 @@ a.resumo-item {
 
 .agenda-titulo__dia {
     margin: 0;
-    font-size: 17px;
+    font-size: calc(17px * var(--escala-texto));
     font-weight: 700;
 }
 
 .agenda-titulo__info {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
@@ -627,7 +627,7 @@ a.resumo-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     white-space: nowrap;
 }
 
@@ -672,7 +672,7 @@ a.resumo-item {
     position: absolute;
     top: 0;
     transform: translateX(-50%);
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     font-weight: 600;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
@@ -689,14 +689,14 @@ a.resumo-item {
 .ocupacao__mesa {
     display: flex;
     flex-direction: column;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     line-height: 1.2;
     min-width: 0;
 }
 
 .ocupacao__mesa small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 500;
     color: var(--text-muted);
     white-space: nowrap;
@@ -741,7 +741,7 @@ a.resumo-item {
     align-items: center;
     overflow: hidden;
     color: #fff;
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 700;
     text-align: left;
     cursor: pointer;
@@ -785,7 +785,7 @@ a.resumo-item {
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-4);
     margin: var(--space-3) 0 0;
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -873,12 +873,12 @@ a.resumo-item {
 }
 
 .aluguel-card__horario strong {
-    font-size: 17px;
+    font-size: calc(17px * var(--escala-texto));
     font-weight: 800;
 }
 
 .aluguel-card__horario small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -891,7 +891,7 @@ a.resumo-item {
 }
 
 .aluguel-card__titulo {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
     white-space: nowrap;
     overflow: hidden;
@@ -903,7 +903,7 @@ a.resumo-item {
     flex-wrap: wrap;
     align-items: center;
     gap: 4px var(--space-2);
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -911,7 +911,7 @@ a.resumo-item {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 700;
     color: var(--vendas-texto);
 }
@@ -925,7 +925,7 @@ a.resumo-item {
 }
 
 .aluguel-card__valor {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -935,7 +935,7 @@ a.resumo-item {
     align-items: center;
     padding: 2px 7px;
     border-radius: var(--radius-chip);
-    font-size: 10px;
+    font-size: calc(10px * var(--escala-texto));
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: .03em;
@@ -966,7 +966,7 @@ a.resumo-item {
     gap: 4px;
     padding: 2px 7px;
     border-radius: var(--radius-chip);
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1020,7 +1020,7 @@ a.resumo-item {
     gap: 6px;
     padding: 8px;
     border-radius: var(--radius-chip);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     color: var(--text-muted);
     white-space: nowrap;
@@ -1041,7 +1041,7 @@ a.resumo-item {
 }
 
 .campo__rotulo {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
     font-weight: 600;
 }
@@ -1072,7 +1072,7 @@ a.resumo-item {
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-full);
     background: var(--field);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     color: var(--text-soft);
     transition: background-color .12s ease, border-color .12s ease;
@@ -1114,14 +1114,14 @@ a.resumo-item {
 }
 
 .seletor-cliente__info strong {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .seletor-cliente__info small {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1161,20 +1161,20 @@ a.resumo-item {
 }
 
 .sugestoes__info strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .sugestoes__info small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
 .sugestoes__vazio {
     padding: 10px var(--space-3);
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1271,7 +1271,7 @@ a.resumo-item {
     justify-content: center;
     background: var(--placeholder);
     color: var(--text-muted);
-    font-size: 18px;
+    font-size: calc(18px * var(--escala-texto));
 }
 
 .catalogo__miniatura img {
@@ -1299,12 +1299,12 @@ a.resumo-item {
 }
 
 .catalogo__info strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
 }
 
 .catalogo__info small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1316,13 +1316,13 @@ a.resumo-item {
 }
 
 .catalogo__preco {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
 
 .catalogo__lado small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1345,7 +1345,7 @@ a.resumo-item {
     justify-content: center;
     background: var(--vendas-acento);
     color: var(--vendas-on-acento);
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
 }
 
 .catalogo__item:disabled .catalogo__adicionar {
@@ -1356,7 +1356,7 @@ a.resumo-item {
 .catalogo__vazio {
     margin: 0;
     padding: var(--space-3);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
     text-align: center;
 }
@@ -1378,7 +1378,7 @@ a.resumo-item {
 }
 
 .carrinho__contagem {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1418,7 +1418,7 @@ a.resumo-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
     background: var(--placeholder);
     color: var(--text-soft);
 }
@@ -1434,13 +1434,13 @@ a.resumo-item {
 }
 
 .carrinho__info strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     overflow-wrap: anywhere;
 }
 
 .carrinho__info small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1454,7 +1454,7 @@ a.resumo-item {
 
 .carrinho__subtotal {
     margin-left: auto;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -1469,7 +1469,7 @@ a.resumo-item {
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .carrinho__remover:hover {
@@ -1486,13 +1486,13 @@ a.resumo-item {
     padding: var(--space-5) var(--space-3);
     border: 1px dashed var(--line);
     border-radius: var(--radius-card);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
     text-align: center;
 }
 
 .carrinho__vazio i {
-    font-size: 20px;
+    font-size: calc(20px * var(--escala-texto));
 }
 
 .stepper {
@@ -1509,7 +1509,7 @@ a.resumo-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: calc(16px * var(--escala-texto));
     color: var(--text);
 }
 
@@ -1521,7 +1521,7 @@ a.resumo-item {
 .stepper__valor {
     min-width: 24px;
     text-align: center;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -1590,11 +1590,11 @@ a.resumo-item {
 }
 
 .usar-creditos__texto strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .usar-creditos__texto small {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-soft);
 }
 
@@ -1612,14 +1612,14 @@ a.resumo-item {
     border: 1px solid var(--surface-border);
     border-radius: var(--radius-card);
     background: var(--field);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     color: var(--text-soft);
     transition: background-color .12s ease, border-color .12s ease;
 }
 
 .forma-pagamento span i {
-    font-size: 17px;
+    font-size: calc(17px * var(--escala-texto));
 }
 
 .forma-pagamento:hover span {
@@ -1642,7 +1642,7 @@ a.resumo-item {
     border-radius: var(--radius-card);
     background: var(--green-100);
     color: var(--green-700);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
 }
 
@@ -1685,7 +1685,7 @@ a.resumo-item {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1703,11 +1703,11 @@ a.resumo-item {
     margin-top: 2px;
     color: var(--text);
     font-weight: 700;
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
 }
 
 .totais__linha--final dd {
-    font-size: 22px;
+    font-size: calc(22px * var(--escala-texto));
     font-weight: 800;
 }
 
@@ -1765,11 +1765,11 @@ a.resumo-item {
 }
 
 .mesa-opcao__caixa strong {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 .mesa-opcao__caixa small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1833,14 +1833,14 @@ a.resumo-item {
 
 .recibo__total {
     margin: 2px 0;
-    font-size: 32px;
+    font-size: calc(32px * var(--escala-texto));
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
 .recibo__data {
     margin: 0 0 var(--space-2);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1875,18 +1875,18 @@ a.resumo-item {
 }
 
 .recibo__item-info strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     overflow-wrap: anywhere;
 }
 
 .recibo__item-info small {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
 }
 
 .recibo__item-valor {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -1899,7 +1899,7 @@ a.resumo-item {
     display: flex;
     justify-content: space-between;
     padding: 3px 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 .recibo__pagamento-linha dt {
@@ -1925,30 +1925,30 @@ a.resumo-item {
 }
 
 .recibo__cliente-info strong {
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 .recibo__cliente-info small {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
 .reserva__horario {
     margin: var(--space-3) 0 2px;
-    font-size: 30px;
+    font-size: calc(30px * var(--escala-texto));
     font-weight: 800;
     font-variant-numeric: tabular-nums;
 }
 
 .reserva__data {
     margin: 0;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
     font-weight: 600;
 }
 
 .reserva__mesa {
     margin: 2px 0 0;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -1970,7 +1970,7 @@ a.resumo-item {
 }
 
 .reserva__sem-cadastro {
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     font-weight: 500;
     color: var(--text-muted);
 }
@@ -2010,11 +2010,11 @@ a.resumo-item {
 }
 
 .opcao-cancelamento strong {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .opcao-cancelamento small {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -2024,7 +2024,7 @@ a.resumo-item {
 
 .modal-mesas__intro {
     margin: 0 0 var(--space-4);
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -2073,7 +2073,7 @@ a.resumo-item {
 }
 
 .campo__prefixado span {
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
     color: var(--text-muted);
 }
@@ -2120,11 +2120,11 @@ a.resumo-item {
 .mesa-item__info strong {
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: calc(14px * var(--escala-texto));
 }
 
 .mesa-item__info small {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-muted);
 }
 
@@ -2145,7 +2145,7 @@ a.resumo-item {
     align-items: center;
     justify-content: center;
     color: var(--text-soft);
-    font-size: 15px;
+    font-size: calc(15px * var(--escala-texto));
 }
 
 .mesa-item__botao:hover {
@@ -2166,7 +2166,7 @@ a.resumo-item {
 .recibo__motivo {
     margin: var(--space-2) 0 0;
     max-width: 320px;
-    font-size: 13px;
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-soft);
 }
 
@@ -2178,13 +2178,13 @@ a.resumo-item {
     margin-top: var(--space-2);
     padding-top: var(--space-4);
     border-top: 1px dashed var(--line);
-    font-size: 11px;
+    font-size: calc(11px * var(--escala-texto));
     color: var(--text-muted);
     text-align: center;
 }
 
 .recibo__loja strong {
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     color: var(--text-soft);
 }
 
@@ -2202,7 +2202,7 @@ a.resumo-item {
     border-radius: var(--radius-control);
     background: var(--vendas-tint);
     color: var(--vendas-tint-texto);
-    font-size: 12px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
 }
 

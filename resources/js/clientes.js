@@ -648,6 +648,17 @@ function iniciarPaginaClientes() {
         }
     });
 
+    // Aviso "completar cadastro" (clientes que vieram de campeonatos) e o
+    // link do pop-up de campeonato (/clientes?abrir=ID) abrem o perfil.
+    pagina.querySelectorAll('[data-abrir-cliente]').forEach((botao) => {
+        botao.addEventListener('click', () => abrirModalDetalhes(botao.getAttribute('data-abrir-cliente')));
+    });
+    const abrirInicial = new URLSearchParams(window.location.search).get('abrir');
+    if (abrirInicial) {
+        // depois do resto da tela iniciar (as referências do modal vêm abaixo)
+        window.setTimeout(() => abrirModalDetalhes(abrirInicial), 0);
+    }
+
     // ---- Exclusão com janela de "desfazer" ----------------------------------
     // Sem soft delete no banco (decisão já tomada neste projeto): a linha some
     // visualmente na hora, mas o DELETE de verdade só é disparado alguns
@@ -845,8 +856,14 @@ function iniciarPaginaClientes() {
                 dRefs.nome.textContent = cliente.nome;
                 dRefs.status.hidden = cliente.status !== 'inativo';
 
-                const nascimento = new Date(cliente.data_nascimento + 'T00:00:00');
-                dRefs.nascimento.textContent = `${nascimento.toLocaleDateString('pt-BR')} (${cliente.idade} anos)`;
+                if (cliente.data_nascimento) {
+                    const nascimento = new Date(cliente.data_nascimento + 'T00:00:00');
+                    dRefs.nascimento.textContent = `${nascimento.toLocaleDateString('pt-BR')} (${cliente.idade} anos)`;
+                } else {
+                    // veio de um campeonato como provisório: falta completar
+                    dRefs.nascimento.textContent = 'Não informado — use “Editar” para completar o cadastro';
+                }
+                dRefs.nascimento.classList.toggle('perfil__vazio', !cliente.data_nascimento);
                 dRefs.whatsapp.textContent = cliente.whatsapp ? formatarWhatsapp(cliente.whatsapp) : 'Não informado';
                 dRefs.whatsapp.classList.toggle('perfil__vazio', !cliente.whatsapp);
                 dRefs.whatsappAdicionar.hidden = Boolean(cliente.whatsapp);

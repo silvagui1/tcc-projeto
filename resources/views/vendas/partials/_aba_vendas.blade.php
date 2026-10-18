@@ -41,7 +41,7 @@
         <label class="filtro">
             <span class="filtro__rotulo">Itens</span>
             <select data-filtro="tipo">
-                @foreach (['todos' => 'Todos', 'produto' => 'Produtos', 'carta' => 'Cartas', 'aluguel' => 'Aluguéis de mesa'] as $valor => $rotulo)
+                @foreach (['todos' => 'Todos', 'produto' => 'Produtos', 'carta' => 'Cartas', 'aluguel' => 'Aluguéis de mesa', 'inscricao' => 'Inscrições em campeonato'] as $valor => $rotulo)
                     <option value="{{ $valor }}" @selected($filtros['tipo'] === $valor)>{{ $rotulo }}</option>
                 @endforeach
             </select>

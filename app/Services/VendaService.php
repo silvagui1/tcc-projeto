@@ -8,6 +8,7 @@ use App\Models\Carta;
 use App\Models\Cliente;
 use App\Models\Produto;
 use App\Models\Venda;
+use App\Models\VendaItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -122,6 +123,9 @@ class VendaService
                     $carta && $this->movimentarEstoque($carta, $item->quantidade, $descricao);
                 } elseif ($item->tipo === 'aluguel' && $item->aluguel_id) {
                     Aluguel::whereKey($item->aluguel_id)->where('status', 'pago')->update(['status' => 'agendado']);
+                } elseif ($item->tipo === VendaItem::TIPO_INSCRICAO) {
+                    // a inscrição volta a ficar em aberto no campeonato
+                    DB::table('campeonato_cliente')->where('venda_id', $venda->id)->update(['valor_pago' => 0, 'venda_id' => null]);
                 }
             }
 

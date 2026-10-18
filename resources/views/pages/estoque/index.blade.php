@@ -11,22 +11,22 @@
     <div class="estoque-resumo">
         <div class="stat-card stat-card--split">
             <div>
-                <span class="stat-card__label">valor em estoque</span>
+                <span class="stat-card__label">Valor em estoque</span>
                 <p class="stat-card__value">R$ {{ number_format($resumo['valorEstoque'], 2, ',', '.') }}</p>
             </div>
             <div>
-                <span class="stat-card__label">quantidade de produtos</span>
+                <span class="stat-card__label">Quantidade de produtos</span>
                 <p class="stat-card__value">{{ $resumo['quantidadeProdutos'] }}</p>
             </div>
         </div>
 
         <div class="stat-grid">
             <div class="stat-card">
-                <span class="stat-card__label">cartas avulsas no estoque</span>
+                <span class="stat-card__label">Cartas avulsas no estoque</span>
                 <p class="stat-card__value stat-card__value--lg">{{ $resumo['cartasAvulsas'] }}</p>
             </div>
             <div class="stat-card">
-                <span class="stat-card__label">valor total em cartas avulsas</span>
+                <span class="stat-card__label">Valor total em cartas avulsas</span>
                 <p class="stat-card__value stat-card__value--lg">R$ {{ number_format($resumo['valorCartasAvulsas'], 2, ',', '.') }}</p>
             </div>
         </div>
@@ -45,8 +45,8 @@
                     {{ $estoqueBaixo->take(4)->map(fn ($p) => "{$p->nome} ({$p->quantidade})")->implode(' · ') }}{{ $estoqueBaixo->count() > 4 ? ' · e mais '.($estoqueBaixo->count() - 4) : '' }}
                 </span>
             </div>
-            <a href="{{ route('config') }}#estoque" class="alerta-estoque__link" title="Alerta a partir de {{ $alertaMinimo }} unidades — mudar em Configurações">
-                até {{ $alertaMinimo }} un.
+            <a href="{{ route('config') }}#estoque" class="alerta-estoque__link" title="Padrão: alerta a partir de {{ $alertaMinimo }} unidades — mudar em Configurações. Produtos com limite próprio usam o deles.">
+                padrão: até {{ $alertaMinimo }} un.
             </a>
         </div>
     @endif
@@ -57,8 +57,8 @@
     <div class="estoque-toolbar">
         {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
         <div class="tabs">
-            <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="{{ $tab === 'produtos' ? 'is-active' : '' }}">estoque produtos</a>
-            <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="{{ $tab === 'cartas' ? 'is-active' : '' }}">estoque cartas</a>
+            <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="{{ $tab === 'produtos' ? 'is-active' : '' }}">Estoque Produtos</a>
+            <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="{{ $tab === 'cartas' ? 'is-active' : '' }}">Estoque Cartas</a>
         </div>
 
         {{-- na aba de produtos filtra a lista abaixo; na de cartas leva para o catálogo --}}
@@ -68,12 +68,12 @@
                 @if ($filtros['categoria'])
                     <input type="hidden" name="categoria" value="{{ $filtros['categoria'] }}">
                 @endif
-                <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="buscar produto" aria-label="Buscar produto">
+                <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Buscar produto" aria-label="Buscar produto">
                 <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
             </form>
         @else
             <form method="GET" action="{{ route('estoque.cartas') }}" class="search-bar" role="search">
-                <input type="search" name="busca" placeholder="buscar carta" aria-label="Buscar carta">
+                <input type="search" name="busca" placeholder="Buscar carta" aria-label="Buscar carta">
                 <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
             </form>
         @endif
@@ -124,7 +124,7 @@
                     @foreach ($produtos as $produto)
                         <div class="product-card">
                             <div class="product-card__image" style="background-image: url('{{ $produto->imagem_url }}'), url('{{ $produto->imagem_padrao }}');">
-                                <span class="product-card__tag">{{ mb_strtolower($produto->categoria->nome) }}</span>
+                                <span class="product-card__tag">{{ Str::ucfirst(mb_strtolower($produto->categoria->nome)) }}</span>
                                 <span class="product-card__actions">
                                     <button type="button" class="product-card__delete" data-form-open="produto"
                                             data-form-dados='@json($produto->dadosFormulario())'
@@ -153,7 +153,7 @@
                                 <p>
                                     <strong>qtd {{ $produto->quantidade }}</strong>
                                     @if ($produto->estoque_baixo)
-                                        <span class="selo-estoque-baixo">estoque baixo</span>
+                                        <span class="selo-estoque-baixo" title="Avisa a partir de {{ $produto->limite_estoque_baixo }} un.{{ $produto->estoque_minimo === null ? ' (padrão)' : '' }}">Estoque baixo</span>
                                     @endif
                                 </p>
                             </div>
@@ -210,7 +210,7 @@
             </div>
 
             <a href="{{ route('estoque.cartas') }}" class="btn-primary estoque-cartas-preview__all" style="margin-top: 20px;">
-                ver todas as cartas
+                Ver todas as cartas
                 <i class="bi bi-arrow-90deg-up"></i>
             </a>
         </div>

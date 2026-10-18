@@ -16,6 +16,7 @@ class Produto extends Model
         'descricao',
         'preco',
         'quantidade',
+        'estoque_minimo',
         'imagem',
         'categoria_id',
     ];
@@ -23,6 +24,7 @@ class Produto extends Model
     protected $casts = [
         'preco' => 'decimal:2',
         'quantidade' => 'integer',
+        'estoque_minimo' => 'integer',
     ];
 
     public function categoria()
@@ -52,8 +54,8 @@ class Produto extends Model
     }
 
     /**
-     * Quantidade a partir da qual o produto entra no alerta de estoque baixo
-     * (Configurações > Estoque), ou null com o alerta desligado.
+     * Quantidade padrão a partir da qual um produto entra no alerta de
+     * estoque baixo (Configurações > Estoque), ou null com o alerta desligado.
      */
     public static function alertaMinimo(): ?int
     {
@@ -61,21 +63,35 @@ class Produto extends Model
     }
 
     /**
-     * Produtos com quantidade menor ou igual ao mínimo do alerta (nenhum,
-     * se o alerta está desligado).
+     * Produtos com quantidade menor ou igual ao seu limite de estoque baixo:
+     * o do próprio produto (estoque_minimo) ou, sem ele, o padrão. Nenhum,
+     * se o alerta está desligado.
      */
     public function scopeEstoqueBaixo(Builder $query): Builder
     {
-        $minimo = self::alertaMinimo();
+        $padrao = self::alertaMinimo();
 
-        return $minimo === null ? $query->whereRaw('1 = 0') : $query->where('quantidade', '<=', $minimo);
+        return $padrao === null
+            ? $query->whereRaw('1 = 0')
+            : $query->whereRaw('quantidade <= COALESCE(estoque_minimo, ?)', [$padrao]);
+    }
+
+    /**
+     * Limite de estoque baixo que vale para este produto (o dele ou o
+     * padrão), ou null com o alerta desligado.
+     */
+    public function getLimiteEstoqueBaixoAttribute(): ?int
+    {
+        $padrao = self::alertaMinimo();
+
+        return $padrao === null ? null : ($this->estoque_minimo ?? $padrao);
     }
 
     public function getEstoqueBaixoAttribute(): bool
     {
-        $minimo = self::alertaMinimo();
+        $limite = $this->limite_estoque_baixo;
 
-        return $minimo !== null && $this->quantidade <= $minimo;
+        return $limite !== null && $this->quantidade <= $limite;
     }
 
     /**
@@ -103,7 +119,7 @@ class Produto extends Model
      */
     public function dadosFormulario(): array
     {
-        return $this->only(['id', 'nome', 'descricao', 'quantidade', 'categoria_id'])
+        return $this->only(['id', 'nome', 'descricao', 'quantidade', 'estoque_minimo', 'categoria_id'])
             + ['preco' => (float) $this->preco]
             + $this->dadosDeImagemDoFormulario();
     }

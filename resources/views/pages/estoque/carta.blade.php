@@ -21,7 +21,7 @@
     <div class="card-detail">
         <div class="card-detail__image" style="background-image: url('{{ $carta->imagem_url }}'), url('{{ $carta->imagem_padrao }}');">
             @if ($carta->foil)
-                <span class="card-detail__foil"><i class="bi bi-stars"></i> foil</span>
+                <span class="card-detail__foil"><i class="bi bi-stars"></i> Foil</span>
             @endif
         </div>
 
@@ -31,7 +31,7 @@
 
             <p class="card-detail__price">
                 R$ {{ number_format($carta->preco, 2, ',', '.') }}
-                <span>por unidade</span>
+                <span>Por unidade</span>
             </p>
 
             <div class="trading-card__meta">

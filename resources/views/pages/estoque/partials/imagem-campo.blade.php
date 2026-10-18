@@ -2,7 +2,8 @@
      "imagem do estoque"). A imagem pode ser escolhida do aparelho (no
      celular, também pela câmera), colada com Ctrl+V em qualquer lugar do
      pop-up, arrastada para a área tracejada ou informada por link. "Remover"
-     tira a imagem do item (ele volta a usar a imagem genérica). --}}
+     tira a imagem do item (ele volta a usar a imagem genérica). Também é
+     usado no banner dos campeonatos ($imagemLink = link já salvo). --}}
 <div class="imagem-campo card-field--full" data-imagem-campo data-imagem-inicial="{{ $imagemInicial ?? '' }}">
     <div class="imagem-campo__area" data-imagem-area>
         <img class="imagem-campo__preview" data-imagem-preview alt="Pré-visualização da imagem" hidden>
@@ -28,8 +29,8 @@
     <input type="hidden" name="remover_imagem" value="0" data-imagem-remover-input>
 
     <label class="card-field">
-        <span>ou cole o link da imagem</span>
+        <span>Ou cole o link da imagem</span>
         <input type="url" name="imagem" maxlength="500" placeholder="https://..."
-               value="{{ old('imagem') }}" data-imagem-url>
+               value="{{ old('imagem', $imagemLink ?? '') }}" data-imagem-url>
     </label>
 </div>

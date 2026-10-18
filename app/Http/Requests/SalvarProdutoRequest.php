@@ -45,6 +45,8 @@ class SalvarProdutoRequest extends FormRequest
             'categoria_id' => ['required', 'integer', 'exists:categorias,id'],
             'descricao' => ['nullable', 'string', 'max:1000'],
             'quantidade' => ['required', 'integer', 'min:0', 'max:99999'],
+            // vazio = usa o padrão de Configurações > Estoque
+            'estoque_minimo' => ['nullable', 'integer', 'min:0', 'max:99999'],
             'preco' => ['required', 'numeric', 'min:0', 'max:999999'],
         ] + $this->regrasDeImagem();
     }
@@ -56,6 +58,7 @@ class SalvarProdutoRequest extends FormRequest
     {
         return [
             'categoria_id' => 'categoria',
+            'estoque_minimo' => 'estoque baixo',
             'descricao' => 'descrição',
             'preco' => 'preço',
             'imagem' => 'url da imagem',

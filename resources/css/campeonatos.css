@@ -1,1157 +1,2660 @@
 /* ==========================================================================
-   TCC Projeto - Tela de campeonatos
-   pages/campeonatos/*. Tokens, chips e pop-up de apagar ficam no app.css.
+   TCC Projeto - Tela de campeonatos (pages/campeonatos/*)
+
+   Segue o mesmo esqueleto de Clientes e Vendas: título no .page-topbar com
+   contador, tira de números (.resumo-tira), botões .botao, campos .campo,
+   busca .busca e paginação .paginacao (definidos em clientes.css). Aqui ficam
+   a cor da seção (rosa, a mesma do card Campeonatos na home) e o que é
+   próprio de campeonatos: filtros, cards, o pop-up (criar, ver, check-in,
+   premiar) e seus componentes. Escrito a partir do celular; tablet e
+   desktop no fim do arquivo.
    ========================================================================== */
 
-/* ==========================================================================
-   Campeonatos (Figma: "seção de campeonato")
-   Telas: campeonatos (lista), acessar_camp_ativo / acessar_camp_finalizado,
-   criar_campeonato, editar_campeonato, premiações e pop up apagar.
-   Ícones e imagens ficam em public/images/campeonatos/.
-   ========================================================================== */
+:root {
+    /* cor da seção — rosa do card Campeonatos na home. Branco sobre
+       --pink-500 dá 5,6:1 e sobre --pink-700 (hover) 9,8:1 */
+    --camp-acento: var(--pink-500);
+    --camp-acento-forte: var(--pink-700);
+    --camp-tint: #f6e9f0;
+    --camp-tint-borda: var(--pink-200);
+    --camp-tint-texto: var(--pink-700);
 
-/* --- Lista: botão "Criar campeonato" ------------------------------------- */
+    /* status: as mesmas cores de sucesso/erro da tela de Clientes */
+    --camp-ativo: var(--green-700);
+    --camp-ativo-tint: var(--green-100);
+    --camp-finalizado: var(--red-700);
+    --camp-finalizado-tint: var(--red-50);
 
-.champ-create {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 74px;
-    padding: 0 22px 0 24px;
-    margin-bottom: 26px;
-    background: var(--pink-400);
-    border-radius: var(--radius-md);
-    color: var(--pink-900);
-    font-size: 24px;
-    font-weight: 600;
+    /* avisos (provisório, data passada) — amarelo do sistema */
+    --camp-alerta-fundo: #fff3dc;
+    --camp-alerta-borda: var(--yellow-400);
+    --camp-alerta-texto: var(--yellow-900);
+
+    --camp-banner-vazio: var(--placeholder);
 }
 
-/* --- Lista: card do campeonato ativo (+ carrossel) ----------------------- */
+:root[data-theme="dark"] {
+    --camp-acento: var(--pink-400);
+    --camp-acento-forte: var(--pink-300);
+    --camp-tint: #3a2633;
+    --camp-tint-borda: #5c3a4d;
+    --camp-tint-texto: var(--pink-200);
 
-.champ-carousel {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+    --camp-ativo: #6fcf8e;
+    --camp-ativo-tint: #1f3a2a;
+    --camp-finalizado: #f08896;
+    --camp-finalizado-tint: #43232a;
+
+    --camp-alerta-fundo: rgba(255, 220, 155, .1);
+    --camp-alerta-borda: rgba(255, 220, 155, .35);
+    --camp-alerta-texto: var(--yellow-300);
 }
 
-.champ-carousel::-webkit-scrollbar {
-    display: none;
+/* --- Estrutura da página --------------------------------------------------- */
+
+/* Abaixo de 992px o botão flutuante do menu fica por cima do fim da página:
+   espaço extra embaixo para o último card e os botões não ficarem atrás
+   dele (mesma regra de Clientes e Vendas). */
+@media (max-width: 991.98px) {
+    main.app-content:has([data-campeonatos-page]) {
+        padding-bottom: calc(var(--bottom-nav-height) + 104px);
+    }
 }
 
-.champ-carousel > .champ-active {
-    flex: 0 0 100%;
-    scroll-snap-align: center;
+/* Tablet: a base do app usa uma coluna de 480px (pensada para celular), que
+   espremia a lista. Usa a mesma largura de Vendas. */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    main.app-content--wide:has([data-campeonatos-page]) {
+        max-width: 920px;
+        padding: 20px 24px calc(var(--bottom-nav-height) + 104px);
+    }
 }
 
-/* com mais de um ativo, o próximo card "espia" pela direita */
-.champ-carousel--multi > .champ-active {
-    flex-basis: 90%;
+[data-campeonatos-page] .page-topbar__title {
+    font-size: calc(20px * var(--escala-texto));
 }
 
-.champ-active {
-    background: var(--pink-400);
-    border-radius: var(--radius-lg);
-    padding: 9px 12px 12px;
-}
-
-.champ-active__top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.champ-active__date {
-    color: var(--on-accent);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.champ-active__banner {
-    width: 100%;
-    height: 259px;
-    margin-top: 6px;
-    object-fit: cover;
-    background: #504c4c;
-    border: 1px solid var(--pink-700);
-    border-radius: var(--radius-sm);
-}
-
-.champ-active__bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 10px;
-}
-
-.champ-active__access {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 52px;
-    padding: 0 14px;
-    background: var(--bg);
-    border-radius: var(--radius-md);
-    color: var(--pink-700);
-    font-size: 16px;
-    font-weight: 600;
-}
-
-/* chip de status ("ativo" / "Finalizado") com a bolinha depois do texto */
-.champ-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    height: 19px;
-    padding: 0 3px 0 9px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.champ-status--sm {
-    height: 17px;
-    padding: 0 3px 0 6px;
-    gap: 6px;
-}
-
-/* lápis + lixeira */
-.champ-actions {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.champ-actions--lg {
-    gap: 4px;
-}
-
-.champ-actions a,
-.champ-actions button {
-    display: inline-flex;
-    padding: 0;
-}
-
-/* --- Lista: "Outras competições" ----------------------------------------- */
-
-.champ-section-title {
-    margin: 24px 0 10px 6px;
-    font-size: 20px;
-    font-weight: 600;
-}
-
-.champ-other {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-    padding: 14px 12px 13px 11px;
-    margin-bottom: 29px;
-}
-
-.champ-other__banner {
-    display: block;
-    height: 170px;
-    background: #504c4c;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
-.champ-other__banner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.champ-other__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 8px 0 12px;
-}
-
-.champ-other__header h3 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
-}
-
-.champ-other p {
-    margin: 0;
-    font-size: 16px;
-}
-
-.champ-other__prizes {
-    margin-top: 20px !important;
-}
-
-.champ-other__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 10px;
+.campeonatos-contador {
+    font-size: calc(13px * var(--escala-texto));
     color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
 }
 
-/* --- Lista: cabeçalho da página ------------------------------------------ */
-
-/* título e "Em andamento" só existem no desktop; no mobile a lista
-   continua começando direto pelo botão "Criar campeonato" */
-.champ-page-header__text,
-.champ-section-title--desktop {
-    display: none;
+/* ações na cor da seção (mesmo padrão de [data-vendas-page]) */
+[data-campeonatos-page] .botao--principal {
+    background: var(--camp-acento);
+    color: var(--white);
 }
 
-/* --- Lista no desktop ------------------------------------------------------
-
-   Usa a mesma largura do estoque (.app-content--wide): cabeçalho com título
-   e botão compacto, ativos em destaque ocupando a largura toda (dois por vez
-   quando há mais de um) e "Outras competições" numa grade de 3 colunas. */
-
-@media (min-width: 992px) {
-    .champ-page-header {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 24px;
-        padding-bottom: 24px;
-        margin-bottom: 32px;
-        border-bottom: 1px solid var(--surface-border);
-    }
-
-    .champ-page-header__text {
-        display: block;
-    }
-
-    .champ-page-header__text h1 {
-        margin: 0 0 6px;
-        font-size: 32px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-
-    .champ-page-header__text p {
-        margin: 0;
-        color: var(--text-muted);
-        font-size: 15px;
-    }
-
-    .champ-create {
-        flex-shrink: 0;
-        gap: 14px;
-        min-height: 52px;
-        padding: 0 10px 0 22px;
-        margin: 0;
-        font-size: 16px;
-        transition: background-color 0.15s ease, transform 0.15s ease;
-    }
-
-    .champ-create img {
-        width: 36px;
-        height: 36px;
-    }
-
-    .champ-create:hover {
-        background: var(--pink-300);
-        transform: translateY(-1px);
-    }
-
-    .champ-section-title,
-    .champ-section-title--desktop {
-        display: block;
-        margin: 0 0 16px;
-        font-size: 22px;
-    }
-
-    .champ-section-title {
-        margin-top: 48px;
-    }
-
-    .champ-section-title--desktop {
-        margin-top: 0;
-    }
-
-    .champ-carousel {
-        gap: 24px;
-    }
-
-    .champ-carousel--multi > .champ-active {
-        flex-basis: calc(50% - 12px);
-    }
-
-    .champ-active {
-        padding: 14px 18px 18px;
-    }
-
-    .champ-active__banner {
-        height: 380px;
-        margin-top: 10px;
-    }
-
-    .champ-carousel--multi .champ-active__banner {
-        height: 300px;
-    }
-
-    .champ-active__bottom {
-        margin-top: 14px;
-    }
-
-    .champ-active__access {
-        transition: background-color 0.15s ease;
-    }
-
-    .champ-active__access:hover {
-        background: var(--field);
-    }
-
-    .champ-other-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 24px;
-    }
-
-    .champ-other {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 0;
-        padding: 12px 12px 14px;
-        transition: box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .champ-other:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .champ-other__banner {
-        height: 180px;
-    }
-
-    .champ-other__header h3 {
-        font-size: 20px;
-    }
-
-    .champ-other p {
-        font-size: 14px;
-    }
-
-    .champ-other__prizes {
-        margin-top: 14px !important;
-        color: var(--text-soft);
-    }
-
-    /* o rodapé (data + ações) fica sempre no fim do card, alinhando a grade */
-    .champ-other__footer {
-        margin-top: auto;
-        padding-top: 16px;
-    }
-
-    .champ-actions a,
-    .champ-actions button {
-        opacity: 0.8;
-        transition: opacity 0.15s ease;
-    }
-
-    .champ-actions a:hover,
-    .champ-actions button:hover {
-        opacity: 1;
-    }
+[data-campeonatos-page] .botao--principal:hover:not(:disabled) {
+    background: var(--camp-acento-forte);
 }
 
-/* --- Acessar campeonato (ativo / finalizado) ----------------------------- */
-
-.champ-detail {
-    position: relative;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
+[data-campeonatos-page] .botao--pequeno {
+    padding: 7px 12px;
+    font-size: calc(13px * var(--escala-texto));
 }
 
-/* bolinha de status "saindo" do canto superior esquerdo do card. O SVG do
-   Figma tem 256.5px de largura (sobra do frame), por isso o recorte 30×30. */
-.champ-detail__status {
-    position: absolute;
-    top: -7px;
-    left: -11px;
-    width: 30px;
-    height: 30px;
-    overflow: hidden;
-    z-index: 1;
+/* ação secundária na cor da seção, com contorno */
+[data-campeonatos-page] .botao--contorno {
+    background: transparent;
+    border: 1px solid var(--camp-tint-borda);
+    color: var(--camp-acento);
 }
 
-.champ-detail__status img {
-    max-width: none;
+[data-campeonatos-page] .botao--contorno:hover {
+    background: var(--camp-tint);
 }
 
-.champ-detail__banner {
-    width: 100%;
-    height: 268.6px;
-    object-fit: cover;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    background: #504c4c;
-}
-
-.champ-detail__body {
-    padding: 14px 13px 0;
-}
-
-.champ-detail__body h2 {
-    margin: 0 0 15px;
-    font-size: 24px;
-    font-weight: 600;
-}
-
-.champ-detail__info {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 3px 12px;
-    font-size: clamp(16px, 5.4vw, 20px);
-    font-weight: 600;
+[data-campeonatos-page] .botao {
     white-space: nowrap;
 }
 
-.champ-detail__info span:nth-child(even) {
-    text-align: right;
+/* foco visível por teclado, como em Clientes */
+[data-campeonatos-page] button:focus-visible,
+[data-campeonatos-page] a:focus-visible,
+[data-campeonatos-page] select:focus-visible,
+[data-campeonatos-page] summary:focus-visible,
+[data-campeonatos-page] [tabindex]:focus-visible,
+.champ-dialog button:focus-visible {
+    outline: 2px solid var(--camp-acento);
+    outline-offset: 2px;
 }
 
-.champ-detail__desc {
-    margin: 21px 13px 17px;
-    padding-top: 15px;
-    border-top: 0.5px solid var(--text);
-    text-align: center;
-    font-size: 20px;
+[data-campeonatos-page] .campo input:focus-visible,
+[data-campeonatos-page] .campo textarea:focus-visible,
+[data-campeonatos-page] .campo select:focus-visible {
+    outline: none;
+    border-color: var(--camp-acento);
+}
+
+[data-campeonatos-page] .resumo-item--destaque .resumo-item__valor {
+    color: var(--camp-acento);
+}
+
+/* paginação (clientes.css) com a cor da seção */
+[data-campeonatos-page] .paginacao {
+    margin-top: var(--space-6);
+}
+
+[data-campeonatos-page] .paginacao__numero--atual {
+    background: var(--camp-acento);
+    border-color: var(--camp-acento);
+    color: var(--white);
+}
+
+/* --- Avisos ---------------------------------------------------------------- */
+
+.champ-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    padding: 10px 12px;
+    background: var(--camp-tint);
+    border: 1px solid var(--camp-tint-borda);
+    border-radius: var(--radius-control);
+    color: var(--camp-tint-texto);
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
 }
 
-/* seções que abrem/fecham: "participantes cadastrados" e "vencedores" */
-.champ-accordion {
-    margin: 0 -1px;
+.champ-aviso i {
+    margin-top: 1px;
 }
 
-.champ-accordion summary {
+.champ-aviso--erro {
+    background: var(--camp-finalizado-tint);
+    border-color: var(--red-200);
+    color: var(--camp-finalizado);
+}
+
+.champ-aviso--alerta {
+    background: var(--camp-alerta-fundo);
+    border-color: var(--camp-alerta-borda);
+    color: var(--camp-alerta-texto);
+}
+
+.champ-aviso ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+    font-weight: 500;
+}
+
+/* provisórios esperando decisão (topo da lista) — mesmo desenho do alerta
+   de estoque baixo, na cor da seção */
+.champ-alerta {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    height: 50px;
-    padding: 0 12px 0 13px;
-    background: var(--placeholder);
-    border: 0.5px solid var(--text-muted-2);
-    font-size: 16px;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--camp-tint-borda);
+    border-radius: var(--radius-card);
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+}
+
+.champ-alerta__icone {
+    font-size: calc(20px * var(--escala-texto));
+}
+
+.champ-alerta__texto {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: calc(12.5px * var(--escala-texto));
+}
+
+.champ-alerta__texto strong {
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-alerta__texto a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.champ-vazio {
+    margin: var(--space-8) 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: calc(14px * var(--escala-texto));
+    list-style: none;
+}
+
+.champ-vazio i {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: calc(28px * var(--escala-texto));
+}
+
+.champ-vazio--compacto {
+    margin: var(--space-4) 0;
+}
+
+.champ-ajuda {
+    margin: 6px 0 0;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    line-height: 1.45;
+}
+
+.champ-link-acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    border: none;
+    background: none;
+    color: var(--camp-acento);
+    font: inherit;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 600;
     list-style: none;
     cursor: pointer;
 }
 
-.champ-accordion summary::-webkit-details-marker {
+.champ-link-acao::-webkit-details-marker {
     display: none;
 }
 
-/* a seta do Figma aponta para a direita; girada fica para baixo */
-.champ-accordion summary img {
-    transform: rotate(90deg);
-    transition: transform .2s;
+.champ-link-acao:hover {
+    color: var(--camp-acento-forte);
 }
 
-.champ-accordion[open] summary img {
-    transform: rotate(-90deg);
-}
+/* --- Selos ------------------------------------------------------------------ */
 
-.champ-accordion__content {
-    padding: 8px 13px;
-}
-
-.champ-detail__prize {
-    display: flex;
+.champ-badge {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 270px;
-    max-width: calc(100% - 26px);
-    height: 47px;
-    margin: 16px auto 24px;
-    background: var(--pink-300);
-    border-radius: var(--radius-md);
-    color: var(--white);
-    font-size: 20px;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
+    white-space: nowrap;
 }
 
-/* --- Criar / editar campeonato ------------------------------------------- */
-
-.champ-form {
-    margin: 0;
-    min-width: 0;
-    border: 0;
-    background: var(--surface);
-    border-radius: var(--radius-sm);
-    padding: 15px 14px 20px;
+.champ-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
-.champ-form h3 {
-    margin: 15px 0 8px;
-    font-size: 16px;
-    font-weight: 600;
+.champ-badge--finalizado {
+    background: var(--camp-finalizado-tint);
+    color: var(--camp-finalizado);
 }
 
-.champ-form h3:first-child {
-    margin: 0 0 11px;
-}
-
-.champ-form__row {
-    display: flex;
-    gap: 16px;
-}
-
-.champ-form__row > * {
-    flex: 1;
-    min-width: 0;
-}
-
-.champ-input,
-.champ-input--icon input {
-    width: 100%;
-    height: 35px;
-    padding: 0 7px;
-    border: none;
-    border-radius: 5px;
-    background: var(--placeholder);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.champ-form > .champ-input,
-.champ-form__row {
-    margin-bottom: 13px;
-}
-
-.champ-input::placeholder,
-.champ-input--icon input::placeholder,
-.champ-search__field input::placeholder,
-.prize-block__desc::placeholder,
-.prize-amount__input input::placeholder {
-    color: var(--text-muted);
-    font-weight: 600;
-    opacity: 1;
-}
-
-.champ-input--area {
-    height: 76px;
-    padding: 8px 7px;
-    resize: vertical;
-}
-
-/* campo com ícone (data / horário): o ícone do Figma fica por cima do
-   seletor nativo, que continua clicável mas invisível */
-.champ-input--icon {
-    position: relative;
-    display: block;
-    padding: 0;
-}
-
-.champ-input--icon input {
-    padding-right: 34px;
-}
-
-.champ-input--icon img {
-    position: absolute;
-    top: 50%;
-    right: 9px;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-.champ-input--icon input::-webkit-calendar-picker-indicator {
-    position: absolute;
-    right: 0;
-    width: 34px;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-/* Status: radios escondidos, o <label> é o chip */
-.champ-status-chips {
-    display: flex;
-    gap: 16px;
-}
-
-.champ-status-chips input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.champ-status-chips label {
+/* tipo do campeonato; oficial (com sanção) ganha contorno na cor da seção */
+.champ-tipo {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    height: 29px;
-    padding: 0 12px 0 7px;
-    background: var(--placeholder);
-    border: 0.5px solid transparent;
-    border-radius: var(--radius-sm);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-status-chips input:checked + label {
-    background: var(--text-muted-2);
-    border-color: var(--text-muted);
-}
-
-.champ-status-chips input:focus-visible + label {
-    outline: 2px solid var(--pink-500);
-    outline-offset: 2px;
-}
-
-/* busca de participantes */
-.champ-search__field {
-    position: relative;
-}
-
-.champ-search__field input {
-    width: 100%;
-    height: 40px;
-    padding: 0 36px 0 12px;
-    border: none;
-    border-radius: 5px;
-    background: var(--placeholder);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.champ-search__field img {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
-/* resultados da busca (criar): painel que "sai" de baixo do campo */
-.champ-search__results {
-    position: relative;
-    margin-top: -6px;
-    padding: 13px 16px 13px 14px;
-    background: var(--surface);
+    padding: 2px 9px;
     border: 1px solid var(--surface-border);
-    border-radius: 5px;
-}
-
-.champ-search__results:empty,
-.champ-search__results:not(:has(.participant-row:not([hidden]))) {
-    display: none;
-}
-
-.champ-form__count {
-    margin: 16px 0 4px;
+    border-radius: 999px;
+    background: var(--field);
     color: var(--text-soft);
-    font-size: 12px;
-}
-
-/* linha de participante (avatar + nome + nascimento) */
-.participant-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 11px 0;
-}
-
-.champ-participants .participant-row + .participant-row,
-.champ-accordion .participant-row + .participant-row {
-    border-top: 0.5px solid var(--line);
-}
-
-.participant-row__avatar {
-    width: 32.5px;
-    height: 32.5px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #ff2828;
-    flex-shrink: 0;
-}
-
-.participant-row__info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.participant-row__info strong {
-    font-size: 16px;
+    font-size: calc(12px * var(--escala-texto));
     font-weight: 600;
+    white-space: nowrap;
 }
 
-.participant-row__info span {
-    color: var(--text-soft);
-    font-size: 12px;
+.champ-tipo--oficial {
+    border-color: var(--camp-acento);
+    color: var(--camp-acento);
 }
 
-.participant-row__remove {
+/* data relativa: "Hoje · 18:00", "Amanhã", "Há 3 dias" */
+.champ-quando {
     display: inline-flex;
-    padding: 0;
-    margin-right: 20px;
-}
-
-.participant-row[hidden] {
-    display: none;
-}
-
-/* resultado da busca com "+": o checkbox fica escondido e o "+" gira em x
-   quando o cliente já foi adicionado */
-.participant-row--pick {
-    padding: 4px 0;
-    cursor: pointer;
-}
-
-.participant-row--pick + .participant-row--pick {
-    margin-top: 11px;
-}
-
-.participant-row--pick input {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.participant-row__add {
-    transition: transform .2s;
-}
-
-.participant-row--pick input:checked + .participant-row__add {
-    transform: rotate(45deg);
-}
-
-.participant-row--pick input:focus-visible + .participant-row__add {
-    outline: 2px solid var(--pink-500);
-    border-radius: 50%;
-}
-
-/* vencedores */
-.winner-row {
-    display: flex;
     align-items: center;
-    gap: 3px;
-    height: 50px;
-    padding-left: 3px;
-    margin-bottom: 7px;
-    background: var(--placeholder);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.winner-row__avatar {
-    width: 32.5px;
-    height: 32.5px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: #ff2828;
-    flex-shrink: 0;
-}
-
-.winner-row__info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    padding-left: 2px;
-}
-
-.winner-row__info strong {
-    font-size: 16px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.winner-row__info span {
+    gap: 6px;
     color: var(--text-soft);
-    font-size: 12px;
-}
-
-.winner-row__value {
-    align-self: flex-start;
-    margin: 6px auto 0 8px;
-    padding: 4px;
-    background: #6bac68;
-    border-radius: 12px;
-    color: #344d33;
-    font-size: 8px;
-    white-space: nowrap;
-}
-
-.winner-row__action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 100%;
-    margin-left: auto;
-    background: var(--pink-200);
-    flex-shrink: 0;
-}
-
-.champ-empty {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.champ-locked {
-    margin: 0 0 12px;
-    padding: 10px 12px;
-    background: var(--pink-200);
-    border-radius: 5px;
-    color: var(--pink-900);
-    font-size: 13px;
-    font-weight: 600;
-}
-
-/* botão principal de rodapé (Criar / Salvar alterações / Finalizar) */
-.champ-submit {
-    display: block;
-    width: 100%;
-    height: 46px;
-    margin-top: 24px;
-    background: var(--pink-300);
-    border-radius: var(--radius-md);
-    color: var(--on-accent);
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.champ-submit--bottom {
-    margin-top: 110px;
-}
-
-/* --- Premiações (um bloco por colocação) --------------------------------- */
-
-.prize-block {
-    margin-bottom: 21px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.prize-block__header {
-    height: 38px;
-    line-height: 38px;
-    margin: -1px -1px 0;
-    background: var(--pink-200);
-    text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.prize-block--2 .prize-block__header { background: var(--pink-300); }
-.prize-block--3 .prize-block__header { background: var(--pink-400); }
-
-.prize-block__body {
-    padding: 14px 14px 12px;
-}
-
-.prize-block__search input,
-.prize-block__desc,
-.prize-amount__input {
-    height: 35px;
-    background: var(--bg);
-    border: 0.5px solid var(--placeholder);
-    border-radius: 5px;
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-.prize-block__search input {
-    padding: 0 36px 0 8px;
-}
-
-.prize-block__desc {
-    width: 100%;
-    padding: 0 8px;
-    color: var(--text);
-}
-
-.prize-amount {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 5px 0;
-}
-
-.prize-amount__input {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 123px;
-    padding: 0 8px;
-}
-
-.prize-amount__input input {
-    width: 100%;
-    min-width: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-    font: inherit;
-    color: var(--text);
-}
-
-/* o SVG do Figma tem 49px porque inclui a sombra; o botão tem 29px */
-.prize-amount__step {
-    position: relative;
-    width: 29px;
-    height: 29px;
-    padding: 0;
-}
-
-.prize-amount__step img {
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    max-width: none;
-}
-
-/* --- Filtros da lista de campeonatos --------------------------------------
-   Painel em duas faixas: em cima busca + ordenação; embaixo (separado por
-   uma linha) os chips de jogo e status, com o total e o "limpar" à direita.
-   No mobile tudo empilha. Os chips reaproveitam o .chip--check das cartas. */
-
-.champ-filtros {
-    margin-bottom: 20px;
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-md);
-}
-
-.champ-filtros__topo,
-.champ-filtros__base {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 14px 16px;
-}
-
-.champ-filtros__base {
-    border-top: 1px solid var(--surface-border);
-}
-
-/* busca: ícone + campo + botão "Buscar" numa pílula só */
-.champ-filtros__busca {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    height: 42px;
-    padding: 0 4px 0 14px;
-    background: var(--field);
-    border: 1px solid var(--surface-border);
-    border-radius: 21px;
-    color: var(--text-muted);
-}
-
-.champ-filtros__busca:focus-within {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.champ-filtros__busca input {
-    flex: 1;
-    width: 0; /* sem isso o campo impõe a largura padrão (~20 letras) */
-    min-width: 0;
-    border: none;
-    outline: none;
-    background: transparent;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 14px;
-}
-
-.champ-filtros__busca button {
-    height: 34px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 17px;
-    background: var(--purple-500);
-    color: var(--white);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-filtros__busca button:hover {
-    background: var(--purple-light-800);
-}
-
-.champ-filtros__ordenar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--text-muted);
-    white-space: nowrap;
-}
-
-.champ-filtros__ordenar select {
-    flex: 1;
-    height: 38px;
-    padding: 0 10px;
-    border: 1px solid var(--surface-border);
-    border-radius: var(--radius-sm);
-    background: var(--field);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.champ-filtros__ordenar select:focus {
-    outline: 2px solid var(--purple-300);
-    outline-offset: 1px;
-    border-color: var(--purple-500);
-}
-
-.champ-filtros__grupo {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-}
-
-/* rótulo em letras maiúsculas pequenas, igual nos dois grupos */
-.champ-filtros__rotulo {
-    font-size: 11px;
+    font-size: calc(13px * var(--escala-texto));
     font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--purple-500);
 }
 
-.champ-filtros .chip-row {
-    gap: 6px;
+.champ-quando--hoje {
+    color: var(--camp-acento);
 }
 
-.champ-filtros .chip {
-    gap: 6px;
-    padding: 5px 12px;
-    font-size: 12.5px;
+.champ-quando--atrasado {
+    color: var(--camp-finalizado);
 }
 
-/* bolinha de status (mesmas cores do selo ativo/finalizado dos cards) */
-.champ-filtros__dot {
+.champ-quando__ponto {
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 0 3px var(--camp-tint);
+    animation: champ-pulsar 1.6s ease-in-out infinite;
 }
 
-.champ-filtros__dot--ativo {
-    background: #3cc15c;
+@keyframes champ-pulsar {
+    50% { box-shadow: 0 0 0 6px transparent; }
 }
 
-.champ-filtros__dot--finalizado {
-    background: #e2463f;
+.champ-selo-provisorio {
+    display: inline-flex;
+    width: fit-content;
+    padding: 0 7px;
+    border: 1px solid var(--camp-alerta-borda);
+    border-radius: 999px;
+    background: var(--camp-alerta-fundo);
+    color: var(--camp-alerta-texto);
+    font-size: calc(10.5px * var(--escala-texto));
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
 }
 
-.chip--check:has(input:checked) .champ-filtros__dot {
-    box-shadow: 0 0 0 2px var(--white);
+/* banner do sistema: enquadrado pela esquerda, onde fica o texto */
+.champ-banner--sistema {
+    object-position: left center;
+}
+
+/* --- Lista: filtros --------------------------------------------------------
+   Busca + "Criar" em cima; embaixo os selects (jogo, tipo, status, ordem).
+   Selects, como em Clientes: cabem numa grade no celular sem rolagem
+   lateral (os chips antigos alargavam a página inteira no celular). */
+
+.champ-filtros {
+    margin-bottom: var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+}
+
+.champ-filtros__topo {
+    display: flex;
+    gap: var(--space-2);
+    padding: 12px;
+}
+
+.champ-filtros .busca {
+    flex: 1;
+    min-width: 0;
+    background: var(--field);
+}
+
+[data-campeonatos-page] .busca:focus-within {
+    box-shadow: 0 0 0 2px var(--camp-tint-borda);
+}
+
+.champ-filtros__criar {
+    flex-shrink: 0;
+}
+
+.champ-filtros__criar-extra {
+    display: none;
+}
+
+.champ-filtros__base {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding: 12px;
+    border-top: 1px solid var(--surface-border);
+}
+
+.champ-filtro {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.champ-filtro > span {
+    color: var(--text-muted);
+    font-size: calc(11px * var(--escala-texto));
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.champ-filtro select {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+    padding: 0 8px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+    font-size: calc(13px * var(--escala-texto));
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* filtro ligado fica na cor da seção */
+.champ-filtro--ativo select {
+    border-color: var(--camp-acento);
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
 }
 
 .champ-filtros__resumo {
     display: flex;
+    grid-column: 1 / -1;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    font-size: 13px;
+    gap: var(--space-3);
+    min-height: 28px;
     color: var(--text-muted);
+    font-size: calc(13px * var(--escala-texto));
 }
 
 .champ-filtros__limpar {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    height: 32px;
-    padding: 0 12px;
-    border-radius: var(--radius-sm);
-    color: var(--purple-500);
-    font-size: 13px;
+    padding: 4px 10px;
+    border-radius: var(--radius-control);
+    color: var(--camp-acento);
     font-weight: 600;
-    white-space: nowrap;
 }
 
 .champ-filtros__limpar:hover {
-    background: var(--purple-light-300);
+    background: var(--camp-tint);
 }
 
-.champ-vazio {
-    margin: 32px 0;
-    text-align: center;
-    color: var(--text-muted-2);
+/* --- Lista: títulos de seção ------------------------------------------------ */
+
+.champ-secao-titulo {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin: var(--space-8) 0 var(--space-3);
+    font-size: calc(16px * var(--escala-texto));
+    font-weight: 700;
 }
 
-@media (min-width: 992px) {
-    .champ-filtros {
-        margin-bottom: 32px;
-    }
+.champ-secao-titulo:first-child {
+    margin-top: 0;
+}
 
-    .champ-filtros__topo {
-        flex-direction: row;
-        align-items: center;
-        gap: 24px;
-        padding: 16px 20px;
-    }
+.champ-secao-titulo span {
+    color: var(--text-muted);
+    font-size: calc(13px * var(--escala-texto));
+    font-weight: 600;
+}
 
-    .champ-filtros__busca {
+/* --- Lista: cards ----------------------------------------------------------- */
+
+/* em andamento: carrossel lateral no celular (o próximo "espia" pela direita) */
+.champ-andamento {
+    display: flex;
+    gap: var(--space-3);
+    margin: 0 -20px;
+    padding: 2px 20px 6px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 20px;
+    scrollbar-width: none;
+}
+
+.champ-andamento::-webkit-scrollbar {
+    display: none;
+}
+
+.champ-andamento > .champ-card {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+}
+
+.champ-andamento--varios > .champ-card {
+    flex-basis: 86%;
+}
+
+.champ-finalizados {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.champ-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+
+/* o de hoje ganha o contorno da seção */
+.champ-card--hoje {
+    border-color: var(--camp-acento);
+    box-shadow: 0 0 0 1px var(--camp-acento);
+}
+
+.champ-card__banner {
+    position: relative;
+    display: block;
+    height: 128px;
+    background: var(--camp-banner-vazio);
+}
+
+.champ-card__banner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champ-card--finalizado .champ-card__banner {
+    height: 96px;
+}
+
+/* bloco de data no canto do banner */
+.champ-card__data {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 46px;
+    padding: 4px 6px 5px;
+    border-radius: var(--radius-control);
+    background: var(--white);
+    color: var(--navy-900);
+    box-shadow: 0 2px 8px rgba(20, 24, 32, .25);
+    line-height: 1;
+}
+
+.champ-card__data strong {
+    font-size: calc(18px * var(--escala-texto));
+    font-weight: 800;
+}
+
+.champ-card__data span {
+    margin-top: 2px;
+    color: var(--camp-acento);
+    font-size: calc(10px * var(--escala-texto));
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.champ-card--finalizado .champ-card__data {
+    display: none;
+}
+
+.champ-banner-selo {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(20, 24, 32, .72);
+    color: var(--white);
+    font-size: calc(11.5px * var(--escala-texto));
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.champ-card__corpo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px 12px;
+}
+
+.champ-card__topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.champ-card__nome {
+    margin: 0;
+    font-size: calc(17px * var(--escala-texto));
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.champ-card__nome a {
+    color: inherit;
+}
+
+.champ-card__nome a:hover {
+    color: var(--camp-acento);
+}
+
+.champ-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--text-soft);
+    font-size: calc(13px * var(--escala-texto));
+}
+
+.champ-meta li {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.champ-meta i {
+    color: var(--text-muted);
+}
+
+.champ-card__vencedor {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: calc(13.5px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-card__vencedor i {
+    color: var(--yellow-500);
+}
+
+.champ-card__vencedor span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.champ-card__vencedor strong {
+    color: var(--camp-ativo);
+    white-space: nowrap;
+}
+
+/* barra: quanto das inscrições já foi pago (e do checklist) */
+.champ-barra {
+    display: block;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--placeholder);
+    overflow: hidden;
+}
+
+.champ-barra > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--camp-ativo);
+    transition: width .25s;
+}
+
+.champ-card__caixa {
+    margin-top: 2px;
+}
+
+.champ-card__rodape {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+/* lápis, copiar e lixeira dos cards */
+.champ-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.champ-actions a,
+.champ-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--text-muted);
+    font-size: calc(16px * var(--escala-texto));
+    cursor: pointer;
+}
+
+.champ-actions a:hover,
+.champ-actions button:hover {
+    background: var(--placeholder);
+    color: var(--text);
+}
+
+.champ-actions button:hover {
+    color: var(--camp-finalizado);
+}
+
+/* --- Pop-up dos campeonatos -------------------------------------------------
+   Mesmo comportamento dos modais de Clientes: no celular sobe do rodapé
+   como uma folha; do tablet em diante fica centralizado. Topo e rodapé
+   fixos, só o corpo rola. */
+
+.champ-modal {
+    width: 100%;
+    max-width: 100%;
+    /* fit-content (o padrão do <dialog>): com "auto" ele estica até a altura máxima */
+    height: fit-content;
+    max-height: 94vh;
+    max-height: 94dvh;
+    margin: auto 0 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-modal) var(--radius-modal) 0 0;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 -8px 32px rgba(20, 24, 32, .2);
+    overflow: hidden;
+}
+
+.champ-modal[open] {
+    display: flex;
+    flex-direction: column;
+    animation: champ-subir .22s ease-out;
+}
+
+/* alça de "folha" no celular */
+.champ-modal::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    z-index: 2;
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--line);
+    transform: translateX(-50%);
+}
+
+@keyframes champ-subir {
+    from { opacity: .4; transform: translateY(24px); }
+}
+
+.champ-modal::backdrop {
+    background: rgba(20, 24, 32, .45);
+}
+
+:root:not([data-theme="dark"]) .champ-modal {
+    --text-muted: #7a7a7a;
+}
+
+/* check-in: ocupa a tela toda */
+.champ-modal--cheio {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+}
+
+.champ-modal--cheio::before {
+    display: none;
+}
+
+.champ-modal__conteudo,
+.champ-modal__painel,
+.champ-modal__form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* enquanto o conteúdo carrega a primeira vez: já no tamanho de uso, para a
+   folha não "pular" depois */
+.champ-modal__conteudo:empty {
+    min-height: min(70dvh, 560px);
+}
+
+.champ-modal__topo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 16px 12px 12px 16px;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.champ-modal__topo--detalhe {
+    align-items: flex-start;
+    gap: var(--space-3);
+}
+
+.champ-modal__miniatura {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: var(--radius-control);
+    object-fit: cover;
+    background: var(--camp-banner-vazio);
+}
+
+/* na miniatura do banner do sistema aparece o desenho (lado direito) */
+.champ-banner--sistema-desenho {
+    object-position: 78% center;
+}
+
+.champ-modal__cabeca {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.champ-modal__quando {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.champ-modal__titulo {
+    margin: 0;
+    font-size: calc(17px * var(--escala-texto));
+    font-weight: 800;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.champ-modal__topo--detalhe .champ-modal__titulo {
+    font-size: calc(19px * var(--escala-texto));
+}
+
+.champ-modal__sub,
+.champ-modal__recorrencia {
+    color: var(--text-muted);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-modal__recorrencia {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.champ-modal__fechar,
+.champ-modal__voltar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--text);
+    font-size: calc(20px * var(--escala-texto));
+    cursor: pointer;
+}
+
+.champ-modal__fechar:hover,
+.champ-modal__voltar:hover {
+    background: var(--placeholder);
+}
+
+.champ-modal__corpo {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.champ-modal__rodape {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--surface-border);
+    background: var(--surface);
+}
+
+.champ-modal__apagar {
+    margin-right: auto;
+    color: var(--camp-finalizado);
+}
+
+.champ-modal__apagar:hover {
+    background: var(--camp-finalizado-tint);
+    color: var(--camp-finalizado);
+}
+
+.champ-modal__colunas {
+    display: grid;
+    gap: 0 var(--space-6);
+    align-items: start;
+}
+
+.champ-modal__coluna {
+    min-width: 0;
+}
+
+.champ-modal__carregando {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+.champ-modal__carregando[hidden] {
+    display: none;
+}
+
+.champ-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--camp-tint-borda);
+    border-top-color: var(--camp-acento);
+    border-radius: 50%;
+    animation: champ-girar .7s linear infinite;
+}
+
+@keyframes champ-girar {
+    to { transform: rotate(360deg); }
+}
+
+/* aviso rápido depois de uma ação (inscreveu, pagou...) */
+.champ-toast {
+    position: absolute;
+    left: 50%;
+    bottom: 84px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: max-content;
+    max-width: calc(100% - 32px);
+    padding: 10px 14px;
+    border-radius: var(--radius-control);
+    background: var(--navy-900);
+    color: var(--white);
+    font-size: calc(13px * var(--escala-texto));
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(20, 24, 32, .25);
+    transform: translateX(-50%);
+    animation: champ-surgir .2s ease-out;
+}
+
+.champ-toast i {
+    color: #8fe0a9;
+}
+
+.champ-toast--erro {
+    background: var(--red-700);
+}
+
+.champ-toast--erro i {
+    color: var(--white);
+}
+
+@keyframes champ-surgir {
+    from { opacity: 0; transform: translate(-50%, 8px); }
+}
+
+.champ-modal .campo select {
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.champ-modal .campo--invalido select {
+    border-color: var(--red-400);
+}
+
+/* o .campo:last-child do clientes.css zera a margem do último campo de cada
+   linha, o que colava a linha seguinte; aqui todo campo mantém o espaço */
+.champ-modal .champ-form__linha > .campo,
+.champ-modal .prize-block__linha > .campo {
+    margin-bottom: var(--space-3);
+}
+
+.champ-modal .campo label .opcional,
+.champ-secao__opcional {
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.champ-modal .campo label .obrigatorio {
+    color: var(--camp-acento);
+}
+
+.campo__aviso {
+    display: flex;
+    gap: 6px;
+    margin: 2px 0 0;
+    color: var(--camp-alerta-texto);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.campo__aviso[hidden] {
+    display: none;
+}
+
+/* --- Seções e cartões do pop-up -------------------------------------------- */
+
+.champ-secao {
+    min-width: 0;
+    margin: 0 0 var(--space-5);
+    padding: 0;
+    border: none;
+}
+
+.champ-secao__cabeca {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: 6px;
+}
+
+.champ-secao__cabeca .champ-secao__titulo {
+    margin: 0;
+}
+
+.champ-secao__titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px;
+    padding: 0;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.champ-secao__titulo span {
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.champ-cartao {
+    padding: 12px 14px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.champ-form__linha {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 var(--space-3);
+}
+
+/* --- Detalhe: caixa do campeonato ------------------------------------------ */
+
+.champ-numeros {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin: 0 0 var(--space-5);
+}
+
+.champ-numeros > div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.champ-numeros dt {
+    color: var(--text-muted);
+    font-size: calc(11px * var(--escala-texto));
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.champ-numeros dd {
+    margin: 2px 0 0;
+    font-size: calc(20px * var(--escala-texto));
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.champ-numeros dd span {
+    color: var(--text-muted);
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.champ-numeros__texto {
+    font-size: calc(16px * var(--escala-texto)) !important;
+}
+
+.champ-numeros small {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-numeros__caixa {
+    border-color: var(--camp-tint-borda) !important;
+    background: var(--camp-tint) !important;
+}
+
+.champ-numeros__caixa dd {
+    color: var(--camp-tint-texto);
+}
+
+.champ-numeros__falta {
+    color: var(--camp-finalizado) !important;
+    font-weight: 600;
+}
+
+.champ-numeros__ok {
+    color: var(--camp-ativo) !important;
+    font-weight: 600;
+}
+
+/* --- Detalhe: participantes ------------------------------------------------- */
+
+.champ-avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--placeholder);
+}
+
+.champ-avatar--provisorio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--camp-tint);
+    color: var(--camp-acento);
+    font-size: calc(15px * var(--escala-texto));
+}
+
+.champ-participantes {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.champ-participante {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    padding: 8px 0;
+}
+
+.champ-participante + .champ-participante {
+    border-top: 1px solid var(--surface-border);
+}
+
+.champ-participante__info {
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
+    min-width: 0;
+}
+
+.champ-participante__info strong {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.champ-participante__nota {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-participante form {
+    margin: 0;
+}
+
+.champ-link-completar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--red-600);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+/* pílula de pagamento: "Pago" (verde) ou "Em aberto" (abre as formas) */
+.champ-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    background: var(--field);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.champ-pill--pago {
+    border-color: transparent;
+    background: var(--camp-ativo-tint);
+    color: var(--camp-ativo);
+}
+
+.champ-pill--aberto {
+    border-color: var(--camp-tint-borda);
+    background: var(--field);
+    color: var(--camp-acento);
+    cursor: pointer;
+}
+
+.champ-pill--aberto:hover,
+.champ-pill--aberto[aria-expanded="true"] {
+    background: var(--camp-tint);
+}
+
+.champ-pill--aberto i {
+    font-size: calc(10px * var(--escala-texto));
+    transition: transform .15s;
+}
+
+.champ-pill--aberto[aria-expanded="true"] i {
+    transform: rotate(180deg);
+}
+
+/* finalizado: dá para receber depois, mas sem chamar atenção */
+.champ-pill--discreto {
+    border-color: var(--surface-border);
+    color: var(--text-muted);
+}
+
+.champ-icone-botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: var(--text-muted);
+    font-size: calc(14px * var(--escala-texto));
+    cursor: pointer;
+}
+
+.champ-icone-botao:hover {
+    background: var(--camp-finalizado-tint);
+    color: var(--camp-finalizado);
+}
+
+/* faixa "Receber R$ 10,00 em [Dinheiro] [Pix] [Cartão]" */
+.champ-receber {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-left: 42px;
+    padding: 8px 10px;
+    border-radius: var(--radius-control);
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-receber[hidden] {
+    display: none;
+}
+
+.champ-receber > span {
+    margin-right: 2px;
+}
+
+.champ-segmento-botao {
+    padding: 5px 12px;
+    border: 1px solid var(--camp-tint-borda);
+    border-radius: 999px;
+    background: var(--field);
+    color: var(--text);
+    font: inherit;
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.champ-segmento-botao:hover {
+    border-color: var(--camp-acento);
+    background: var(--camp-acento);
+    color: var(--white);
+}
+
+.is-enviando {
+    opacity: .6;
+    pointer-events: none;
+}
+
+/* inscrição rápida */
+.champ-inscrever {
+    margin-bottom: var(--space-2);
+}
+
+.champ-modal .busca {
+    background: var(--field);
+}
+
+.champ-modal .busca:focus-within {
+    box-shadow: 0 0 0 2px var(--camp-tint-borda);
+}
+
+/* "ao inscrever, receber em": segmentos */
+.champ-pagar-junto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 0 0;
+    padding: 0;
+    border: none;
+}
+
+.champ-pagar-junto legend {
+    float: left;
+    margin-right: 4px;
+    padding: 0;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-segmento {
+    position: relative;
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.champ-segmento input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.champ-segmento > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 11px;
+    border: 1px solid var(--surface-border);
+    border-radius: 999px;
+    background: var(--field);
+    color: var(--text-soft);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color .12s, border-color .12s;
+}
+
+.champ-segmento:hover > span {
+    border-color: var(--camp-tint-borda);
+}
+
+.champ-segmento input:checked + span {
+    border-color: var(--camp-acento);
+    background: var(--camp-acento);
+    color: var(--white);
+}
+
+.champ-segmento input:focus-visible + span {
+    outline: 2px solid var(--camp-acento);
+    outline-offset: 2px;
+}
+
+/* resultados da busca: só aparecem digitando */
+.champ-search__resultados {
+    margin-top: var(--space-2);
+    padding: 4px;
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.champ-inscrever .champ-search__resultados {
+    display: none;
+}
+
+.champ-inscrever.tem-resultados .champ-search__resultados {
+    display: block;
+}
+
+.champ-search__resultados form {
+    margin: 0;
+}
+
+.champ-search__resultados form[hidden],
+.champ-escolha[hidden] {
+    display: none;
+}
+
+.champ-resultado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    border-radius: var(--radius-control);
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.champ-resultado:hover,
+.champ-resultado:focus-visible {
+    background: var(--camp-tint);
+}
+
+.champ-resultado__nome {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.champ-resultado__acao {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--camp-acento);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.champ-provisorio-form summary {
+    list-style: none;
+}
+
+.champ-inscrever.sem-resultados .champ-provisorio-form summary {
+    color: var(--camp-acento-forte);
+}
+
+.champ-provisorio-form[open] form {
+    margin-top: 4px;
+    padding: 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.champ-provisorio-form .champ-ajuda {
+    margin: 0 0 10px;
+}
+
+/* provisórios depois de finalizar: vira cliente ou não */
+.champ-provisorios-decisao {
+    padding: 12px 14px;
+    border: 1px solid var(--camp-alerta-borda);
+    border-radius: var(--radius-control);
+    background: var(--camp-alerta-fundo);
+}
+
+.champ-provisorios-decisao .champ-secao__titulo {
+    color: var(--camp-alerta-texto);
+}
+
+.champ-provisorios-decisao .champ-ajuda {
+    margin: -4px 0 6px;
+}
+
+.champ-decisao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    padding: 8px 0;
+}
+
+.champ-decisao + .champ-decisao {
+    border-top: 1px solid var(--camp-alerta-borda);
+}
+
+.champ-decisao__info {
+    display: flex;
+    flex: 1 1 140px;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.champ-decisao__info strong {
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-decisao__info span {
+    color: var(--text-soft);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-decisao__acoes {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.champ-decisao__acoes form {
+    margin: 0;
+}
+
+/* --- Detalhe: coluna de informações ----------------------------------------- */
+
+.champ-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3) var(--space-4);
+    margin: 0;
+}
+
+.champ-info div {
+    min-width: 0;
+}
+
+.champ-info dt {
+    margin-bottom: 1px;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-info dd {
+    margin: 0;
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.champ-detail__desc {
+    margin: var(--space-3) 0 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--surface-border);
+    color: var(--text-soft);
+    font-size: calc(13.5px * var(--escala-texto));
+    line-height: 1.5;
+}
+
+.champ-premiacao-plano {
+    padding: 12px 14px;
+    border: 1px solid var(--camp-tint-borda);
+    border-radius: var(--radius-control);
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+}
+
+.champ-premiacao-plano .champ-secao__titulo {
+    color: var(--camp-tint-texto);
+}
+
+.champ-podio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: calc(15px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.champ-podio span {
+    margin-right: 5px;
+    opacity: .75;
+}
+
+.champ-premiacao-plano p {
+    margin: 8px 0 0;
+    font-size: calc(12.5px * var(--escala-texto));
+}
+
+/* checklist dos oficiais: tarefa feita = check verde (não riscado) */
+.champ-checklist .champ-barra {
+    margin-bottom: 6px;
+}
+
+.champ-checklist form {
+    margin: 0;
+}
+
+.champ-checklist__completo {
+    color: var(--camp-ativo) !important;
+}
+
+.champ-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: calc(13.5px * var(--escala-texto));
+    cursor: pointer;
+}
+
+.champ-check[hidden] {
+    display: none;
+}
+
+.champ-check input {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: var(--camp-acento);
+}
+
+.champ-check strong {
+    display: block;
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-check small {
+    display: block;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-check--tarefa input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.champ-check__caixa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    border: 2px solid var(--line);
+    border-radius: 6px;
+    color: transparent;
+    font-size: calc(13px * var(--escala-texto));
+    transition: background-color .12s, border-color .12s;
+}
+
+.champ-check--tarefa:hover .champ-check__caixa {
+    border-color: var(--camp-ativo);
+}
+
+.champ-check--tarefa input:checked + .champ-check__caixa {
+    border-color: var(--camp-ativo);
+    background: var(--camp-ativo);
+    color: var(--white);
+}
+
+.champ-check--tarefa input:checked ~ span:last-child {
+    color: var(--text-soft);
+}
+
+.champ-check--tarefa input:focus-visible + .champ-check__caixa {
+    outline: 2px solid var(--camp-acento);
+    outline-offset: 2px;
+}
+
+/* --- Vencedores --------------------------------------------------------------- */
+
+.winner-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 8px 12px;
+    margin-bottom: var(--space-2);
+    background: var(--field);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+}
+
+.winner-row:first-child {
+    border-color: var(--yellow-400);
+}
+
+.winner-row__posicao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 800;
+}
+
+.winner-row:first-child .winner-row__posicao {
+    background: var(--yellow-400);
+    color: var(--yellow-900);
+}
+
+.winner-row__avatar {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--placeholder);
+}
+
+.winner-row__info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.winner-row__info strong {
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.winner-row__info span {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.winner-row__value {
+    flex-shrink: 0;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: var(--camp-ativo-tint);
+    color: var(--camp-ativo);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* --- Criar / editar --------------------------------------------------------- */
+
+/* tipo: seletor segmentado + a descrição do escolhido embaixo */
+.champ-tipos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.champ-segmento--tipo > span {
+    justify-content: center;
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius-control);
+    font-size: calc(13px * var(--escala-texto));
+}
+
+.champ-segmento--tipo {
+    display: flex;
+}
+
+.champ-tipo-descricao {
+    margin: 8px 0 0;
+    color: var(--text-soft);
+    font-size: calc(12.5px * var(--escala-texto));
+    line-height: 1.45;
+}
+
+.champ-oficial {
+    margin-top: var(--space-3);
+    padding: 12px;
+    border: 1px dashed var(--camp-tint-borda);
+    border-radius: var(--radius-control);
+}
+
+.champ-oficial[hidden] {
+    display: none;
+}
+
+.champ-oficial__texto {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0 0 10px;
+    color: var(--camp-tint-texto);
+    font-size: calc(12.5px * var(--escala-texto));
+    line-height: 1.4;
+}
+
+/* "repete toda semana" */
+.champ-switch {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: 12px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+    cursor: pointer;
+}
+
+.champ-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.champ-switch__trilho {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--line);
+    transition: background-color .15s;
+}
+
+.champ-switch__trilho::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--white);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transition: transform .15s;
+}
+
+.champ-switch:has(input:checked) {
+    border-color: var(--camp-tint-borda);
+    background: var(--camp-tint);
+}
+
+.champ-switch:has(input:checked) .champ-switch__trilho {
+    background: var(--camp-acento);
+}
+
+.champ-switch:has(input:checked) .champ-switch__trilho::after {
+    transform: translateX(16px);
+}
+
+.champ-switch:has(input:focus-visible) {
+    outline: 2px solid var(--camp-acento);
+    outline-offset: 2px;
+}
+
+.champ-switch__texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.champ-switch__texto strong {
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-switch__texto small {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    line-height: 1.4;
+}
+
+/* prêmios em créditos + total */
+.champ-premios {
+    margin-bottom: var(--space-3);
+}
+
+.champ-premios__rotulo {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-premios__linha {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+}
+
+.champ-modal .champ-premio {
+    margin-bottom: 0;
+}
+
+.champ-premio__input {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+    padding: 0 8px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--placeholder);
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-premio__input:focus-within {
+    border-color: var(--camp-acento);
+}
+
+.campo--invalido .champ-premio__input,
+.campo--invalido.champ-premios .champ-premio:first-child .champ-premio__input {
+    border-color: var(--red-400);
+}
+
+.champ-premio__input > span {
+    color: var(--text-muted);
+    font-size: calc(12.5px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-premio__input input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    outline: none;
+}
+
+.champ-premios__total {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-premios__total--valor {
+    color: var(--camp-tint-texto);
+    font-weight: 600;
+}
+
+/* "Mais opções" (prêmio extra, banner, descrição) */
+.champ-mais {
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+}
+
+.champ-mais summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px 8px;
+    padding: 12px 14px;
+    list-style: none;
+    cursor: pointer;
+}
+
+.champ-mais summary::-webkit-details-marker {
+    display: none;
+}
+
+.champ-mais summary span {
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.champ-mais summary small {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-mais summary i {
+    margin-left: auto;
+    color: var(--text-muted);
+    transition: transform .15s;
+}
+
+.champ-mais[open] summary i {
+    transform: rotate(180deg);
+}
+
+.champ-mais__corpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 0 14px 14px;
+}
+
+.champ-mais__corpo .campo {
+    margin-bottom: 0;
+}
+
+/* banner: o do sistema aparece inteiro, com um selo no canto */
+.champ-banner-campo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.champ-banner-campo .champ-premios__rotulo {
+    margin-bottom: 0;
+}
+
+.champ-banner-campo__area {
+    position: relative;
+    aspect-ratio: 5 / 2;
+    border: 2px dashed var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--camp-banner-vazio);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .15s;
+}
+
+.champ-banner-campo__area:hover,
+.champ-banner-campo__area.is-arrastando {
+    border-color: var(--camp-acento);
+}
+
+.champ-banner-campo__preview,
+.champ-banner-campo__sistema,
+.champ-banner-campo__sistema img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.champ-banner-campo__preview[hidden],
+.champ-banner-campo__sistema[hidden] {
+    display: none;
+}
+
+.champ-banner-campo__selo {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(20, 24, 32, .72);
+    color: var(--white);
+    font-size: calc(11.5px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-banner-campo__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+.champ-banner-campo__acoes label {
+    cursor: pointer;
+}
+
+.champ-banner-campo__remover[hidden] {
+    display: none;
+}
+
+.champ-banner-campo__dica {
+    color: var(--text-muted);
+    font-size: calc(12px * var(--escala-texto));
+}
+
+.champ-banner-campo .campo {
+    margin-bottom: 0;
+}
+
+/* participantes ao criar: lista para marcar */
+.champ-search__contador {
+    display: block;
+    margin-top: var(--space-1);
+    color: var(--camp-acento);
+    font-size: calc(12px * var(--escala-texto));
+    font-weight: 600;
+}
+
+.champ-search__contador:empty {
+    display: none;
+}
+
+.champ-search__resultados--escolha:not(:has(.champ-escolha:not([hidden]))) {
+    display: none;
+}
+
+.champ-escolha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: var(--radius-control);
+    cursor: pointer;
+}
+
+.champ-escolha:hover {
+    background: var(--camp-tint);
+}
+
+.champ-escolha input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.champ-escolha__nome {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.champ-escolha__marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    color: transparent;
+    font-size: calc(13px * var(--escala-texto));
+}
+
+.champ-escolha:has(input:checked) .champ-escolha__marca {
+    border-color: var(--camp-acento);
+    background: var(--camp-acento);
+    color: var(--white);
+}
+
+.champ-escolha:has(input:focus-visible) {
+    outline: 2px solid var(--camp-acento);
+    outline-offset: 1px;
+}
+
+.champ-provisorio-sugestao {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    margin-top: var(--space-2);
+    padding: 10px 12px;
+    border: 1px dashed var(--camp-tint-borda);
+    border-radius: var(--radius-control);
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+    font: inherit;
+    font-size: calc(13px * var(--escala-texto));
+    text-align: left;
+    cursor: pointer;
+}
+
+.champ-provisorio-sugestao[hidden] {
+    display: none;
+}
+
+.champ-provisorios:not(:empty) {
+    margin-top: var(--space-2);
+}
+
+.champ-provisorio-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+}
+
+.champ-provisorio-item__campos {
+    display: grid;
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    min-width: 0;
+}
+
+.champ-provisorio-item__campos input {
+    min-width: 0;
+    padding: 7px 9px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--placeholder);
+    color: var(--text);
+    font: inherit;
+    font-size: calc(13.5px * var(--escala-texto));
+    outline: none;
+}
+
+.champ-provisorio-item__campos input:focus {
+    border-color: var(--camp-acento);
+}
+
+/* --- Premiação -------------------------------------------------------------- */
+
+.champ-intro {
+    margin: 0 0 var(--space-4);
+    color: var(--text-soft);
+    font-size: calc(13.5px * var(--escala-texto));
+}
+
+.prize-grid {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.prize-block {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.prize-block__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 9px 14px;
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+    font-size: calc(14px * var(--escala-texto));
+    font-weight: 700;
+}
+
+.prize-block--principal {
+    border-color: var(--camp-acento);
+}
+
+.prize-block--principal .prize-block__header {
+    background: var(--camp-acento);
+    color: var(--white);
+}
+
+.prize-block__obrigatorio {
+    margin-left: auto;
+    font-size: calc(11px * var(--escala-texto));
+    font-weight: 600;
+    text-transform: uppercase;
+    opacity: .85;
+}
+
+.prize-block__body {
+    padding: 12px 14px 4px;
+}
+
+.prize-block__linha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0 var(--space-3);
+}
+
+.prize-block select {
+    width: 100%;
+    min-width: 0;
+}
+
+.prize-amount {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+}
+
+.prize-amount__input {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    gap: 4px;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-control);
+    background: var(--placeholder);
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.prize-amount__input:focus-within {
+    border-color: var(--camp-acento);
+}
+
+.campo--invalido .prize-amount__input {
+    border-color: var(--red-400);
+}
+
+.prize-amount__input span {
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.prize-amount__input input {
+    width: 100%;
+    min-width: 0;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    outline: none;
+    font: inherit;
+    color: var(--text);
+}
+
+.prize-amount__step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+    color: var(--text);
+    font-size: calc(16px * var(--escala-texto));
+    cursor: pointer;
+}
+
+.prize-amount__step:hover {
+    background: var(--camp-tint);
+    color: var(--camp-tint-texto);
+}
+
+/* --- Diálogos pequenos (apagar, confirmar) ---------------------------------- */
+
+.champ-dialog {
+    width: 400px;
+    max-width: calc(100% - 32px);
+    padding: var(--space-5);
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: 0 12px 24px rgba(20, 24, 32, .16);
+}
+
+.champ-dialog::backdrop {
+    background: rgba(20, 24, 32, .45);
+}
+
+.champ-dialog__titulo {
+    margin: 0 0 var(--space-2);
+    font-size: calc(17px * var(--escala-texto));
+    font-weight: 800;
+}
+
+.champ-dialog__texto {
+    margin: 0 0 var(--space-4);
+    color: var(--text-soft);
+    font-size: calc(14px * var(--escala-texto));
+}
+
+.champ-dialog__acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+}
+
+.champ-dialog .botao--principal {
+    background: var(--camp-acento);
+    color: var(--white);
+}
+
+.champ-dialog .botao--principal:hover {
+    background: var(--camp-acento-forte);
+}
+
+/* --- Celular pequeno --------------------------------------------------------- */
+
+@media (max-width: 575.98px) {
+    /* rodapé do pop-up: ações principais dividem a linha; "Apagar" vira só ícone */
+    .champ-modal__rodape .botao:not(.champ-modal__apagar) {
         flex: 1;
+        padding-left: 10px;
+        padding-right: 10px;
     }
 
-    .champ-filtros__ordenar select {
-        width: 160px;
+    .champ-modal__rodape .champ-modal__apagar {
+        width: 44px;
+        padding-left: 0;
+        padding-right: 0;
     }
 
-    /* jogo e status lado a lado, separados por um traço; total à direita */
+    .champ-apagar-texto {
+        display: none;
+    }
+
+    .champ-receber {
+        margin-left: 0;
+    }
+}
+
+/* --- Tablet ------------------------------------------------------------------ */
+
+@media (min-width: 576px) {
+    .champ-filtros__criar-extra {
+        display: inline;
+    }
+
     .champ-filtros__base {
-        flex-direction: row;
-        align-items: center;
-        gap: 28px;
-        padding: 14px 20px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .champ-filtros__grupo {
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
+    .champ-numeros {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .champ-filtros__grupo + .champ-filtros__grupo {
-        padding-left: 28px;
-        border-left: 1px solid var(--surface-border);
+    .champ-tipos {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .champ-provisorio-item__campos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 768px) {
+    .champ-filtros__topo {
+        padding: 14px 16px;
+    }
+
+    /* selects com largura fixa e o total à direita, na mesma faixa */
+    .champ-filtros__base {
+        grid-template-columns: repeat(4, minmax(0, 170px)) 1fr;
+        align-items: end;
+        padding: 12px 16px;
     }
 
     .champ-filtros__resumo {
-        margin-left: auto;
+        grid-column: auto;
+        justify-content: flex-end;
+        min-height: 38px;
+    }
+
+    .champ-andamento {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin: 0;
+        padding: 0;
+        overflow: visible;
+        gap: var(--space-4);
+    }
+
+    .champ-andamento:not(.champ-andamento--varios) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .champ-finalizados {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4);
+    }
+
+    .champ-card__banner {
+        height: 150px;
+    }
+
+    .champ-andamento:not(.champ-andamento--varios) .champ-card {
+        flex-direction: row;
+    }
+
+    .champ-andamento:not(.champ-andamento--varios) .champ-card__banner {
+        width: 46%;
+        height: auto;
+        min-height: 200px;
+    }
+
+    .champ-card:hover {
+        box-shadow: 0 8px 20px var(--shadow);
+    }
+
+    .prize-block__linha {
+        grid-template-columns: minmax(0, 1fr) 200px;
+    }
+
+    /* pop-up centralizado, com cantos nos 4 lados */
+    .champ-modal {
+        width: min(960px, calc(100% - 48px));
+        max-height: 90vh;
+        max-height: 90dvh;
+        margin: auto;
+        border-radius: var(--radius-modal);
+        box-shadow: 0 12px 40px rgba(20, 24, 32, .25);
+    }
+
+    .champ-modal::before {
+        display: none;
+    }
+
+    .champ-modal[open] {
+        animation-name: champ-aparecer;
+    }
+
+    @keyframes champ-aparecer {
+        from { opacity: 0; transform: scale(.98); }
+    }
+
+    .champ-modal--cheio {
+        width: min(1100px, calc(100% - 48px));
+        height: 94dvh;
+        max-height: 94dvh;
+        border-radius: var(--radius-modal);
+    }
+
+    .champ-modal__topo {
+        padding: 16px 16px 14px 24px;
+    }
+
+    .champ-modal__corpo {
+        padding: 20px 24px;
+    }
+
+    .champ-modal__rodape {
+        padding: 14px 24px;
+    }
+
+    .champ-modal__miniatura {
+        width: 64px;
+        height: 64px;
+    }
+
+    .champ-modal__topo--detalhe .champ-modal__titulo {
+        font-size: calc(22px * var(--escala-texto));
     }
 }
 
-/* --- Ajustes do tema escuro (campeonatos) -------------------------------- */
+/* --- Desktop ---------------------------------------------------------------- */
 
-/* botão claro sobre o card rosa do campeonato ativo: mantém o visual claro */
-:root[data-theme="dark"] .champ-active__access {
-    background: var(--on-accent);
+@media (min-width: 992px) {
+    .champ-andamento--varios {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: var(--space-5);
+    }
+
+    .champ-finalizados {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-5);
+    }
+
+    .champ-card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* pop-up: duas colunas (a principal mais larga) */
+    .champ-modal__colunas {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .champ-modal__colunas--detalhe {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    }
+
+    .champ-modal--cheio .champ-modal__colunas--detalhe {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .champ-modal--cheio .champ-numeros {
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .champ-modal__form .champ-tipos {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* premiação: 1°, 2° e 3° lado a lado */
+    .prize-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: var(--space-4);
+    }
+
+    .prize-grid .prize-block__linha {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }
 
-:root[data-theme="dark"] .champ-active__access:hover {
-    background: var(--white);
+/* --- Tema escuro: ajustes pontuais ------------------------------------------ */
+
+:root[data-theme="dark"] .champ-card__data {
+    background: var(--surface);
+    color: var(--text);
 }

@@ -29,11 +29,19 @@ class Cliente extends Model
         '#2e3045', // --navy-900
     ];
 
+    /**
+     * Valores de `cadastro` (ver migration add_cadastro_to_clientes_table).
+     */
+    public const CADASTRO_CLIENTE = 'cliente';
+    public const CADASTRO_PROVISORIO = 'provisorio';
+    public const CADASTRO_AVULSO = 'avulso';
+
     protected $fillable = [
         'nome',
         'data_nascimento',
         'whatsapp',
         'status',
+        'cadastro',
         'foto',
         'observacoes',
         'creditos',
@@ -70,7 +78,7 @@ class Cliente extends Model
     public function campeonatos()
     {
         return $this->belongsToMany(Campeonato::class, 'campeonato_cliente')
-            ->withPivot('valor_pago', 'colocacao')
+            ->withPivot('valor_pago', 'venda_id', 'colocacao')
             ->withTimestamps();
     }
 
@@ -90,7 +98,7 @@ class Cliente extends Model
 
         if ($saldoNovo < 0) {
             throw ValidationException::withMessages([
-                'creditos' => "{$atual->nome} já usou parte desses créditos (saldo atual: R$ ".number_format($saldoAnterior, 2, ',', '.').').',
+                'creditos' => "Saldo insuficiente: {$atual->nome} tem R$ ".number_format($saldoAnterior, 2, ',', '.').' em créditos.',
             ]);
         }
 
@@ -107,6 +115,60 @@ class Cliente extends Model
     }
 
     /**
+     * Participante "fantasma" de campeonato: nunca veio à loja, então entra
+     * só com o nome (e o WhatsApp, se quiser). Ganha créditos normalmente;
+     * no fim a loja decide se ele vira cliente (tornarCliente) ou não
+     * (descartarProvisorio).
+     */
+    public static function criarProvisorio(string $nome, ?string $whatsapp = null): self
+    {
+        return self::create([
+            'nome' => $nome,
+            'whatsapp' => $whatsapp ?: null,
+            'status' => 'ativo',
+            'cadastro' => self::CADASTRO_PROVISORIO,
+            'creditos' => 0,
+        ]);
+    }
+
+    public function provisorio(): bool
+    {
+        return $this->cadastro === self::CADASTRO_PROVISORIO;
+    }
+
+    /**
+     * Provisório que vira cliente de verdade: passa a aparecer em Clientes,
+     * com o aviso de cadastro incompleto até preencherem o nascimento.
+     */
+    public function tornarCliente(): void
+    {
+        $this->update(['cadastro' => self::CADASTRO_CLIENTE]);
+    }
+
+    /**
+     * Provisório que não vai virar cliente: continua no histórico do
+     * campeonato (nome, colocação, inscrição paga), mas some das buscas. Os
+     * créditos que ganhou e não usou são zerados, com o motivo no histórico.
+     * Chamar dentro de uma DB::transaction (ver lancarCredito).
+     */
+    public function descartarProvisorio(string $motivo): void
+    {
+        if ((float) $this->creditos > 0) {
+            $this->lancarCredito(-(float) $this->creditos, $motivo);
+        }
+
+        $this->update(['cadastro' => self::CADASTRO_AVULSO]);
+    }
+
+    /**
+     * Cliente que entrou pelo campeonato e ainda não tem nascimento.
+     */
+    public function getIncompletoAttribute(): bool
+    {
+        return $this->cadastro === self::CADASTRO_CLIENTE && $this->data_nascimento === null;
+    }
+
+    /**
      * Dados curtos do cliente (avatar, nome e nascimento) usados nas telas
      * de campeonato — lista de participantes e busca para inscrever.
      *
@@ -119,6 +181,8 @@ class Cliente extends Model
             'nome' => $this->nome,
             'nascimento' => $this->data_nascimento?->format('d/m/Y') ?? '',
             'avatar' => $this->avatar_url,
+            'cadastro' => $this->cadastro ?? self::CADASTRO_CLIENTE,
+            'incompleto' => $this->incompleto,
         ];
     }
 
@@ -138,12 +202,32 @@ class Cliente extends Model
             'foto_url' => $this->foto_url,
             'creditos' => (float) $this->creditos,
             'inativo' => $this->status === 'inativo',
+            'provisorio' => $this->provisorio(),
         ];
     }
 
     public function scopeAtivos(Builder $query): Builder
     {
         return $query->where('status', 'ativo');
+    }
+
+    /**
+     * Só quem está na lista de Clientes (sem os participantes provisórios
+     * de campeonato e os que não viraram clientes).
+     */
+    public function scopeCadastrados(Builder $query): Builder
+    {
+        return $query->where('cadastro', self::CADASTRO_CLIENTE);
+    }
+
+    public function scopeProvisorios(Builder $query): Builder
+    {
+        return $query->where('cadastro', self::CADASTRO_PROVISORIO);
+    }
+
+    public function scopeIncompletos(Builder $query): Builder
+    {
+        return $query->cadastrados()->whereNull('data_nascimento');
     }
 
     public function scopeInativos(Builder $query): Builder
@@ -175,9 +259,9 @@ class Cliente extends Model
     /**
      * Idade atual do cliente, em anos completos.
      */
-    public function getIdadeAttribute(): int
+    public function getIdadeAttribute(): ?int
     {
-        return $this->data_nascimento->age;
+        return $this->data_nascimento?->age;
     }
 
     /**

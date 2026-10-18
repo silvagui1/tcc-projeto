@@ -42,7 +42,7 @@ class ClienteController extends Controller
         $termo = '';
         $filtros = $this->filtrosAtuais($request);
 
-        $clientes = $this->aplicarFiltros(Cliente::query(), $termo, $filtros)
+        $clientes = $this->aplicarFiltros(Cliente::cadastrados(), $termo, $filtros)
             ->paginate(self::CLIENTES_POR_PAGINA);
 
         return view('clientes.index', [
@@ -50,6 +50,9 @@ class ClienteController extends Controller
             'termo' => $termo,
             'filtros' => $filtros,
             'resumo' => $this->resumo(),
+            // vieram de campeonatos como provisórios e viraram clientes:
+            // falta a data de nascimento (aviso no topo da tela)
+            'incompletos' => Cliente::incompletos()->orderBy('nome')->get(['id', 'nome']),
         ]);
     }
 
@@ -64,7 +67,7 @@ class ClienteController extends Controller
         $termo = trim((string) $request->query('nome', ''));
         $filtros = $this->filtrosAtuais($request);
 
-        $clientes = $this->aplicarFiltros(Cliente::query(), $termo, $filtros)
+        $clientes = $this->aplicarFiltros(Cliente::cadastrados(), $termo, $filtros)
             ->paginate(self::CLIENTES_POR_PAGINA)
             ->withQueryString();
 
@@ -126,10 +129,10 @@ class ClienteController extends Controller
     private function resumo(): array
     {
         return [
-            'total' => Cliente::count(),
-            'creditosEmCarteira' => (float) Cliente::sum('creditos'),
-            'aniversariantesNoMes' => Cliente::aniversariantesDoMes()->count(),
-            'cadastrosNaSemana' => Cliente::where('created_at', '>=', now()->subDays(7))->count(),
+            'total' => Cliente::cadastrados()->count(),
+            'creditosEmCarteira' => (float) Cliente::cadastrados()->sum('creditos'),
+            'aniversariantesNoMes' => Cliente::cadastrados()->aniversariantesDoMes()->count(),
+            'cadastrosNaSemana' => Cliente::cadastrados()->where('created_at', '>=', now()->subDays(7))->count(),
         ];
     }
 
@@ -142,8 +145,10 @@ class ClienteController extends Controller
         return response()->json([
             'id' => $cliente->id,
             'nome' => $cliente->nome,
-            'data_nascimento' => $cliente->data_nascimento->format('Y-m-d'),
+            // vazio quando o cliente veio de um campeonato (cadastro incompleto)
+            'data_nascimento' => $cliente->data_nascimento?->format('Y-m-d'),
             'idade' => $cliente->idade,
+            'incompleto' => $cliente->incompleto,
             'whatsapp' => $cliente->whatsapp,
             'whatsapp_url' => $cliente->whatsapp_url,
             'status' => $cliente->status,
@@ -403,14 +408,14 @@ class ClienteController extends Controller
         $filtros = $this->filtrosAtuais($request);
 
         $clientes = $ids !== []
-            ? Cliente::whereIn('id', $ids)->orderBy('nome')->get()
-            : $this->aplicarFiltros(Cliente::query(), $termo, $filtros)->get();
+            ? Cliente::cadastrados()->whereIn('id', $ids)->orderBy('nome')->get()
+            : $this->aplicarFiltros(Cliente::cadastrados(), $termo, $filtros)->get();
 
         $linhas = array_merge(
             [['Nome', 'Data de nascimento', 'WhatsApp', 'Status', 'Créditos (R$)', 'Observações']],
             $clientes->map(fn (Cliente $cliente) => [
                 $cliente->nome,
-                $cliente->data_nascimento->format('d/m/Y'),
+                $cliente->data_nascimento?->format('d/m/Y') ?? '',
                 $cliente->whatsapp ?? '',
                 $cliente->status,
                 number_format((float) $cliente->creditos, 2, ',', '.'),
