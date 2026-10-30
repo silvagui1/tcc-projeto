@@ -60,5 +60,17 @@
         {{-- Menu inferior: fixo, só aparece no mobile --}}
         @include('partials.bottom-nav')
     </div>
+
+    {{-- Aviso flutuante único do sistema (sucesso / erro / "Desfazer") —
+         preenchido por avisar() em resources/js/comum.js. Depois de um
+         redirect o aviso vem do servidor em session('aviso'):
+         ['texto' => ..., 'tipo' => 'sucesso|erro', 'desfazer' => ['url' => ..., 'metodo' => ...]] --}}
+    <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
+    @if (session('aviso'))
+        <script type="application/json" data-aviso-inicial>{!! json_encode(session('aviso'), JSON_HEX_TAG | JSON_UNESCAPED_UNICODE) !!}</script>
+    @endif
+
+    {{-- Busca geral (Ctrl+K ou "/"): clientes, produtos, cartas e vendas --}}
+    @include('partials.busca-geral')
 </body>
 </html>

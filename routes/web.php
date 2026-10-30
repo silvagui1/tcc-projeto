@@ -2,20 +2,20 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AluguelController;
+use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\CampeonatoController;
 use App\Http\Controllers\CartaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ConfiguracaoController;
 use App\Http\Controllers\ContaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MesaController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendaController;
-use App\Models\Aluguel;
-use App\Models\Produto;
-use App\Models\Venda;
+
 /*
 |--------------------------------------------------------------------------
 | Rotas do sistema
@@ -33,40 +33,38 @@ Route::get('/', function () {
 
 Route::post('/logout', [LoginController::class, 'sair'])->name('logout');
 
-Route::get('/inicio', function () {
-    // cartões do topo: vendido hoje x ontem (vendas concluídas)
-    $hoje = Venda::resumoDoDia(today());
-    $ontem = Venda::resumoDoDia(today()->subDay());
-    // alerta de estoque baixo (Configurações > Estoque)
-    $estoqueBaixo = Produto::estoqueBaixo()->count();
-    // mesas reservadas para hoje (inclui as que começaram ontem e passam da meia-noite)
-    $alugueisHoje = Aluguel::ativos()
-        ->with(['mesa', 'cliente'])
-        ->where('inicio', '<', today()->addDay())
-        ->where('fim', '>', today())
-        ->orderBy('inicio')
-        ->get();
+// busca geral (Ctrl+K): clientes, produtos, cartas, vendas e campeonatos
+Route::get('/busca', BuscaController::class)->name('busca');
 
-    return view('pages.home', compact('hoje', 'ontem', 'estoqueBaixo', 'alugueisHoje'));
-})->name('home');
+// página inicial: vendas do dia, mesas, estoque baixo, campeonatos e últimas vendas
+Route::get('/inicio', HomeController::class)->name('home');
 
 
 // --- Estoque (produtos + cartas avulsas) ------------------------------------
 
 Route::get('/estoque', [EstoqueController::class, 'index'])->name('estoque.index');
 
+// "apagar" (destroy) arquiva; os arquivados abrem nos detalhes, podem ser
+// restaurados ou excluídos de vez (withTrashed nessas rotas)
 Route::prefix('estoque/produtos')->name('estoque.produtos.')->group(function () {
     Route::post('/', [ProdutoController::class, 'store'])->name('store');
+    Route::get('/{produto}', [ProdutoController::class, 'show'])->withTrashed()->name('show');
     Route::put('/{produto}', [ProdutoController::class, 'update'])->name('update');
     Route::delete('/{produto}', [ProdutoController::class, 'destroy'])->name('destroy');
+    Route::post('/{produto}/ajuste', [ProdutoController::class, 'ajustar'])->name('ajustar');
+    Route::post('/{produto}/restaurar', [ProdutoController::class, 'restaurar'])->withTrashed()->name('restaurar');
+    Route::delete('/{produto}/definitivo', [ProdutoController::class, 'excluir'])->withTrashed()->name('excluir');
 });
 
 Route::prefix('estoque/cartas')->name('estoque.cartas')->group(function () {
     Route::get('/', [CartaController::class, 'index'])->name('');
     Route::post('/', [CartaController::class, 'store'])->name('.store');
-    Route::get('/{carta}', [CartaController::class, 'show'])->name('.show');
+    Route::get('/{carta}', [CartaController::class, 'show'])->withTrashed()->name('.show');
     Route::put('/{carta}', [CartaController::class, 'update'])->name('.update');
     Route::delete('/{carta}', [CartaController::class, 'destroy'])->name('.destroy');
+    Route::post('/{carta}/ajuste', [CartaController::class, 'ajustar'])->name('.ajustar');
+    Route::post('/{carta}/restaurar', [CartaController::class, 'restaurar'])->withTrashed()->name('.restaurar');
+    Route::delete('/{carta}/definitivo', [CartaController::class, 'excluir'])->withTrashed()->name('.excluir');
 });
 
 

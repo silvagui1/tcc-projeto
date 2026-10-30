@@ -31,7 +31,7 @@
 
 <div class="config-page" data-config-page data-url-base="{{ url('/config') }}">
     <div class="page-topbar">
-        <p class="page-topbar__title">Configurações</p>
+        <h1 class="page-topbar__title">Configurações</h1>
         <span class="config-subtitulo">
             <i class="bi bi-info-circle" aria-hidden="true"></i>
             @if ($ehAdmin)
@@ -68,7 +68,6 @@
         </div>
     </div>
 
-    <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
     @include('clientes.partials._modal_confirmar')
 </div>
 @endsection

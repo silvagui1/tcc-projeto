@@ -8,9 +8,7 @@
  * configurações. O tema (Aparência) continua no app.js.
  */
 
-import { ativarFocusTrap, desativarFocusTrap } from './comum';
-
-const ICONES_MENSAGEM = { sucesso: 'bi-check-circle-fill', erro: 'bi-exclamation-circle-fill' };
+import { ativarFocusTrap, avisar, desativarFocusTrap } from './comum';
 
 // Mesmos limites validados em ConfiguracaoController.
 const LIMITES_CHIPS = { 'valores_rapidos[]': 6, 'motivos[]': 12, 'estados[]': 20, 'idiomas[]': 20 };
@@ -52,7 +50,6 @@ function iniciarPaginaConfiguracoes() {
     if (!pagina) return;
 
     const urlBase = pagina.dataset.urlBase;
-    const mensagemEl = pagina.querySelector('[data-mensagem]');
     const modalConfirmar = pagina.querySelector('[data-modal-confirmar]');
 
     // ---- Comunicação ----------------------------------------------------------
@@ -89,13 +86,7 @@ function iniciarPaginaConfiguracoes() {
     }
 
     function mostrarMensagem(texto, tipo = 'sucesso') {
-        if (!mensagemEl || !texto) return;
-        mensagemEl.innerHTML = '';
-        mensagemEl.append(icone(ICONES_MENSAGEM[tipo]), criar('span', '', texto));
-        mensagemEl.className = `mensagem-flutuante mensagem-flutuante--${tipo}`;
-        mensagemEl.hidden = false;
-        window.clearTimeout(mensagemEl._timeout);
-        mensagemEl._timeout = window.setTimeout(() => { mensagemEl.hidden = true; }, tipo === 'erro' ? 6000 : 3500);
+        avisar(texto, tipo);
     }
 
     /** Confirmação com o modal genérico de Clientes. */

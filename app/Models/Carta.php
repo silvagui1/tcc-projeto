@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Models\Concerns\TemImagemDeEstoque;
+use App\Models\Concerns\TemMovimentacoes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Carta extends Model
 {
-    use TemImagemDeEstoque;
+    // SoftDeletes: "apagar" arquiva (ver migration add_arquivamento_ao_estoque)
+    use SoftDeletes, TemImagemDeEstoque, TemMovimentacoes;
 
     // Jogos, estados e idiomas aceitos são configuráveis (Configurações >
     // Estoque): ver JogoCarta e as chaves estoque.* de App\Services\Configuracoes.

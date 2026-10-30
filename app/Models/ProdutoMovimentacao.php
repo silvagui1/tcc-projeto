@@ -22,10 +22,19 @@ class ProdutoMovimentacao extends Model
         'quantidade_anterior',
         'quantidade_nova',
         'descricao',
+        'venda_id',
     ];
 
     public function produto()
     {
-        return $this->belongsTo(Produto::class);
+        return $this->belongsTo(Produto::class)->withTrashed();
+    }
+
+    /**
+     * Venda que causou a movimentação (venda ou cancelamento), se houver.
+     */
+    public function venda()
+    {
+        return $this->belongsTo(Venda::class);
     }
 }

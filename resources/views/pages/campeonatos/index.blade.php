@@ -12,7 +12,7 @@
     <div class="page-topbar">
         <h1 class="page-topbar__title">Campeonatos</h1>
         @php($totalCampeonatos = $resumo['ativos'] + $resumo['finalizados'])
-        <span class="campeonatos-contador">
+        <span class="page-topbar__contador">
             {{ $totalCampeonatos }} {{ $totalCampeonatos === 1 ? 'cadastrado' : 'cadastrados' }}
         </span>
     </div>

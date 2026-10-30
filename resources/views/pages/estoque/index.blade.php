@@ -7,215 +7,156 @@
 
 @section('content')
 
-    {{-- no mobile os cartões ficam empilhados; no desktop viram uma fileira só --}}
-    <div class="estoque-resumo">
-        <div class="stat-card stat-card--split">
-            <div>
-                <span class="stat-card__label">Valor em estoque</span>
-                <p class="stat-card__value">R$ {{ number_format($resumo['valorEstoque'], 2, ',', '.') }}</p>
-            </div>
-            <div>
-                <span class="stat-card__label">Quantidade de produtos</span>
-                <p class="stat-card__value">{{ $resumo['quantidadeProdutos'] }}</p>
-            </div>
-        </div>
+    @include('pages.estoque.partials.cabecalho')
 
-        <div class="stat-grid">
-            <div class="stat-card">
-                <span class="stat-card__label">Cartas avulsas no estoque</span>
-                <p class="stat-card__value stat-card__value--lg">{{ $resumo['cartasAvulsas'] }}</p>
-            </div>
-            <div class="stat-card">
-                <span class="stat-card__label">Valor total em cartas avulsas</span>
-                <p class="stat-card__value stat-card__value--lg">R$ {{ number_format($resumo['valorCartasAvulsas'], 2, ',', '.') }}</p>
-            </div>
-        </div>
-    </div>
-
-    {{-- Alerta de estoque baixo (Configurações > Estoque) --}}
-    @if ($estoqueBaixo->isNotEmpty())
-        <div class="alerta-estoque" role="status">
-            <i class="bi bi-exclamation-triangle-fill alerta-estoque__icone" aria-hidden="true"></i>
-            <div class="alerta-estoque__texto">
-                <strong>
-                    {{ $estoqueBaixo->count() }} {{ $estoqueBaixo->count() === 1 ? 'produto está' : 'produtos estão' }}
-                    com estoque baixo
-                </strong>
-                <span>
-                    {{ $estoqueBaixo->take(4)->map(fn ($p) => "{$p->nome} ({$p->quantidade})")->implode(' · ') }}{{ $estoqueBaixo->count() > 4 ? ' · e mais '.($estoqueBaixo->count() - 4) : '' }}
-                </span>
-            </div>
-            <a href="{{ route('config') }}#estoque" class="alerta-estoque__link" title="Padrão: alerta a partir de {{ $alertaMinimo }} unidades — mudar em Configurações. Produtos com limite próprio usam o deles.">
-                padrão: até {{ $alertaMinimo }} un.
-            </a>
-        </div>
-    @endif
-
-    <hr class="divider">
+    @php
+        // monta os links dos filtros mantendo o resto da url
+        $comFiltro = fn (array $troca) => route('estoque.index', array_filter(array_merge([
+            'busca' => $filtros['busca'] ?: null,
+            'categoria' => $filtros['categoria'] ?: null,
+            'situacao' => $filtros['situacao'] !== 'todos' ? $filtros['situacao'] : null,
+            'ordenar' => $filtros['ordenar'] !== 'recentes' ? $filtros['ordenar'] : null,
+        ], $troca)));
+        $arquivadosAberto = $filtros['situacao'] === 'arquivados';
+        $temFiltro = $filtros['busca'] !== '' || $filtros['categoria'] || $filtros['situacao'] !== 'todos';
+    @endphp
 
     {{-- abas + busca: empilhadas no mobile, lado a lado no desktop --}}
     <div class="estoque-toolbar">
-        {{-- alterna entre a visão de produtos e a visão de cartas avulsas --}}
-        <div class="tabs">
-            <a href="{{ route('estoque.index', ['tab' => 'produtos']) }}" class="{{ $tab === 'produtos' ? 'is-active' : '' }}">Estoque Produtos</a>
-            <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="{{ $tab === 'cartas' ? 'is-active' : '' }}">Estoque Cartas</a>
-        </div>
+        @include('pages.estoque.partials.abas', ['aba' => 'produtos'])
 
-        {{-- na aba de produtos filtra a lista abaixo; na de cartas leva para o catálogo --}}
-        @if ($tab === 'produtos')
-            <form method="GET" action="{{ route('estoque.index') }}" class="search-bar" role="search">
-                <input type="hidden" name="tab" value="produtos">
-                @if ($filtros['categoria'])
-                    <input type="hidden" name="categoria" value="{{ $filtros['categoria'] }}">
+        <form method="GET" action="{{ route('estoque.index') }}" class="search-bar" role="search">
+            @foreach (['categoria', 'situacao', 'ordenar'] as $campo)
+                @if ($filtros[$campo] && ! in_array($filtros[$campo], ['todos', 'recentes'], true))
+                    <input type="hidden" name="{{ $campo }}" value="{{ $filtros[$campo] }}">
                 @endif
-                <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Buscar produto" aria-label="Buscar produto">
-                <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
-            </form>
-        @else
-            <form method="GET" action="{{ route('estoque.cartas') }}" class="search-bar" role="search">
-                <input type="search" name="busca" placeholder="Buscar carta" aria-label="Buscar carta">
-                <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
-            </form>
-        @endif
+            @endforeach
+            <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Buscar produto" aria-label="Buscar produto">
+            <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
+        </form>
     </div>
 
-    @include('pages.estoque.partials.mensagem')
+    @include('pages.estoque.partials.produto-form')
 
-    @if ($tab === 'produtos')
+    {{-- no desktop: filtros numa coluna à esquerda, produtos à direita --}}
+    <div class="estoque-layout">
+        <aside class="filters" aria-label="Filtros de produtos">
+            <h2 class="filters__titulo">Filtros</h2>
 
-        @include('pages.estoque.partials.produto-form')
-
-        {{-- no desktop: filtros numa coluna à esquerda, produtos à direita --}}
-        <div class="estoque-layout">
-            <aside class="filters">
-                <h3>Filtros</h3>
-
-                <span class="filters__group-label">Categorias</span>
-                <div class="chip-row">
-                    <a href="{{ route('estoque.index', ['tab' => 'produtos', 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
-                       class="chip {{ ! $filtros['categoria'] ? 'is-active' : '' }}">Todas</a>
-                    @foreach ($categorias as $categoria)
-                        <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $categoria->id, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $filtros['ordenar']]) }}"
-                           class="chip {{ $filtros['categoria'] === $categoria->id ? 'is-active' : '' }}">{{ Str::ucfirst(mb_strtolower($categoria->nome)) }}</a>
-                    @endforeach
-                </div>
-
-                <span class="filters__group-label">Ordenar</span>
-                <div class="chip-row">
-                    @foreach (['antigos' => 'Primeiros adicionados', 'recentes' => 'Últimos adicionados'] as $valor => $rotulo)
-                        <a href="{{ route('estoque.index', ['tab' => 'produtos', 'categoria' => $filtros['categoria'] ?: null, 'busca' => $filtros['busca'] ?: null, 'ordenar' => $valor]) }}"
-                           class="chip {{ $filtros['ordenar'] === $valor ? 'is-active' : '' }}">{{ $rotulo }}</a>
-                    @endforeach
-                </div>
-            </aside>
-
-            <hr class="divider estoque-layout__divider">
-
-            <section class="estoque-layout__produtos">
-                <h2 style="font-size: 20px;">Produtos</h2>
-
-                @if ($produtos->isEmpty())
-                    <p style="color: var(--text-muted-2);">
-                        {{ $filtros['busca'] !== '' || $filtros['categoria'] ? 'Nenhum produto encontrado com esses filtros.' : 'Nenhum produto cadastrado ainda.' }}
-                    </p>
-                @endif
-
-                <div class="product-grid">
-                    @foreach ($produtos as $produto)
-                        <div class="product-card">
-                            <div class="product-card__image" style="background-image: url('{{ $produto->imagem_url }}'), url('{{ $produto->imagem_padrao }}');">
-                                <span class="product-card__tag">{{ Str::ucfirst(mb_strtolower($produto->categoria->nome)) }}</span>
-                                <span class="product-card__actions">
-                                    <button type="button" class="product-card__delete" data-form-open="produto"
-                                            data-form-dados='@json($produto->dadosFormulario())'
-                                            aria-label="Editar {{ $produto->nome }}" title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button type="button" class="product-card__delete"
-                                            data-delete-open="{{ route('estoque.produtos.destroy', $produto) }}"
-                                            data-delete-title="Deseja apagar o produto &quot;{{ $produto->nome }}&quot;?"
-                                            aria-label="Apagar {{ $produto->nome }}" title="Apagar">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="product-card__body">
-                                <div class="name-price">
-                                    <strong>{{ $produto->nome }}</strong>
-                                    @if ($produto->comercializavel)
-                                        <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
-                                    @else
-                                        {{-- categoria não comercializável: só pode ser dado --}}
-                                        <span class="price price--brinde" title="Não comercializável: só pode ser dado">Brinde</span>
-                                    @endif
-                                </div>
-                                <p>{{ $produto->descricao }}</p>
-                                <p>
-                                    <strong>qtd {{ $produto->quantidade }}</strong>
-                                    @if ($produto->estoque_baixo)
-                                        <span class="selo-estoque-baixo" title="Avisa a partir de {{ $produto->limite_estoque_baixo }} un.{{ $produto->estoque_minimo === null ? ' (padrão)' : '' }}">Estoque baixo</span>
-                                    @endif
-                                </p>
-                            </div>
-                        </div>
-                    @endforeach
-
-                    <button type="button" class="add-product-card" data-form-open="produto">
-                        <span class="plus-circle"><i class="bi bi-plus-lg"></i></span>
-                        Adicionar produto
-                    </button>
-                </div>
-            </section>
-        </div>
-
-    @else
-
-        <div class="estoque-cartas-preview">
-            <div class="cartas-header">
-                <h2>Cartas em destaque</h2>
-                @include('pages.estoque.partials.adicionar-carta-botao')
+            <span class="filters__group-label">Situação</span>
+            <div class="chip-row">
+                <a href="{{ $comFiltro(['situacao' => null]) }}" class="chip {{ $filtros['situacao'] === 'todos' ? 'is-active' : '' }}">Ativos</a>
+                <a href="{{ $comFiltro(['situacao' => 'baixo']) }}" class="chip {{ $filtros['situacao'] === 'baixo' ? 'is-active' : '' }}">
+                    Estoque baixo @if ($quantidadeEstoqueBaixo)<span class="chip__contador">{{ $quantidadeEstoqueBaixo }}</span>@endif
+                </a>
+                <a href="{{ $comFiltro(['situacao' => 'arquivados']) }}" class="chip {{ $arquivadosAberto ? 'is-active' : '' }}">
+                    Arquivados @if ($arquivados)<span class="chip__contador">{{ $arquivados }}</span>@endif
+                </a>
             </div>
 
-            @include('pages.estoque.partials.carta-form', ['jogoPadrao' => array_key_first($jogosDisponiveis)])
-
-            @if ($cartasDestaque->isEmpty())
-                <p style="color: var(--text-muted-2);">Nenhuma carta cadastrada ainda.</p>
-            @endif
-
-            {{-- prévia das últimas cartas, com link para o catálogo completo.
-                 No mobile vira um carrossel lateral; no desktop, uma fileira de 4. --}}
-            <div class="estoque-cartas-grid">
-                @foreach ($cartasDestaque as $carta)
-                    <div class="trading-card trading-card--link">
-                        {{-- o link cobre a carta inteira; os botões ficam por cima dele --}}
-                        <a href="{{ route('estoque.cartas.show', $carta) }}" class="trading-card__link"
-                           aria-label="Ver detalhes de {{ $carta->nome }}"></a>
-                        @include('pages.estoque.partials.carta-acoes')
-                        <div class="trading-card__image" style="background-image: url('{{ $carta->imagem_url }}'), url('{{ $carta->imagem_padrao }}');"></div>
-                        <div class="trading-card__title-row">
-                            <strong>{{ $carta->nome }}</strong>
-                            <span class="price">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
-                        </div>
-                        <p class="trading-card__estoque">
-                            <i class="bi bi-box-seam" aria-hidden="true"></i>
-                            {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
-                        </p>
-                        <div class="trading-card__meta">
-                            @foreach ($carta->tags as $tag)
-                                <span>{{ $tag }}</span>
-                            @endforeach
-                        </div>
-                    </div>
+            <span class="filters__group-label">Categorias</span>
+            <div class="chip-row">
+                <a href="{{ $comFiltro(['categoria' => null]) }}" class="chip {{ ! $filtros['categoria'] ? 'is-active' : '' }}">Todas</a>
+                @foreach ($categorias as $categoria)
+                    <a href="{{ $comFiltro(['categoria' => $categoria->id]) }}"
+                       class="chip {{ $filtros['categoria'] === $categoria->id ? 'is-active' : '' }}">{{ Str::ucfirst(mb_strtolower($categoria->nome)) }}</a>
                 @endforeach
             </div>
 
-            <a href="{{ route('estoque.cartas') }}" class="btn-primary estoque-cartas-preview__all" style="margin-top: 20px;">
-                Ver todas as cartas
-                <i class="bi bi-arrow-90deg-up"></i>
-            </a>
-        </div>
+            <form method="GET" action="{{ route('estoque.index') }}" class="filters__ordenar" data-enviar-ao-mudar>
+                @foreach (['busca', 'categoria', 'situacao'] as $campo)
+                    @if ($filtros[$campo] && $filtros[$campo] !== 'todos')
+                        <input type="hidden" name="{{ $campo }}" value="{{ $filtros[$campo] }}">
+                    @endif
+                @endforeach
+                <label class="filters__group-label" for="estoque-ordenar">Ordenar por</label>
+                <select name="ordenar" id="estoque-ordenar" class="cartas-filtros__select">
+                    @foreach (\App\Http\Controllers\EstoqueController::ORDENACOES as $valor => $rotulo)
+                        <option value="{{ $valor }}" @selected($filtros['ordenar'] === $valor)>{{ $rotulo }}</option>
+                    @endforeach
+                </select>
+                <noscript><button type="submit" class="botao botao--neutro">Ordenar</button></noscript>
+            </form>
 
-    @endif
+            @if ($temFiltro)
+                <a href="{{ route('estoque.index') }}" class="botao-texto filters__limpar">Limpar filtros</a>
+            @endif
+        </aside>
+
+        <section class="estoque-layout__produtos" aria-labelledby="produtos-titulo">
+            <div class="estoque-lista-topo">
+                <h2 id="produtos-titulo">
+                    {{ $produtos->total() }}
+                    {{ $arquivadosAberto ? ($produtos->total() === 1 ? 'produto arquivado' : 'produtos arquivados') : ($produtos->total() === 1 ? 'produto' : 'produtos') }}
+                </h2>
+                @unless ($arquivadosAberto)
+                    <button type="button" class="botao botao--principal" data-form-open="produto">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Adicionar produto
+                    </button>
+                @endunless
+            </div>
+
+            @if ($arquivadosAberto)
+                <p class="estoque-aviso-arquivados">
+                    <i class="bi bi-archive" aria-hidden="true"></i>
+                    Produtos arquivados não aparecem nas vendas nem nos números do estoque. Restaure para voltar a vender.
+                </p>
+            @endif
+
+            @if ($produtos->isEmpty())
+                <div class="estoque-vazio">
+                    <i class="bi {{ $temFiltro ? 'bi-funnel' : 'bi-box-seam' }}" aria-hidden="true"></i>
+                    <p class="estoque-vazio__titulo">
+                        @if ($arquivadosAberto) Nenhum produto arquivado
+                        @elseif ($temFiltro) Nenhum produto encontrado
+                        @else Nenhum produto cadastrado ainda
+                        @endif
+                    </p>
+                    @if ($temFiltro && ! $arquivadosAberto)
+                        <p>Tente outra busca ou <a href="{{ route('estoque.index') }}">limpe os filtros</a>.</p>
+                    @endif
+                </div>
+            @endif
+
+            <div class="product-grid">
+                @foreach ($produtos as $produto)
+                    <article class="product-card product-card--link {{ $produto->trashed() ? 'product-card--arquivado' : '' }}">
+                        {{-- o link cobre o card inteiro; os botões ficam por cima dele --}}
+                        <a href="{{ route('estoque.produtos.show', $produto) }}" class="product-card__link"
+                           aria-label="Ver detalhes de {{ $produto->nome }}"></a>
+                        <div class="product-card__image" style="background-image: url('{{ $produto->imagem_url }}'), url('{{ $produto->imagem_padrao }}');">
+                            <span class="product-card__tag">{{ Str::ucfirst(mb_strtolower($produto->categoria->nome)) }}</span>
+                            @include('pages.estoque.partials.acoes-item', ['tipo' => 'produto', 'item' => $produto])
+                        </div>
+                        <div class="product-card__body">
+                            <div class="name-price">
+                                <h3>{{ $produto->nome }}</h3>
+                                @if ($produto->comercializavel)
+                                    <span class="price">R$ {{ number_format($produto->preco, 2, ',', '.') }}</span>
+                                @else
+                                    {{-- categoria não comercializável: só pode ser dado --}}
+                                    <span class="price price--brinde" title="Não comercializável: só pode ser dado">Brinde</span>
+                                @endif
+                            </div>
+                            @if ($produto->descricao)
+                                <p class="product-card__descricao">{{ $produto->descricao }}</p>
+                            @endif
+                            <p class="product-card__qtd">
+                                <strong>{{ $produto->quantidade }} em estoque</strong>
+                                @if ($produto->trashed())
+                                    <span class="selo-arquivado">Arquivado</span>
+                                @elseif ($produto->estoque_baixo)
+                                    <span class="selo-estoque-baixo" title="Avisa a partir de {{ $produto->limite_estoque_baixo }} un.{{ $produto->estoque_minimo === null ? ' (padrão)' : '' }}">Estoque baixo</span>
+                                @endif
+                            </p>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+
+            @include('pages.estoque.partials.paginacao', ['paginador' => $produtos, 'rotulo' => 'produtos'])
+        </section>
+    </div>
 
     @include('pages.estoque.partials.apagar-popup')
 

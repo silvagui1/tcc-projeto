@@ -70,15 +70,6 @@
     }
 }
 
-[data-campeonatos-page] .page-topbar__title {
-    font-size: calc(20px * var(--escala-texto));
-}
-
-.campeonatos-contador {
-    font-size: calc(13px * var(--escala-texto));
-    color: var(--text-muted);
-}
-
 /* ações na cor da seção (mesmo padrão de [data-vendas-page]) */
 [data-campeonatos-page] .botao--principal {
     background: var(--camp-acento);
@@ -91,7 +82,7 @@
 
 [data-campeonatos-page] .botao--pequeno {
     padding: 7px 12px;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 /* ação secundária na cor da seção, com contorno */
@@ -154,7 +145,7 @@
     border: 1px solid var(--camp-tint-borda);
     border-radius: var(--radius-control);
     color: var(--camp-tint-texto);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
 }
 
@@ -195,7 +186,7 @@
 }
 
 .champ-alerta__icone {
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
 }
 
 .champ-alerta__texto {
@@ -204,11 +195,11 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 .champ-alerta__texto strong {
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-alerta__texto a {
@@ -221,14 +212,14 @@
     margin: var(--space-8) 0;
     text-align: center;
     color: var(--text-muted);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     list-style: none;
 }
 
 .champ-vazio i {
     display: block;
     margin-bottom: var(--space-2);
-    font-size: calc(28px * var(--escala-texto));
+    font-size: var(--fs-32);
 }
 
 .champ-vazio--compacto {
@@ -238,7 +229,7 @@
 .champ-ajuda {
     margin: 6px 0 0;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     line-height: 1.45;
 }
 
@@ -251,7 +242,7 @@
     background: none;
     color: var(--camp-acento);
     font: inherit;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     list-style: none;
     cursor: pointer;
@@ -273,7 +264,7 @@
     gap: 6px;
     padding: 2px 10px;
     border-radius: 999px;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -301,7 +292,7 @@
     border-radius: 999px;
     background: var(--field);
     color: var(--text-soft);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     white-space: nowrap;
 }
@@ -317,7 +308,7 @@
     align-items: center;
     gap: 6px;
     color: var(--text-soft);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 700;
 }
 
@@ -350,7 +341,7 @@
     border-radius: 999px;
     background: var(--camp-alerta-fundo);
     color: var(--camp-alerta-texto);
-    font-size: calc(10.5px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     letter-spacing: .02em;
     text-transform: uppercase;
@@ -414,7 +405,7 @@
 
 .champ-filtro > span {
     color: var(--text-muted);
-    font-size: calc(11px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -430,7 +421,7 @@
     background: var(--field);
     color: var(--text);
     font: inherit;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     cursor: pointer;
 }
@@ -450,7 +441,7 @@
     gap: var(--space-3);
     min-height: 28px;
     color: var(--text-muted);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 .champ-filtros__limpar {
@@ -474,7 +465,7 @@
     align-items: baseline;
     gap: var(--space-2);
     margin: var(--space-8) 0 var(--space-3);
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-16);
     font-weight: 700;
 }
 
@@ -484,7 +475,7 @@
 
 .champ-secao-titulo span {
     color: var(--text-muted);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
 }
 
@@ -573,14 +564,14 @@
 }
 
 .champ-card__data strong {
-    font-size: calc(18px * var(--escala-texto));
+    font-size: var(--fs-18);
     font-weight: 800;
 }
 
 .champ-card__data span {
     margin-top: 2px;
     color: var(--camp-acento);
-    font-size: calc(10px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 800;
     letter-spacing: .06em;
 }
@@ -600,7 +591,7 @@
     border-radius: 999px;
     background: rgba(20, 24, 32, .72);
     color: var(--white);
-    font-size: calc(11.5px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     backdrop-filter: blur(4px);
 }
@@ -623,7 +614,7 @@
 
 .champ-card__nome {
     margin: 0;
-    font-size: calc(17px * var(--escala-texto));
+    font-size: var(--fs-18);
     font-weight: 700;
     line-height: 1.25;
 }
@@ -644,7 +635,7 @@
     padding: 0;
     list-style: none;
     color: var(--text-soft);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 .champ-meta li {
@@ -662,7 +653,7 @@
     align-items: center;
     gap: 6px;
     margin: 0;
-    font-size: calc(13.5px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
 }
 
@@ -731,7 +722,7 @@
     border-radius: var(--radius-control);
     background: none;
     color: var(--text-muted);
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-16);
     cursor: pointer;
 }
 
@@ -792,11 +783,7 @@
 }
 
 .champ-modal::backdrop {
-    background: rgba(20, 24, 32, .45);
-}
-
-:root:not([data-theme="dark"]) .champ-modal {
-    --text-muted: #7a7a7a;
+    background: var(--backdrop);
 }
 
 /* check-in: ocupa a tela toda */
@@ -869,20 +856,20 @@
 
 .champ-modal__titulo {
     margin: 0;
-    font-size: calc(17px * var(--escala-texto));
+    font-size: var(--fs-18);
     font-weight: 800;
     line-height: 1.25;
     overflow-wrap: anywhere;
 }
 
 .champ-modal__topo--detalhe .champ-modal__titulo {
-    font-size: calc(19px * var(--escala-texto));
+    font-size: var(--fs-20);
 }
 
 .champ-modal__sub,
 .champ-modal__recorrencia {
     color: var(--text-muted);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
 }
 
@@ -905,7 +892,7 @@
     border-radius: var(--radius-control);
     background: none;
     color: var(--text);
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
     cursor: pointer;
 }
 
@@ -994,7 +981,7 @@
     border-radius: var(--radius-control);
     background: var(--navy-900);
     color: var(--white);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     box-shadow: 0 8px 20px rgba(20, 24, 32, .25);
     transform: translateX(-50%);
@@ -1049,7 +1036,7 @@
     gap: 6px;
     margin: 2px 0 0;
     color: var(--camp-alerta-texto);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -1085,7 +1072,7 @@
     margin: 0 0 10px;
     padding: 0;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -1132,7 +1119,7 @@
 
 .champ-numeros dt {
     color: var(--text-muted);
-    font-size: calc(11px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -1140,24 +1127,24 @@
 
 .champ-numeros dd {
     margin: 2px 0 0;
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
     font-weight: 800;
     line-height: 1.2;
 }
 
 .champ-numeros dd span {
     color: var(--text-muted);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 700;
 }
 
 .champ-numeros__texto {
-    font-size: calc(16px * var(--escala-texto)) !important;
+    font-size: var(--fs-16) !important;
 }
 
 .champ-numeros small {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-numeros__caixa {
@@ -1196,7 +1183,7 @@
     justify-content: center;
     background: var(--camp-tint);
     color: var(--camp-acento);
-    font-size: calc(15px * var(--escala-texto));
+    font-size: var(--fs-16);
 }
 
 .champ-participantes {
@@ -1230,7 +1217,7 @@
     min-width: 0;
     max-width: 100%;
     overflow: hidden;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1238,7 +1225,7 @@
 
 .champ-participante__nota {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-participante form {
@@ -1250,7 +1237,7 @@
     align-items: center;
     gap: 4px;
     color: var(--red-600);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -1266,7 +1253,7 @@
     background: var(--field);
     color: var(--text-muted);
     font: inherit;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1290,7 +1277,7 @@
 }
 
 .champ-pill--aberto i {
-    font-size: calc(10px * var(--escala-texto));
+    font-size: var(--fs-12);
     transition: transform .15s;
 }
 
@@ -1316,7 +1303,7 @@
     border-radius: var(--radius-control);
     background: none;
     color: var(--text-muted);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     cursor: pointer;
 }
 
@@ -1337,7 +1324,7 @@
     border-radius: var(--radius-control);
     background: var(--camp-tint);
     color: var(--camp-tint-texto);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
 }
 
@@ -1356,7 +1343,7 @@
     background: var(--field);
     color: var(--text);
     font: inherit;
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 700;
     cursor: pointer;
 }
@@ -1401,7 +1388,7 @@
     margin-right: 4px;
     padding: 0;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -1426,7 +1413,7 @@
     border-radius: 999px;
     background: var(--field);
     color: var(--text-soft);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     white-space: nowrap;
     transition: background-color .12s, border-color .12s;
@@ -1499,7 +1486,7 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1510,7 +1497,7 @@
     align-items: center;
     gap: 4px;
     color: var(--camp-acento);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 700;
 }
 
@@ -1570,12 +1557,12 @@
 }
 
 .champ-decisao__info strong {
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-decisao__info span {
     color: var(--text-soft);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-decisao__acoes {
@@ -1604,13 +1591,13 @@
 .champ-info dt {
     margin-bottom: 1px;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
 .champ-info dd {
     margin: 0;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
     overflow-wrap: anywhere;
 }
@@ -1620,7 +1607,7 @@
     padding-top: var(--space-3);
     border-top: 1px solid var(--surface-border);
     color: var(--text-soft);
-    font-size: calc(13.5px * var(--escala-texto));
+    font-size: var(--fs-14);
     line-height: 1.5;
 }
 
@@ -1643,7 +1630,7 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    font-size: calc(15px * var(--escala-texto));
+    font-size: var(--fs-16);
     font-weight: 700;
 }
 
@@ -1654,7 +1641,7 @@
 
 .champ-premiacao-plano p {
     margin: 8px 0 0;
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 /* checklist dos oficiais: tarefa feita = check verde (não riscado) */
@@ -1675,7 +1662,7 @@
     align-items: flex-start;
     gap: 10px;
     padding: 7px 0;
-    font-size: calc(13.5px * var(--escala-texto));
+    font-size: var(--fs-14);
     cursor: pointer;
 }
 
@@ -1693,13 +1680,13 @@
 
 .champ-check strong {
     display: block;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-check small {
     display: block;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-check--tarefa input {
@@ -1718,7 +1705,7 @@
     border: 2px solid var(--line);
     border-radius: 6px;
     color: transparent;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     transition: background-color .12s, border-color .12s;
 }
 
@@ -1768,7 +1755,7 @@
     border-radius: 50%;
     background: var(--camp-tint);
     color: var(--camp-tint-texto);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 800;
 }
 
@@ -1795,7 +1782,7 @@
 }
 
 .winner-row__info strong {
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1804,7 +1791,7 @@
 
 .winner-row__info span {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .winner-row__value {
@@ -1813,7 +1800,7 @@
     border-radius: 999px;
     background: var(--camp-ativo-tint);
     color: var(--camp-ativo);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 700;
     white-space: nowrap;
 }
@@ -1832,7 +1819,7 @@
     width: 100%;
     padding: 8px 10px;
     border-radius: var(--radius-control);
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 .champ-segmento--tipo {
@@ -1842,7 +1829,7 @@
 .champ-tipo-descricao {
     margin: 8px 0 0;
     color: var(--text-soft);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     line-height: 1.45;
 }
 
@@ -1862,7 +1849,7 @@
     gap: var(--space-2);
     margin: 0 0 10px;
     color: var(--camp-tint-texto);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     line-height: 1.4;
 }
 
@@ -1932,12 +1919,12 @@
 }
 
 .champ-switch__texto strong {
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-switch__texto small {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     line-height: 1.4;
 }
 
@@ -1950,7 +1937,7 @@
     display: block;
     margin-bottom: 6px;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -1973,7 +1960,7 @@
     border: 2px solid transparent;
     border-radius: var(--radius-control);
     background: var(--placeholder);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-premio__input:focus-within {
@@ -1987,7 +1974,7 @@
 
 .champ-premio__input > span {
     color: var(--text-muted);
-    font-size: calc(12.5px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
 }
 
@@ -2003,7 +1990,7 @@
 .champ-premios__total {
     margin: 8px 0 0;
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-premios__total--valor {
@@ -2034,13 +2021,13 @@
 }
 
 .champ-mais summary span {
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 700;
 }
 
 .champ-mais summary small {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-mais summary i {
@@ -2116,7 +2103,7 @@
     border-radius: 999px;
     background: rgba(20, 24, 32, .72);
     color: var(--white);
-    font-size: calc(11.5px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -2137,7 +2124,7 @@
 
 .champ-banner-campo__dica {
     color: var(--text-muted);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .champ-banner-campo .campo {
@@ -2149,7 +2136,7 @@
     display: block;
     margin-top: var(--space-1);
     color: var(--camp-acento);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
 }
 
@@ -2184,7 +2171,7 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2199,7 +2186,7 @@
     border: 2px solid var(--line);
     border-radius: 50%;
     color: transparent;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
 }
 
 .champ-escolha:has(input:checked) .champ-escolha__marca {
@@ -2225,7 +2212,7 @@
     background: var(--camp-tint);
     color: var(--camp-tint-texto);
     font: inherit;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     text-align: left;
     cursor: pointer;
 }
@@ -2261,7 +2248,7 @@
     background: var(--placeholder);
     color: var(--text);
     font: inherit;
-    font-size: calc(13.5px * var(--escala-texto));
+    font-size: var(--fs-14);
     outline: none;
 }
 
@@ -2274,7 +2261,7 @@
 .champ-intro {
     margin: 0 0 var(--space-4);
     color: var(--text-soft);
-    font-size: calc(13.5px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .prize-grid {
@@ -2297,7 +2284,7 @@
     padding: 9px 14px;
     background: var(--camp-tint);
     color: var(--camp-tint-texto);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     font-weight: 700;
 }
 
@@ -2312,7 +2299,7 @@
 
 .prize-block__obrigatorio {
     margin-left: auto;
-    font-size: calc(11px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     text-transform: uppercase;
     opacity: .85;
@@ -2350,7 +2337,7 @@
     border: 2px solid transparent;
     border-radius: var(--radius-control);
     background: var(--placeholder);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .prize-amount__input:focus-within {
@@ -2387,7 +2374,7 @@
     border-radius: var(--radius-control);
     background: var(--field);
     color: var(--text);
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-16);
     cursor: pointer;
 }
 
@@ -2403,26 +2390,26 @@
     max-width: calc(100% - 32px);
     padding: var(--space-5);
     border: 1px solid var(--surface-border);
-    border-radius: 14px;
-    background: var(--bg);
+    border-radius: var(--radius-modal);
+    background: var(--surface);
     color: var(--text);
-    box-shadow: 0 12px 24px rgba(20, 24, 32, .16);
+    box-shadow: var(--shadow-modal);
 }
 
 .champ-dialog::backdrop {
-    background: rgba(20, 24, 32, .45);
+    background: var(--backdrop);
 }
 
 .champ-dialog__titulo {
     margin: 0 0 var(--space-2);
-    font-size: calc(17px * var(--escala-texto));
+    font-size: var(--fs-18);
     font-weight: 800;
 }
 
 .champ-dialog__texto {
     margin: 0 0 var(--space-4);
     color: var(--text-soft);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 .champ-dialog__acoes {
@@ -2595,7 +2582,7 @@
     }
 
     .champ-modal__topo--detalhe .champ-modal__titulo {
-        font-size: calc(22px * var(--escala-texto));
+        font-size: var(--fs-24);
     }
 }
 

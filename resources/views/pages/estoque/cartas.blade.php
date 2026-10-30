@@ -1,42 +1,54 @@
 @extends('layouts.app')
 
-@section('title', 'Cartas em estoque')
+@section('title', 'Cartas avulsas')
 
 {{-- no desktop usa a mesma área larga do estoque (ver .app-content--wide) --}}
 @section('main_class', 'app-content--wide')
 
 @section('content')
 
-    <div class="page-topbar">
-        <a href="{{ route('estoque.index', ['tab' => 'cartas']) }}" class="icon-btn"><i class="bi bi-arrow-left"></i></a>
-        <p class="page-topbar__title">Veja nossas cartas</p>
-        <span style="width: 30px;"></span>
-    </div>
+    @include('pages.estoque.partials.cabecalho')
 
-    {{-- busca + filtro por jogo: empilhados no mobile, lado a lado no desktop --}}
-    <div class="cartas-toolbar">
+    {{-- abas + busca: empilhadas no mobile, lado a lado no desktop --}}
+    <div class="estoque-toolbar">
+        @include('pages.estoque.partials.abas', ['aba' => 'cartas'])
+
         <form method="GET" action="{{ route('estoque.cartas') }}" class="search-bar" role="search">
             <input type="hidden" name="jogo" value="{{ $jogoAtual }}">
-            <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Buscar cartas" aria-label="Buscar cartas">
+            <input type="search" name="busca" value="{{ $filtros['busca'] }}" placeholder="Buscar carta" aria-label="Buscar carta">
             <button type="submit" aria-label="Buscar"><i class="bi bi-search"></i></button>
         </form>
-
-        {{-- filtro por jogo (cadastrados em Configurações > Estoque) --}}
-        <div class="tabs tabs--pill">
-            @foreach ($jogosDisponiveis as $chave => $nomeJogo)
-                <a href="{{ route('estoque.cartas', ['jogo' => $chave]) }}" class="{{ $jogoAtual === $chave ? 'is-active' : '' }}">
-                    {{ $nomeJogo }}
-                </a>
-            @endforeach
-        </div>
     </div>
 
-    <div class="cartas-header" style="margin-top: 24px;">
-        <h2>{{ $cartas->total() }} {{ $cartas->total() === 1 ? 'carta' : 'cartas' }} de {{ $jogosDisponiveis[$jogoAtual] ?? ucfirst($jogoAtual) }}</h2>
-        @include('pages.estoque.partials.adicionar-carta-botao')
+    {{-- filtro por jogo (cadastrados em Configurações > Estoque) --}}
+    <nav class="tabs tabs--pill cartas-jogos" aria-label="Jogo">
+        @foreach ($jogosDisponiveis as $chave => $nomeJogo)
+            <a href="{{ route('estoque.cartas', ['jogo' => $chave]) }}" class="{{ $jogoAtual === $chave ? 'is-active' : '' }}" @if ($jogoAtual === $chave) aria-current="page" @endif>
+                {{ $nomeJogo }}
+            </a>
+        @endforeach
+    </nav>
+
+    <div class="estoque-lista-topo">
+        @php
+            $rotuloCartas = $filtros['arquivadas']
+                ? ($cartas->total() === 1 ? 'carta arquivada' : 'cartas arquivadas')
+                : ($cartas->total() === 1 ? 'carta' : 'cartas');
+        @endphp
+        <h2>{{ $cartas->total() }} {{ $rotuloCartas }} de {{ $jogosDisponiveis[$jogoAtual] ?? ucfirst($jogoAtual) }}</h2>
+        @unless ($filtros['arquivadas'])
+            <button type="button" class="botao botao--principal" data-form-open="carta">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Adicionar carta
+            </button>
+        @endunless
     </div>
 
-    @include('pages.estoque.partials.mensagem')
+    @if ($filtros['arquivadas'])
+        <p class="estoque-aviso-arquivados">
+            <i class="bi bi-archive" aria-hidden="true"></i>
+            Cartas arquivadas não aparecem nas vendas nem nos números do estoque. Restaure para voltar a vender.
+        </p>
+    @endif
 
     @include('pages.estoque.partials.carta-form', ['jogoPadrao' => $jogoAtual])
 
@@ -45,38 +57,48 @@
         @include('pages.estoque.partials.filtros-cartas')
 
         @forelse ($cartas as $carta)
-            <article class="trading-card--link">
+            <article class="trading-card--link {{ $carta->trashed() ? 'trading-card--arquivada' : '' }}">
                 {{-- o link cobre a carta inteira; os botões ficam por cima dele --}}
                 <a href="{{ route('estoque.cartas.show', $carta) }}" class="trading-card__link"
                    aria-label="Ver detalhes de {{ $carta->nome }}"></a>
-                <h3 style="font-size: 20px; margin-bottom: 12px;">{{ $carta->nome }}</h3>
-                <div class="trading-card" style="position: relative;">
-                    @include('pages.estoque.partials.carta-acoes')
+                <h3 class="trading-card__nome">{{ $carta->nome }}</h3>
+                <div class="trading-card">
+                    @include('pages.estoque.partials.acoes-item', ['tipo' => 'carta', 'item' => $carta])
                     <div class="trading-card__image" style="background-image: url('{{ $carta->imagem_url }}'), url('{{ $carta->imagem_padrao }}');"></div>
-                    <p style="margin: 0 0 4px;"><strong>Estado:</strong> {{ $carta->estado }}</p>
-                    <p style="margin: 0 0 4px;"><strong>Coleção:</strong> {{ $carta->colecao ?? '—' }}</p>
-                    <p style="margin: 0 0 4px;"><strong>Raridade:</strong> {{ $carta->raridade ?? '—' }}</p>
-                    <p style="margin: 0 0 4px;"><strong>Idioma:</strong> {{ $carta->idioma }}</p>
+                    <dl class="trading-card__dados">
+                        <div><dt>Estado</dt><dd>{{ $carta->estado }}</dd></div>
+                        <div><dt>Coleção</dt><dd>{{ $carta->colecao ?? '—' }}</dd></div>
+                        <div><dt>Raridade</dt><dd>{{ $carta->raridade ?? '—' }}</dd></div>
+                        <div><dt>Idioma</dt><dd>{{ $carta->idioma }}</dd></div>
+                    </dl>
                     {{-- preço e quantidade juntos no rodapé da carta --}}
                     <div class="trading-card__rodape">
-                        <p style="font-size: 16.5px; font-weight: 600;">
-                            Preço: <span style="color: var(--text-accent);">R$ {{ number_format($carta->preco, 2, ',', '.') }}</span>
-                        </p>
+                        <p class="trading-card__preco">R$ {{ number_format($carta->preco, 2, ',', '.') }}</p>
                         <p class="trading-card__estoque">
                             <i class="bi bi-box-seam" aria-hidden="true"></i>
-                            {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
+                            @if ($carta->trashed())
+                                <span class="selo-arquivado">Arquivada</span>
+                            @else
+                                {{ $carta->quantidade > 0 ? $carta->quantidade.' em estoque' : 'Sem estoque' }}
+                            @endif
                         </p>
                     </div>
                 </div>
             </article>
         @empty
-            <p style="text-align:center; color: var(--text-muted-2);">
-                {{ $filtrosAtivos ? 'Nenhuma carta encontrada com esses filtros.' : 'Nenhuma carta cadastrada para este jogo ainda.' }}
-            </p>
+            <div class="estoque-vazio">
+                <i class="bi {{ $filtrosAtivos ? 'bi-funnel' : 'bi-stack' }}" aria-hidden="true"></i>
+                <p class="estoque-vazio__titulo">
+                    @if ($filtros['arquivadas']) Nenhuma carta arquivada
+                    @elseif ($filtrosAtivos) Nenhuma carta encontrada com esses filtros
+                    @else Nenhuma carta cadastrada para este jogo ainda
+                    @endif
+                </p>
+            </div>
         @endforelse
     </div>
 
-    @include('pages.estoque.partials.paginacao-cartas')
+    @include('pages.estoque.partials.paginacao', ['paginador' => $cartas, 'rotulo' => 'cartas'])
 
     @include('pages.estoque.partials.apagar-popup')
 

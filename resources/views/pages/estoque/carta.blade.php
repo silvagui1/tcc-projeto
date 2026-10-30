@@ -7,15 +7,21 @@
 
 @section('content')
 
-    <div class="page-topbar">
-        <a href="{{ route('estoque.cartas', ['jogo' => $carta->jogo]) }}" class="icon-btn" aria-label="Voltar para as cartas">
-            <i class="bi bi-arrow-left"></i>
+    {{-- caminho de volta: Cartas de <jogo> › nome --}}
+    <nav class="trilha" aria-label="Você está em">
+        <a href="{{ route('estoque.cartas', ['jogo' => $carta->jogo]) }}">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i> Cartas de {{ $jogosDisponiveis[$carta->jogo] ?? ucfirst($carta->jogo) }}
         </a>
-        <p class="page-topbar__title">Detalhes da carta</p>
-        <span style="width: 30px;"></span>
-    </div>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">{{ $carta->nome }}</span>
+    </nav>
 
-    @include('pages.estoque.partials.mensagem')
+    @if ($carta->trashed())
+        <p class="estoque-aviso-arquivados">
+            <i class="bi bi-archive" aria-hidden="true"></i>
+            Carta arquivada em {{ $carta->deleted_at->format('d/m/Y') }}: não aparece nas vendas nem nos números do estoque.
+        </p>
+    @endif
 
     {{-- imagem grande à esquerda e informações à direita (empilhadas no mobile) --}}
     <div class="card-detail">
@@ -31,7 +37,7 @@
 
             <p class="card-detail__price">
                 R$ {{ number_format($carta->preco, 2, ',', '.') }}
-                <span>Por unidade</span>
+                <span>por unidade</span>
             </p>
 
             <div class="trading-card__meta">
@@ -53,23 +59,19 @@
                 </div>
             </dl>
 
-            <div class="card-detail__actions">
-                <button type="button" class="card-detail__btn" data-form-open="carta"
-                        data-form-dados='@json($carta->dadosFormulario())'>
-                    <i class="bi bi-pencil"></i>
-                    Editar carta
-                </button>
-                <button type="button" class="card-detail__btn card-detail__btn--danger"
-                        data-delete-open="{{ route('estoque.cartas.destroy', $carta) }}"
-                        data-delete-title="Deseja apagar a carta &quot;{{ $carta->nome }}&quot;?">
-                    <i class="bi bi-trash"></i>
-                    Apagar
-                </button>
-            </div>
+            @include('pages.estoque.partials.detalhe-acoes', ['tipo' => 'carta', 'item' => $carta])
+
+            @unless ($carta->trashed())
+                @include('pages.estoque.partials.ajuste', ['tipo' => 'carta', 'item' => $carta])
+            @endunless
         </div>
     </div>
 
-    @include('pages.estoque.partials.carta-form', ['jogoPadrao' => $carta->jogo])
+    @include('pages.estoque.partials.historico')
+
+    @unless ($carta->trashed())
+        @include('pages.estoque.partials.carta-form', ['jogoPadrao' => $carta->jogo])
+    @endunless
     @include('pages.estoque.partials.apagar-popup')
 
 @endsection

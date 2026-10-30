@@ -22,6 +22,15 @@
 
         return \Illuminate\Support\Str::ucfirst($data->locale('pt_BR')->translatedFormat($formato));
     };
+
+    // "Hoje" e "Ontem" ganham a data ao lado (ex.: "Hoje · seg, 27/10")
+    $dataCurta = function (string $dia): ?string {
+        $data = \Illuminate\Support\Carbon::createFromFormat('Y-m-d', $dia);
+
+        return $data->isToday() || $data->isYesterday()
+            ? $data->locale('pt_BR')->translatedFormat('D, d/m')
+            : null;
+    };
 @endphp
 
 {{-- Cabeçalho de colunas: só a partir do tablet (ver .vendas-lista-cabecalho). --}}
@@ -44,7 +53,12 @@
         @php $totalDia = $totaisPorDia[$dia] ?? ['total' => 0, 'quantidade' => 0]; @endphp
         <section class="vendas-dia" aria-label="{{ $rotuloDia($dia) }}">
             <header class="vendas-dia__cabecalho">
-                <h3 class="vendas-dia__titulo">{{ $rotuloDia($dia) }}</h3>
+                <h3 class="vendas-dia__titulo">
+                    {{ $rotuloDia($dia) }}
+                    @if ($dataCurta($dia))
+                        <small>{{ $dataCurta($dia) }}</small>
+                    @endif
+                </h3>
                 <span class="vendas-dia__total">
                     @if ($totalDia['quantidade'] > 0)
                         {{ $totalDia['quantidade'] }} {{ $totalDia['quantidade'] === 1 ? 'venda' : 'vendas' }}

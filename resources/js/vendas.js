@@ -10,12 +10,7 @@
  * guardado em sessionStorage, para resumo, lista e agenda ficarem certos.
  */
 
-import { ativarFocusTrap, desativarFocusTrap, formatarMoeda } from './comum';
-
-const ICONES_MENSAGEM = {
-    sucesso: 'bi-check-circle-fill',
-    erro: 'bi-exclamation-circle-fill',
-};
+import { ativarFocusTrap, avisar, desativarFocusTrap, formatarMoeda } from './comum';
 
 const ICONES_TIPO = { produto: 'bi-box-seam', carta: 'bi-stack', aluguel: 'bi-dice-5', inscricao: 'bi-trophy' };
 const PLACEHOLDER_CATALOGO = {
@@ -127,7 +122,6 @@ function iniciarPaginaVendas() {
 
     const config = lerConfig(pagina);
     const urlBase = pagina.dataset.urlBase;
-    const mensagemEl = pagina.querySelector('[data-mensagem]');
     const modalConfirmar = document.querySelector('[data-modal-confirmar]');
     const ehDesktop = () => window.matchMedia('(min-width: 768px)').matches;
 
@@ -176,13 +170,7 @@ function iniciarPaginaVendas() {
     // ---- Avisos ---------------------------------------------------------------
 
     function mostrarMensagem(texto, tipo = 'sucesso') {
-        if (!mensagemEl || !texto) return;
-        mensagemEl.innerHTML = '';
-        mensagemEl.append(icone(ICONES_MENSAGEM[tipo] || ICONES_MENSAGEM.sucesso), criar('span', '', texto));
-        mensagemEl.className = 'mensagem-flutuante mensagem-flutuante--' + tipo;
-        mensagemEl.hidden = false;
-        window.clearTimeout(mensagemEl._timeout);
-        mensagemEl._timeout = window.setTimeout(() => { mensagemEl.hidden = true; }, tipo === 'erro' ? 6000 : 4000);
+        avisar(texto, tipo);
     }
 
     /** Recarrega a página (ou vai para outra url) e mostra o aviso depois. */
@@ -1796,6 +1784,16 @@ function iniciarPaginaVendas() {
 
     // ?mesas=1 (atalho "Gerenciar mesas" de Configurações)
     const parametros = new URLSearchParams(window.location.search);
+
+    // ?venda=ID (link do histórico do estoque e da busca geral) abre os detalhes
+    if (/^\d+$/.test(parametros.get('venda') || '')) {
+        const url = new URL(window.location.href);
+        const id = url.searchParams.get('venda');
+        url.searchParams.delete('venda');
+        window.history.replaceState(null, '', url);
+        abrirDetalhesVenda(id);
+    }
+
     if (parametros.get('mesas') === '1') {
         const url = new URL(window.location.href);
         url.searchParams.delete('mesas');

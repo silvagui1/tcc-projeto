@@ -12,12 +12,7 @@
  * projeto, e só é inicializado quando a página atual é a de clientes.
  */
 
-import { ativarFocusTrap, desativarFocusTrap, formatarMoeda } from './comum';
-
-const ICONES_MENSAGEM = {
-    sucesso: 'bi-check-circle-fill',
-    erro: 'bi-exclamation-circle-fill',
-};
+import { ativarFocusTrap, avisar, desativarFocusTrap, formatarMoeda } from './comum';
 
 // Mesmo limite de app/Http/Requests/Store|UpdateClienteRequest.php (foto.max).
 const TAMANHO_MAX_FOTO = 2 * 1024 * 1024;
@@ -198,7 +193,6 @@ function iniciarPaginaClientes() {
     const filtroSaldoSelect = pagina.querySelector('[data-filtro-saldo]');
     const filtroAniversariantesCheckbox = pagina.querySelector('[data-filtro-aniversariantes]');
     const botaoLimparFiltros = pagina.querySelector('[data-limpar-filtros]');
-    const mensagemEl = document.querySelector('[data-mensagem]');
     const modalConfirmar = document.querySelector('[data-modal-confirmar]');
 
     let termoAtual = '';
@@ -218,31 +212,7 @@ function iniciarPaginaClientes() {
     }
 
     function mostrarMensagem(texto, tipo = 'sucesso', onDesfazer = null) {
-        if (!mensagemEl) return;
-        const icone = ICONES_MENSAGEM[tipo] || ICONES_MENSAGEM.sucesso;
-
-        mensagemEl.innerHTML = `<i class="bi ${icone}" aria-hidden="true"></i><span></span>`;
-        mensagemEl.querySelector('span').textContent = texto;
-
-        if (onDesfazer) {
-            const botaoDesfazer = document.createElement('button');
-            botaoDesfazer.type = 'button';
-            botaoDesfazer.className = 'mensagem-flutuante__desfazer';
-            botaoDesfazer.textContent = 'Desfazer';
-            botaoDesfazer.addEventListener('click', () => {
-                onDesfazer();
-                mensagemEl.hidden = true;
-                window.clearTimeout(mensagemEl._timeout);
-            });
-            mensagemEl.appendChild(botaoDesfazer);
-        }
-
-        mensagemEl.hidden = false;
-        mensagemEl.className = 'mensagem-flutuante mensagem-flutuante--' + tipo;
-        window.clearTimeout(mensagemEl._timeout);
-        mensagemEl._timeout = window.setTimeout(() => {
-            mensagemEl.hidden = true;
-        }, onDesfazer ? JANELA_DESFAZER_MS : 4000);
+        avisar(texto, tipo, { desfazer: onDesfazer, duracao: onDesfazer ? JANELA_DESFAZER_MS : null });
     }
 
     /**

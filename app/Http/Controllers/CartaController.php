@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AcoesDoEstoque;
+use App\Http\Requests\AjustarEstoqueRequest;
 use App\Http\Requests\SalvarCartaRequest;
 use App\Models\Atividade;
 use App\Models\Carta;
 use App\Models\JogoCarta;
+use App\Models\Produto;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,14 +16,22 @@ use Illuminate\View\View;
 
 class CartaController extends Controller
 {
+    use AcoesDoEstoque;
+
     /**
      * 3 fileiras no desktop: 3 cartas ao lado dos filtros + 4 + 4.
      */
     private const CARTAS_POR_PAGINA = 11;
 
     /**
-     * Catálogo de cartas de um jogo, com busca por nome e os filtros
-     * laterais (estado, raridade, idioma, foil, faixa de preço, ordenação).
+     * Quantos lançamentos do histórico aparecem na página de detalhes.
+     */
+    private const MOVIMENTACOES_NOS_DETALHES = 15;
+
+    /**
+     * Catálogo de cartas de um jogo (aba "Cartas" do estoque), com busca por
+     * nome e os filtros laterais (estado, raridade, idioma, foil, faixa de
+     * preço, ordenação e as arquivadas).
      */
     public function index(Request $request): View
     {
@@ -36,9 +47,11 @@ class CartaController extends Controller
             'preco_min' => is_numeric($request->query('preco_min')) ? (float) $request->query('preco_min') : null,
             'preco_max' => is_numeric($request->query('preco_max')) ? (float) $request->query('preco_max') : null,
             'ordenar' => $request->query('ordenar', 'recentes'),
+            'arquivadas' => $request->boolean('arquivadas'),
         ];
 
         $cartas = Carta::where('jogo', $jogoAtual)
+            ->when($filtros['arquivadas'], fn (Builder $q) => $q->onlyTrashed())
             ->when($filtros['busca'] !== '', fn (Builder $q) => $q->where('nome', 'like', "%{$filtros['busca']}%"))
             ->when($filtros['estado'], fn (Builder $q) => $q->whereIn('estado', $filtros['estado']))
             ->when($filtros['raridade'], fn (Builder $q) => $q->whereIn('raridade', $filtros['raridade']))
@@ -51,6 +64,8 @@ class CartaController extends Controller
             'menor_preco' => $cartas->orderBy('preco'),
             'maior_preco' => $cartas->orderByDesc('preco'),
             'nome' => $cartas->orderBy('nome'),
+            'menor_qtd' => $cartas->orderBy('quantidade')->orderBy('nome'),
+            'maior_qtd' => $cartas->orderByDesc('quantidade')->orderBy('nome'),
             default => $cartas->latest('id'),
         };
 
@@ -67,7 +82,7 @@ class CartaController extends Controller
 
         $filtrosAtivos = count($filtros['estado']) + count($filtros['raridade']) + count($filtros['idioma'])
             + ($filtros['foil'] ? 1 : 0) + ($filtros['preco_min'] !== null ? 1 : 0) + ($filtros['preco_max'] !== null ? 1 : 0)
-            + ($filtros['busca'] !== '' ? 1 : 0);
+            + ($filtros['busca'] !== '' ? 1 : 0) + ($filtros['arquivadas'] ? 1 : 0);
 
         return view('pages.estoque.cartas', [
             'jogosDisponiveis' => JogoCarta::opcoes(),
@@ -81,13 +96,16 @@ class CartaController extends Controller
     }
 
     /**
-     * Página de detalhes de uma carta.
+     * Página de detalhes de uma carta, com o ajuste rápido de quantidade e
+     * as últimas movimentações. Abre também para cartas arquivadas.
      */
     public function show(Carta $carta): View
     {
         return view('pages.estoque.carta', [
             'carta' => $carta,
             'jogosDisponiveis' => JogoCarta::opcoes(),
+            'movimentacoes' => $carta->movimentacoes()->with('venda')->take(self::MOVIMENTACOES_NOS_DETALHES)->get(),
+            'totalMovimentacoes' => $carta->movimentacoes()->count(),
         ]);
     }
 
@@ -100,13 +118,11 @@ class CartaController extends Controller
 
         // Quantidade inicial entra como uma "entrada" a partir de zero (ver
         // ProdutoController::store).
-        if ($carta->quantidade > 0) {
-            $this->registrarMovimentacao($carta, 0, $carta->quantidade, 'Cadastro da carta');
-        }
+        $carta->registrarMovimentacao(0, $carta->quantidade, 'Cadastro da carta');
 
         Atividade::registrar('estoque', "Carta cadastrada: {$carta->nome} (qtd {$carta->quantidade})");
 
-        return back()->with('estoqueMensagem', "\"{$carta->nome}\" foi adicionada ao estoque.");
+        return back()->with('aviso', ['texto' => "\"{$carta->nome}\" foi adicionada ao estoque.", 'tipo' => 'sucesso']);
     }
 
     /**
@@ -117,50 +133,44 @@ class CartaController extends Controller
         $quantidadeAnterior = $carta->quantidade;
 
         $carta->update($request->dadosComImagem('cartas', $carta));
-
-        if ($carta->quantidade !== $quantidadeAnterior) {
-            $this->registrarMovimentacao($carta, $quantidadeAnterior, $carta->quantidade, 'Edição da carta');
-        }
+        $carta->registrarMovimentacao($quantidadeAnterior, $carta->quantidade, 'Edição da carta');
 
         Atividade::registrar('estoque', "Carta editada: {$carta->nome}"
             .($carta->quantidade !== $quantidadeAnterior ? " (qtd {$quantidadeAnterior} → {$carta->quantidade})" : ''));
 
-        return back()->with('estoqueMensagem', "\"{$carta->nome}\" foi atualizada.");
+        return back()->with('aviso', ['texto' => "\"{$carta->nome}\" foi atualizada.", 'tipo' => 'sucesso']);
     }
 
     /**
-     * Remove definitivamente uma carta, o arquivo da imagem (se houver) e o
-     * histórico (por causa do cascadeOnDelete). Se o pedido veio da própria página de detalhes — que
-     * deixa de existir —, volta para o catálogo do jogo.
+     * "Apagar" uma carta arquiva (ver AcoesDoEstoque).
      */
     public function destroy(Carta $carta): RedirectResponse
     {
-        $nome = $carta->nome;
-        $veioDosDetalhes = url()->previous() === route('estoque.cartas.show', $carta);
-
-        $carta->apagarArquivoDeImagem();
-        $carta->delete();
-
-        Atividade::registrar('estoque', "Carta excluída: {$nome}");
-
-        $resposta = $veioDosDetalhes
-            ? redirect()->route('estoque.cartas', ['jogo' => $carta->jogo])
-            : back();
-
-        return $resposta->with('estoqueMensagem', "\"{$nome}\" foi removida do estoque.");
+        return $this->arquivarItem($carta);
     }
 
-    /**
-     * Registra no histórico uma mudança de quantidade da carta.
-     */
-    private function registrarMovimentacao(Carta $carta, int $anterior, int $nova, string $descricao): void
+    public function restaurar(Carta $carta): RedirectResponse
     {
-        $carta->movimentacoes()->create([
-            'tipo' => $nova > $anterior ? 'entrada' : 'saida',
-            'quantidade' => abs($nova - $anterior),
-            'quantidade_anterior' => $anterior,
-            'quantidade_nova' => $nova,
-            'descricao' => $descricao,
-        ]);
+        return $this->restaurarItem($carta);
+    }
+
+    public function excluir(Carta $carta): RedirectResponse
+    {
+        return $this->excluirItem($carta);
+    }
+
+    public function ajustar(AjustarEstoqueRequest $request, Carta $carta): RedirectResponse
+    {
+        return $this->ajustarItem($request, $carta);
+    }
+
+    protected function rotulo(): array
+    {
+        return ['nome' => 'carta', 'o' => 'a', 'rota' => 'estoque.cartas'];
+    }
+
+    protected function urlDaLista(Produto|Carta $item): string
+    {
+        return route('estoque.cartas', ['jogo' => $item->jogo, 'arquivadas' => 1]);
     }
 }

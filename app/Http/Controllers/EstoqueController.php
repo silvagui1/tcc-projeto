@@ -2,66 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Carta;
-use App\Models\JogoCarta;
 use App\Models\Categoria;
 use App\Models\Produto;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class EstoqueController extends Controller
 {
     /**
-     * Tela principal do estoque: cards de resumo (sobre o estoque inteiro,
-     * sem filtros) e uma das abas — produtos (com busca, categoria e
-     * ordenação) ou a prévia de cartas avulsas.
+     * 4 fileiras de 4 no desktop.
      */
-    public function index(Request $request): View
+    private const PRODUTOS_POR_PAGINA = 16;
+
+    /**
+     * Opções de ordenação da grade de produtos (valor da url => rótulo).
+     */
+    public const ORDENACOES = [
+        'recentes' => 'Últimos adicionados',
+        'antigos' => 'Primeiros adicionados',
+        'nome' => 'Nome (A–Z)',
+        'menor_qtd' => 'Menor quantidade',
+        'maior_qtd' => 'Maior quantidade',
+        'menor_preco' => 'Menor preço',
+        'maior_preco' => 'Maior preço',
+    ];
+
+    /**
+     * Aba "Produtos" do estoque: grade com busca, categoria, situação
+     * (todos / estoque baixo / arquivados), ordenação e paginação. O
+     * cabeçalho (resumo, alerta e abas) vem do view composer de
+     * pages.estoque.partials.cabecalho. A aba "Cartas" é o catálogo
+     * (CartaController::index).
+     */
+    public function index(Request $request): View|RedirectResponse
     {
-        $tab = $request->query('tab') === 'cartas' ? 'cartas' : 'produtos';
+        // links antigos da aba de cartas (?tab=cartas) vão para o catálogo
+        if ($request->query('tab') === 'cartas') {
+            return redirect()->route('estoque.cartas');
+        }
 
         $filtros = [
             'busca' => trim((string) $request->query('busca', '')),
             'categoria' => (int) $request->query('categoria', 0),
-            'ordenar' => $request->query('ordenar') === 'antigos' ? 'antigos' : 'recentes',
+            'ordenar' => array_key_exists($request->query('ordenar'), self::ORDENACOES) ? $request->query('ordenar') : 'recentes',
+            'situacao' => in_array($request->query('situacao'), ['baixo', 'arquivados'], true) ? $request->query('situacao') : 'todos',
         ];
 
         $produtos = Produto::with('categoria')
+            ->when($filtros['situacao'] === 'arquivados', fn (Builder $q) => $q->onlyTrashed())
+            ->when($filtros['situacao'] === 'baixo', fn (Builder $q) => $q->estoqueBaixo())
             ->when($filtros['busca'] !== '', fn (Builder $q) => $q->where('nome', 'like', "%{$filtros['busca']}%"))
-            ->when($filtros['categoria'], fn (Builder $q) => $q->where('categoria_id', $filtros['categoria']))
-            ->orderBy('id', $filtros['ordenar'] === 'antigos' ? 'asc' : 'desc')
-            ->get();
+            ->when($filtros['categoria'], fn (Builder $q) => $q->where('categoria_id', $filtros['categoria']));
 
-        // prévia da aba "estoque cartas": as últimas cartas cadastradas
-        $cartasDestaque = Carta::latest('id')->take(4)->get();
+        match ($filtros['ordenar']) {
+            'antigos' => $produtos->orderBy('id'),
+            'nome' => $produtos->orderBy('nome'),
+            'menor_qtd' => $produtos->orderBy('quantidade')->orderBy('nome'),
+            'maior_qtd' => $produtos->orderByDesc('quantidade')->orderBy('nome'),
+            'menor_preco' => $produtos->orderBy('preco')->orderBy('nome'),
+            'maior_preco' => $produtos->orderByDesc('preco')->orderBy('nome'),
+            default => $produtos->orderByDesc('id'),
+        };
 
         return view('pages.estoque.index', [
-            'estoqueBaixo' => Produto::estoqueBaixo()->orderBy('quantidade')->get(),
-            'alertaMinimo' => Produto::alertaMinimo(),
-            'tab' => $tab,
             'filtros' => $filtros,
-            'resumo' => $this->resumo(),
             'categorias' => Categoria::orderBy('nome')->get(),
-            'produtos' => $produtos,
-            'cartasDestaque' => $cartasDestaque,
-            'jogosDisponiveis' => JogoCarta::opcoes(),
+            // a paginação mantém busca, filtros e ordenação na url
+            'produtos' => $produtos->paginate(self::PRODUTOS_POR_PAGINA)->withQueryString(),
+            // contadores dos chips de situação
+            'quantidadeEstoqueBaixo' => Produto::estoqueBaixo()->count(),
+            'arquivados' => Produto::onlyTrashed()->count(),
         ]);
-    }
-
-    /**
-     * Números dos cards no topo da tela — panorama do estoque inteiro.
-     *
-     * @return array{valorEstoque: float, quantidadeProdutos: int, cartasAvulsas: int, valorCartasAvulsas: float}
-     */
-    private function resumo(): array
-    {
-        return [
-            'valorEstoque' => (float) Produto::sum(DB::raw('preco * quantidade')),
-            'quantidadeProdutos' => (int) Produto::sum('quantidade'),
-            'cartasAvulsas' => (int) Carta::sum('quantidade'),
-            'valorCartasAvulsas' => (float) Carta::sum(DB::raw('preco * quantidade')),
-        ];
     }
 }

@@ -116,11 +116,12 @@ class VendaService
 
             foreach ($venda->itens as $item) {
                 if ($item->tipo === 'produto' && $item->produto_id) {
-                    $produto = Produto::query()->whereKey($item->produto_id)->lockForUpdate()->first();
-                    $produto && $this->movimentarEstoque($produto, $item->quantidade, $descricao);
+                    // withTrashed: devolve o estoque mesmo se o produto foi arquivado depois
+                    $produto = Produto::withTrashed()->whereKey($item->produto_id)->lockForUpdate()->first();
+                    $produto?->movimentarQuantidade($item->quantidade, $descricao, $venda->id);
                 } elseif ($item->tipo === 'carta' && $item->carta_id) {
-                    $carta = Carta::query()->whereKey($item->carta_id)->lockForUpdate()->first();
-                    $carta && $this->movimentarEstoque($carta, $item->quantidade, $descricao);
+                    $carta = Carta::withTrashed()->whereKey($item->carta_id)->lockForUpdate()->first();
+                    $carta?->movimentarQuantidade($item->quantidade, $descricao, $venda->id);
                 } elseif ($item->tipo === 'aluguel' && $item->aluguel_id) {
                     Aluguel::whereKey($item->aluguel_id)->where('status', 'pago')->update(['status' => 'agendado']);
                 } elseif ($item->tipo === VendaItem::TIPO_INSCRICAO) {
@@ -196,7 +197,7 @@ class VendaService
         }
 
         $this->garantirEstoque($produto->nome, $produto->quantidade, $quantidade);
-        $this->movimentarEstoque($produto, -$quantidade, "Venda #{$venda->id}");
+        $produto->movimentarQuantidade(-$quantidade, "Venda #{$venda->id}", $venda->id);
 
         return $this->criarItem($venda, 'produto', ['produto_id' => $produto->id], $produto->nome, $quantidade, (float) $produto->preco);
     }
@@ -210,7 +211,7 @@ class VendaService
         }
 
         $this->garantirEstoque($carta->nome, $carta->quantidade, $quantidade);
-        $this->movimentarEstoque($carta, -$quantidade, "Venda #{$venda->id}");
+        $carta->movimentarQuantidade(-$quantidade, "Venda #{$venda->id}", $venda->id);
 
         return $this->criarItem($venda, 'carta', ['carta_id' => $carta->id], $carta->nome, $quantidade, (float) $carta->preco);
     }
@@ -239,25 +240,6 @@ class VendaService
                     : "Estoque insuficiente de \"{$nome}\": restam {$disponivel}.",
             ]);
         }
-    }
-
-    /**
-     * Soma (positivo) ou tira (negativo) do estoque de um produto/carta e
-     * registra o lançamento no histórico de movimentações do item.
-     */
-    private function movimentarEstoque(Produto|Carta $item, int $diferenca, string $descricao): void
-    {
-        $anterior = $item->quantidade;
-        $nova = $anterior + $diferenca;
-
-        $item->update(['quantidade' => $nova]);
-        $item->movimentacoes()->create([
-            'tipo' => $diferenca > 0 ? 'entrada' : 'saida',
-            'quantidade' => abs($diferenca),
-            'quantidade_anterior' => $anterior,
-            'quantidade_nova' => $nova,
-            'descricao' => $descricao,
-        ]);
     }
 
     private function criarItem(Venda $venda, string $tipo, array $referencia, string $descricao, int $quantidade, float $preco): float

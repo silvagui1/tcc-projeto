@@ -50,7 +50,8 @@ class EstoqueBaixoTest extends TestCase
         $this->assertSame(10, $produto->limite_estoque_baixo);
 
         $this->get('/estoque')->assertSee('com estoque baixo')->assertSee('Booster Pokémon (8)');
-        $this->get('/inicio')->assertSee('1 produto está com estoque baixo');
+        // na página inicial o painel "Estoque baixo" fica em destaque
+        $this->get('/inicio')->assertSee('home-painel--alerta', false);
     }
 
     public function test_sem_limite_proprio_usa_o_padrao(): void

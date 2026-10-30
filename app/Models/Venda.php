@@ -72,8 +72,19 @@ class Venda extends Model
      */
     public static function resumoDoDia(CarbonInterface $dia): array
     {
+        return self::resumoEntre($dia->copy()->startOfDay(), $dia->copy()->endOfDay());
+    }
+
+    /**
+     * Total e quantidade de vendas concluídas num intervalo — ex.: ontem até
+     * este mesmo horário, para comparar com hoje de forma justa.
+     *
+     * @return array{total: float, quantidade: int}
+     */
+    public static function resumoEntre(CarbonInterface $inicio, CarbonInterface $fim): array
+    {
         $linha = self::concluidas()
-            ->whereBetween('created_at', [$dia->copy()->startOfDay(), $dia->copy()->endOfDay()])
+            ->whereBetween('created_at', [$inicio, $fim])
             ->selectRaw('COALESCE(SUM(total), 0) as total, COUNT(*) as quantidade')
             ->first();
 

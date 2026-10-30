@@ -7,26 +7,29 @@
 
 @section('content')
 
+    <h1 class="sr-only">Página inicial</h1>
+
     {{-- resumo do dia: empilhado no mobile, lado a lado no desktop --}}
     <div class="home-resumo">
         <div class="stat-card stat-card--blue stat-card--split">
-            @php $diferenca = $hoje['total'] - $ontem['total']; @endphp
+            {{-- comparação justa: hoje até agora x ontem até este mesmo horário --}}
+            @php $diferenca = $hoje['total'] - $ontemAteAgora['total']; @endphp
             <div>
                 <span class="stat-card__label">Vendido hoje</span>
                 <p class="stat-card__value stat-card__value--lg">R$ {{ number_format($hoje['total'], 2, ',', '.') }}</p>
                 <span class="stat-card__label">Em {{ $hoje['quantidade'] }} {{ $hoje['quantidade'] === 1 ? 'venda' : 'vendas' }}</span>
             </div>
-            {{-- diferença para ontem: verde se vendeu mais, vermelho se vendeu menos --}}
+            {{-- verde se vendeu mais, vermelho se vendeu menos --}}
             <span class="home-diferenca {{ $diferenca > 0 ? 'home-diferenca--positiva' : ($diferenca < 0 ? 'home-diferenca--negativa' : '') }}"
-                  title="Em relação ao total de ontem">
+                  title="Ontem até {{ now()->format('H:i') }}: R$ {{ number_format($ontemAteAgora['total'], 2, ',', '.') }}">
                 <strong>{{ $diferenca > 0 ? '+' : ($diferenca < 0 ? '−' : '') }}R$ {{ number_format(abs($diferenca), 2, ',', '.') }}</strong>
-                <small>vs. ontem</small>
+                <small>vs. ontem até {{ now()->format('H:i') }}</small>
             </span>
         </div>
 
         <div class="stat-card stat-card--blue stat-grid home-ontem">
             <div>
-                <span class="stat-card__label">Ontem</span>
+                <span class="stat-card__label">Ontem (dia inteiro)</span>
                 <p class="stat-card__value">R$ {{ number_format($ontem['total'], 2, ',', '.') }}</p>
                 <span class="stat-card__label">Em {{ $ontem['quantidade'] }} {{ $ontem['quantidade'] === 1 ? 'venda' : 'vendas' }}</span>
             </div>
@@ -42,21 +45,17 @@
         </div>
     </div>
 
-    @if ($estoqueBaixo > 0)
-        <a href="{{ route('estoque.index') }}" class="alerta-estoque alerta-estoque--link">
-            <i class="bi bi-exclamation-triangle-fill alerta-estoque__icone" aria-hidden="true"></i>
-            <div class="alerta-estoque__texto">
-                <strong>{{ $estoqueBaixo }} {{ $estoqueBaixo === 1 ? 'produto está' : 'produtos estão' }} com estoque baixo</strong>
-                <span>Toque para ver no estoque.</span>
-            </div>
-            <i class="bi bi-chevron-right" aria-hidden="true"></i>
-        </a>
-    @endif
+    {{-- busca geral (o mesmo pop-up do Ctrl+K) --}}
+    <button type="button" class="home-busca" data-abrir-busca>
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <span>Buscar cliente, produto, carta, venda ou campeonato</span>
+        <kbd aria-hidden="true">Ctrl K</kbd>
+    </button>
 
     {{-- mesas reservadas para hoje, em ordem de horário --}}
-    <section class="home-mesas">
+    <section class="home-mesas" aria-labelledby="home-mesas-titulo">
         <div class="home-mesas__header">
-            <h2>Mesas de hoje</h2>
+            <h2 id="home-mesas-titulo">Mesas de hoje</h2>
             <a href="{{ route('vendas.index', ['aba' => 'alugueis']) }}">
                 Ver agenda <i class="bi bi-chevron-right" aria-hidden="true"></i>
             </a>
@@ -89,11 +88,75 @@
         @endforelse
     </section>
 
-    <h2 style="font-size: 20px;">Realize suas ações</h2>
+    {{-- o que pede atenção hoje: estoque, campeonatos e o que acabou de ser vendido --}}
+    <div class="home-paineis">
+        <section class="home-painel {{ $estoqueBaixo->isNotEmpty() ? 'home-painel--alerta' : '' }}" aria-labelledby="home-estoque-titulo">
+            <div class="home-painel__topo">
+                <h2 id="home-estoque-titulo">
+                    @if ($estoqueBaixo->isNotEmpty())
+                        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                    @endif
+                    Estoque baixo
+                </h2>
+                <a href="{{ route('estoque.index', ['situacao' => 'baixo']) }}">Ver todos <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            </div>
+            @forelse ($estoqueBaixo->take(5) as $produto)
+                <a href="{{ route('estoque.produtos.show', $produto) }}" class="home-painel__linha">
+                    <span>{{ $produto->nome }}</span>
+                    <strong>{{ $produto->quantidade }} un.</strong>
+                </a>
+            @empty
+                <p class="home-painel__vazio"><i class="bi bi-check-circle" aria-hidden="true"></i> Nenhum produto acabando.</p>
+            @endforelse
+            @if ($estoqueBaixo->count() > 5)
+                <p class="home-painel__mais">e mais {{ $estoqueBaixo->count() - 5 }}</p>
+            @endif
+        </section>
+
+        <section class="home-painel" aria-labelledby="home-campeonatos-titulo">
+            <div class="home-painel__topo">
+                <h2 id="home-campeonatos-titulo">Próximos campeonatos</h2>
+                <a href="{{ route('campeonatos.index') }}">Ver todos <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            </div>
+            @forelse ($proximosCampeonatos as $campeonato)
+                <a href="{{ route('campeonatos.index', ['abrir' => $campeonato->id]) }}" class="home-painel__linha">
+                    <span>
+                        {{ $campeonato->nome }}
+                        <small>{{ $campeonato->quando }}{{ $campeonato->horario_curto ? ' · '.$campeonato->horario_curto : '' }}</small>
+                    </span>
+                    <strong title="Inscritos">{{ $campeonato->participantes_count }} <i class="bi bi-people" aria-label="inscritos"></i></strong>
+                </a>
+            @empty
+                <p class="home-painel__vazio">Nenhum campeonato marcado.</p>
+            @endforelse
+        </section>
+
+        <section class="home-painel" aria-labelledby="home-vendas-titulo">
+            <div class="home-painel__topo">
+                <h2 id="home-vendas-titulo">Últimas vendas</h2>
+                <a href="{{ route('vendas.index') }}">Ver todas <i class="bi bi-chevron-right" aria-hidden="true"></i></a>
+            </div>
+            @forelse ($ultimasVendas as $venda)
+                <a href="{{ route('vendas.index', ['venda' => $venda->id]) }}" class="home-painel__linha {{ $venda->cancelada ? 'home-painel__linha--cancelada' : '' }}">
+                    <span>
+                        {{ $venda->resumo_itens }}
+                        <small>{{ $venda->created_at->isToday() ? $venda->created_at->format('H:i') : $venda->created_at->format('d/m H:i') }} · {{ $venda->cliente?->nome ?? 'sem cliente' }}{{ $venda->cancelada ? ' · cancelada' : '' }}</small>
+                    </span>
+                    <strong>R$ {{ number_format($venda->total, 2, ',', '.') }}</strong>
+                </a>
+            @empty
+                <p class="home-painel__vazio">Nenhuma venda ainda.</p>
+            @endforelse
+        </section>
+    </div>
+
+    {{-- atalhos para as telas (no celular o menu fica recolhido no botão
+         flutuante, então estes cards continuam sendo o caminho mais rápido) --}}
+    <h2 class="home-secao-titulo">Atalhos</h2>
 
     <div class="action-list">
         <a href="{{ route('clientes.index') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--blue-300);"><i class="bi bi-people-fill"></i></span>
+            <span class="action-card__icon action-card__icon--clientes"><i class="bi bi-people-fill"></i></span>
             <span class="action-card__text">
                 <strong>Clientes</strong>
                 <span>Cadastre e consulte clientes.</span>
@@ -102,7 +165,7 @@
         </a>
 
         <a href="{{ route('campeonatos.index') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--pink-300);"><i class="bi bi-trophy-fill"></i></span>
+            <span class="action-card__icon action-card__icon--campeonatos"><i class="bi bi-trophy-fill"></i></span>
             <span class="action-card__text">
                 <strong>Campeonatos</strong>
                 <span>Crie e acompanhe campeonatos.</span>
@@ -111,7 +174,7 @@
         </a>
 
         <a href="{{ route('estoque.index') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--purple-300);"><i class="bi bi-box-seam-fill"></i></span>
+            <span class="action-card__icon action-card__icon--estoque"><i class="bi bi-box-seam-fill"></i></span>
             <span class="action-card__text">
                 <strong>Estoque</strong>
                 <span>Consulte e atualize o estoque.</span>
@@ -120,7 +183,7 @@
         </a>
 
         <a href="{{ route('vendas.index') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--yellow-400);"><i class="bi bi-credit-card-fill"></i></span>
+            <span class="action-card__icon action-card__icon--vendas"><i class="bi bi-credit-card-fill"></i></span>
             <span class="action-card__text">
                 <strong>Vendas</strong>
                 <span>Registre e consulte vendas.</span>
@@ -129,7 +192,7 @@
         </a>
 
         <a href="{{ route('config') }}" class="action-card">
-            <span class="action-card__icon" style="background: var(--purple-light-300);"><i class="bi bi-gear-fill"></i></span>
+            <span class="action-card__icon action-card__icon--config"><i class="bi bi-gear-fill"></i></span>
             <span class="action-card__text">
                 <strong>Configurações</strong>
                 <span>Ajuste a loja e o sistema.</span>

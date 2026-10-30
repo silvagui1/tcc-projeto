@@ -34,6 +34,16 @@
         @endforeach
 
         <fieldset class="cartas-filtros__grupo">
+            <legend>Situação</legend>
+            <div class="chip-row">
+                <label class="chip chip--check">
+                    <input type="checkbox" name="arquivadas" value="1" {{ $filtros['arquivadas'] ? 'checked' : '' }}>
+                    Só arquivadas
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="cartas-filtros__grupo">
             <legend>Acabamento</legend>
             <div class="chip-row">
                 <label class="chip chip--check">
@@ -57,7 +67,7 @@
         <fieldset class="cartas-filtros__grupo">
             <legend>Ordenar</legend>
             <select name="ordenar" class="cartas-filtros__select">
-                @foreach (['recentes' => 'Mais recentes', 'menor_preco' => 'Menor preço', 'maior_preco' => 'Maior preço', 'nome' => 'Nome (A–Z)'] as $valor => $rotulo)
+                @foreach (['recentes' => 'Mais recentes', 'nome' => 'Nome (A–Z)', 'menor_qtd' => 'Menor quantidade', 'maior_qtd' => 'Maior quantidade', 'menor_preco' => 'Menor preço', 'maior_preco' => 'Maior preço'] as $valor => $rotulo)
                     <option value="{{ $valor }}" {{ $filtros['ordenar'] === $valor ? 'selected' : '' }}>{{ $rotulo }}</option>
                 @endforeach
             </select>

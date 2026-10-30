@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Models\Concerns\TemImagemDeEstoque;
+use App\Models\Concerns\TemMovimentacoes;
 use App\Services\Configuracoes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Produto extends Model
 {
-    use TemImagemDeEstoque;
+    // SoftDeletes: "apagar" arquiva (ver migration add_arquivamento_ao_estoque)
+    use SoftDeletes, TemImagemDeEstoque, TemMovimentacoes;
 
     protected $fillable = [
         'nome',

@@ -274,7 +274,8 @@ class ConfiguracoesTest extends TestCase
         $this->configurar(['estoque.alerta_minimo' => 5]);
 
         $this->get('/estoque')->assertSee('com estoque baixo')->assertSee('Coca-Cola (2)');
-        $this->get('/inicio')->assertSee('1 produto está com estoque baixo');
+        // na página inicial o painel "Estoque baixo" fica em destaque
+        $this->get('/inicio')->assertSee('home-painel--alerta', false);
 
         $this->configurar(['estoque.alerta_ativo' => false]);
         $this->get('/estoque')->assertDontSee('com estoque baixo');

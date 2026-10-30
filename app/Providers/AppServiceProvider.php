@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\Configuracoes;
+use App\View\Composers\CabecalhoDoEstoque;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // cabeçalho das abas Produtos e Cartas do estoque
+        View::composer('pages.estoque.partials.cabecalho', CabecalhoDoEstoque::class);
     }
 }

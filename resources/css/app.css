@@ -19,8 +19,10 @@
     --surface-border: #d5d5d5;
     --white: #ffffff;
     --text: #1a1a1a;
-    --text-muted: #999696;
-    --text-muted-2: #aaaaaa;
+    /* textos de apoio: 4,9:1 sobre o fundo e 5,6:1 sobre --surface (WCAG AA;
+       os antigos #999696 / #aaaaaa ficavam em ~2,2:1) */
+    --text-muted: #605d5d;
+    --text-muted-2: #666363;
 
     /* cartões escuros (estoque / resumo) */
     --navy-900: #2e3045;
@@ -76,6 +78,73 @@
     --shadow: rgba(0, 0, 0, 0.08);
     --text-accent: #2e4762;  /* preços e destaques em texto */
     --on-accent: #dfdede;    /* texto claro sobre cartões/botões coloridos (igual nos dois temas) */
+    --on-accent-muted: rgba(223, 222, 222, 0.78); /* rótulos sobre os cartões escuros */
+
+    /* cor das ações principais (botão .botao--principal): azul escuro com
+       texto branco = 7,7:1. Cada tela pode trocar pelo seu acento. */
+    --acento: var(--blue-glow);
+    --acento-forte: var(--blue-900);
+
+    /* escala de texto do sistema — use só estes tamanhos (sempre multiplicados
+       pela --escala-texto): 12 apoio · 13 secundário · 14 corpo · 16 destaque ·
+       18 título de grupo · 20 título de seção · 24 título de página/número ·
+       32 número grande */
+    --fs-12: calc(12px * var(--escala-texto));
+    --fs-13: calc(13px * var(--escala-texto));
+    --fs-14: calc(14px * var(--escala-texto));
+    --fs-16: calc(16px * var(--escala-texto));
+    --fs-18: calc(18px * var(--escala-texto));
+    --fs-20: calc(20px * var(--escala-texto));
+    --fs-24: calc(24px * var(--escala-texto));
+    --fs-32: calc(32px * var(--escala-texto));
+
+    /* espaçamento em grade de 4px */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* raios e alturas de controle (botões, busca, selects) */
+    --controle-altura: 44px;
+    --radius-xl: 24px;
+    --radius-full: 999px;
+    --radius-modal: 16px;
+    --radius-card: 12px;
+    --radius-control: 8px;
+    --radius-chip: 6px;
+
+    --shadow-sm: 0 1px 2px rgba(20, 24, 32, .06), 0 1px 3px rgba(20, 24, 32, .08);
+    --shadow-md: 0 4px 10px rgba(20, 24, 32, .12);
+    --shadow-lg: 0 12px 24px rgba(20, 24, 32, .16);
+    --shadow-modal: 0 20px 50px rgba(0, 0, 0, .3);
+    --backdrop: rgba(20, 21, 32, .6);
+
+    /* vermelho / verde / amarelo de estado */
+    --red-50: #faeaec;
+    --red-200: #eeb4bc;
+    --red-400: #e07180;
+    --red-600: #da4357;
+    --red-700: #c72239;
+    --green-100: #dcefe2;
+    --green-700: #338f53;
+
+    /* cores semânticas — use estas (e não hexadecimais soltos) para
+       perigo, sucesso e aviso */
+    --perigo: var(--red-700);
+    --perigo-fundo: var(--red-50);
+    --perigo-acao: #c0392b;
+    --perigo-acao-hover: #a93226;
+    --sucesso: var(--green-700);
+    --sucesso-fundo: var(--green-100);
+    --aviso-fundo: #fff3dc;
+    --aviso-borda: #f5c874;
+    --aviso-texto: #5e4217;
+    --aviso-selo: #fbe3c4;
 
     color-scheme: light;
 }
@@ -97,8 +166,19 @@
     --text: #ecebf3;
     --text-soft: #c9c7d6;
     --text-muted: #9a98ab;
-    --text-muted-2: #7f7d92;
+    --text-muted-2: #9794ab;
     --shadow: rgba(0, 0, 0, 0.35);
+
+    --red-50: #3a2328;
+    --green-100: #1f3328;
+    --perigo: #f0899a;
+    --sucesso: #6fd193;
+    --perigo-acao: #d9534f;
+    --perigo-acao-hover: #c0392b;
+    --aviso-fundo: #3a3020;
+    --aviso-borda: #7a5f2a;
+    --aviso-texto: #ffdc9b;
+    --aviso-selo: rgba(255, 220, 155, .16);
 
     /* cartões escuros ficam um pouco mais claros que o fundo para destacar */
     --navy-900: #2b2d44;
@@ -137,7 +217,7 @@ body {
     color: var(--text);
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
     /* texto sem tamanho próprio também segue a escala geral */
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-16);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -195,8 +275,9 @@ img {
 }
 
 .page-topbar__title {
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-24);
     font-weight: 700;
+    letter-spacing: -0.01em;
     margin: 0;
 }
 
@@ -207,7 +288,7 @@ img {
     width: 30px;
     height: 30px;
     color: var(--text);
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
 }
 
 /* ==========================================================================
@@ -227,19 +308,19 @@ img {
 }
 
 .stat-card__label {
-    font-size: calc(12px * var(--escala-texto));
-    color: var(--text-muted);
+    font-size: var(--fs-12);
+    color: var(--on-accent-muted);
     margin: 0 0 6px;
 }
 
 .stat-card__value {
-    font-size: calc(24px * var(--escala-texto));
+    font-size: var(--fs-24);
     font-weight: 600;
     margin: 0;
 }
 
 .stat-card__value--lg {
-    font-size: calc(32px * var(--escala-texto));
+    font-size: var(--fs-32);
 }
 
 .stat-grid {
@@ -322,7 +403,7 @@ img {
 }
 
 .home-diferenca small {
-    font-size: calc(10px * var(--escala-texto));
+    font-size: var(--fs-12);
     opacity: 0.8;
 }
 
@@ -358,7 +439,7 @@ img {
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: rgba(255, 255, 255, 0.08);
     color: var(--on-accent);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     line-height: 1.2;
     text-align: center;
@@ -366,7 +447,7 @@ img {
 }
 
 .home-atalho i {
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
     line-height: 1;
 }
 
@@ -401,7 +482,7 @@ img {
     .home-atalho {
         width: 70px;
         height: 64px;
-        font-size: calc(11px * var(--escala-texto));
+        font-size: var(--fs-12);
     }
 }
 
@@ -424,18 +505,18 @@ img {
 
 .home-mesas__header h2 {
     margin: 0;
-    font-size: calc(18px * var(--escala-texto));
+    font-size: var(--fs-18);
 }
 
 .home-mesas__header a {
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     color: var(--text-accent);
 }
 
 .home-mesas__vazio {
     margin: 4px 0 0;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     color: var(--text-muted);
 }
 
@@ -458,12 +539,12 @@ img {
 }
 
 .home-mesa__horario strong {
-    font-size: calc(16px * var(--escala-texto));
+    font-size: var(--fs-16);
 }
 
 .home-mesa__horario small,
 .home-mesa__corpo .jogo-chip {
-    font-size: calc(11px * var(--escala-texto));
+    font-size: var(--fs-12);
 }
 
 .home-mesa__horario small {
@@ -481,7 +562,7 @@ img {
 
 .home-mesa__corpo strong {
     max-width: 100%;
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -491,7 +572,7 @@ img {
     flex-shrink: 0;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: calc(11px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 700;
     background: rgba(111, 209, 147, 0.2);
     color: #2f7a4a;
@@ -565,7 +646,7 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: calc(22px * var(--escala-texto));
+    font-size: var(--fs-24);
     flex-shrink: 0;
     color: var(--white);
 }
@@ -576,18 +657,18 @@ img {
 
 .action-card__text strong {
     display: block;
-    font-size: calc(15px * var(--escala-texto));
+    font-size: var(--fs-16);
     font-weight: 600;
 }
 
 .action-card__text span {
     display: block;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     color: var(--text-muted-2);
 }
 
 .action-card__arrow {
-    font-size: calc(18px * var(--escala-texto));
+    font-size: var(--fs-18);
     color: var(--text-muted-2);
     border-left: 1px solid var(--line);
     padding-left: 12px;
@@ -610,7 +691,7 @@ img {
     flex: 1;
     text-align: center;
     padding: 12px;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 600;
     background: var(--surface);
     color: var(--text);
@@ -656,7 +737,7 @@ img {
     padding: 12px 16px;
     margin-bottom: 20px;
     color: var(--text-muted-2);
-    font-size: calc(14px * var(--escala-texto));
+    font-size: var(--fs-14);
 }
 
 /* quando a busca é um <form> de verdade (estoque) */
@@ -690,14 +771,15 @@ img {
     margin-bottom: 16px;
 }
 
-.filters h3 {
-    font-size: calc(16px * var(--escala-texto));
+.filters h3,
+.filters__titulo {
+    font-size: var(--fs-16);
     margin: 0 0 8px;
 }
 
 .filters .filters__group-label {
-    font-size: calc(12px * var(--escala-texto));
-    font-weight: 500;
+    font-size: var(--fs-12);
+    font-weight: 600;
     color: var(--text);
     display: block;
     margin: 10px 0 6px;
@@ -714,7 +796,7 @@ img {
     align-items: center;
     padding: 4px 12px;
     border-radius: 12px;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     border: 1px solid var(--purple-light-800);
     color: var(--text);
     background: transparent;
@@ -785,19 +867,6 @@ a.chip {
     }
 }
 
-.btn-primary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 16px 20px;
-    color: var(--pink-700);
-    font-weight: 600;
-    font-size: calc(18px * var(--escala-texto));
-    margin-bottom: 24px;
-}
-
 /* ==========================================================================
    Configurações
    ========================================================================== */
@@ -834,18 +903,18 @@ a.chip {
     align-items: center;
     justify-content: center;
     color: var(--purple-500);
-    font-size: calc(18px * var(--escala-texto));
+    font-size: var(--fs-18);
 }
 
 .settings-row__label div span {
     display: block;
-    font-size: calc(10px * var(--escala-texto));
+    font-size: var(--fs-12);
     color: var(--text-muted);
 }
 
 .settings-row__label div strong {
     display: block;
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-12);
     font-weight: 400;
 }
 
@@ -894,7 +963,7 @@ a.chip {
     border-radius: 50%;
     background: var(--blue-400);
     color: var(--navy-900);
-    font-size: calc(22px * var(--escala-texto));
+    font-size: var(--fs-24);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -964,7 +1033,7 @@ a.chip {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: calc(20px * var(--escala-texto));
+    font-size: var(--fs-20);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     /* gira até o ângulo do item, anda o raio "para cima" e gira de volta
        — assim os 6 quadrados ficam à mesma distância do centro, formando
@@ -1037,7 +1106,7 @@ a.chip {
     .topbar__nav a {
         color: var(--white);
         font-weight: 600;
-        font-size: calc(15px * var(--escala-texto));
+        font-size: var(--fs-16);
         padding: 4px 2px;
         opacity: 0.75;
         border-bottom: 2px solid transparent;
@@ -1144,7 +1213,7 @@ a.chip {
         align-items: center;
         justify-content: center;
         color: var(--white);
-        font-size: calc(20px * var(--escala-texto));
+        font-size: var(--fs-20);
         opacity: 0.75;
     }
 
@@ -1168,7 +1237,7 @@ a.chip {
         white-space: nowrap;
         text-overflow: ellipsis;
         color: var(--white);
-        font-size: calc(13px * var(--escala-texto));
+        font-size: var(--fs-13);
         font-weight: 600;
         opacity: 0.85;
     }
@@ -1211,50 +1280,45 @@ a.chip {
     }
 }
 
-/* --- Pop-up de confirmação para apagar (estoque e campeonatos) ----------- */
+/* --- Pop-up de confirmação (apagar, arquivar...) -------------------------
+   Padrão de todas as confirmações: título, texto explicando a consequência
+   e as ações à direita (a destrutiva por último). Campeonatos (.champ-dialog)
+   e Clientes (.modal-confirmar) usam os mesmos raios, sombra e fundo. */
 
-.confirm-popup {
-    width: 298px;
+.dialogo-confirmar {
+    width: 400px;
     max-width: calc(100% - 32px);
-    padding: 16px 16px 15px;
-    background: var(--bg);
-    border: 1px solid #6d6c6c;
-    border-radius: 20px;
-    box-shadow: 8px 8px 10px rgba(0, 0, 0, .04),
-                inset -33px -33px 46px #ccc7c7,
-                inset 28px 28px 54px rgba(0, 0, 0, .16);
+    padding: var(--space-5);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-modal);
+    background: var(--surface);
     color: var(--text);
+    box-shadow: var(--shadow-modal);
 }
 
-.confirm-popup::backdrop {
-    background: rgba(0, 0, 0, .7);
+.dialogo-confirmar::backdrop {
+    background: var(--backdrop);
 }
 
-.confirm-popup__title {
-    margin: 0 0 12px;
-    font-size: calc(16px * var(--escala-texto));
-    font-weight: 600;
+.dialogo-confirmar__titulo {
+    margin: 0 0 var(--space-2);
+    font-size: var(--fs-18);
+    font-weight: 800;
 }
 
-.confirm-popup__actions {
-    display: flex;
-    gap: 26px;
-}
-
-.confirm-popup__actions button {
-    padding: 8px 12px;
-    border-radius: 4px;
-    color: var(--text);
-    font-size: calc(16px * var(--escala-texto));
-}
-
-.confirm-popup__yes { background: #e96e70; }
-.confirm-popup__no { background: #c4b7f7; }
-
-.confirm-popup__hint {
-    margin: 9px 0 0;
+.dialogo-confirmar__texto {
+    margin: 0;
     color: var(--text-soft);
-    font-size: calc(12px * var(--escala-texto));
+    font-size: var(--fs-14);
+    line-height: 1.5;
+}
+
+.dialogo-confirmar__acoes {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
 }
 
 /* --- Configurações > Aparência: seletor de tema ---------------------------- */
@@ -1280,7 +1344,7 @@ a.chip {
     gap: 6px;
     padding: 7px 12px;
     border-radius: 9px;
-    font-size: calc(13px * var(--escala-texto));
+    font-size: var(--fs-13);
     font-weight: 600;
     color: var(--text-muted);
     cursor: pointer;
@@ -1318,13 +1382,617 @@ body,
    O grosso do tema vem dos tokens em :root[data-theme="dark"]; aqui ficam só
    os casos que usam cores próprias. */
 
-/* textos em rosa-escuro sobre fundo escuro */
-:root[data-theme="dark"] .btn-primary {
-    color: var(--pink-200);
+
+/* ==========================================================================
+   Componentes comuns a todas as telas
+   Vieram da tela de Clientes (o padrão mais completo) e passaram a ser o
+   padrão do sistema: aviso flutuante e botões.
+   ========================================================================== */
+
+/* Mensagem flutuante de sucesso/erro — ícone + texto, para não depender só
+   da cor de fundo (acessibilidade para quem tem dificuldade de perceber
+   cor). */
+.mensagem-flutuante {
+    position: fixed;
+    top: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: var(--navy-900);
+    color: var(--white);
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-card);
+    font-size: var(--fs-13);
+    font-weight: 600;
+    z-index: 90;
+    box-shadow: var(--shadow-md);
+    max-width: calc(100vw - var(--space-8));
+    text-align: left;
 }
 
-/* ícones SVG pretos/escuros (fechar, lixeira): ficam claros */
-:root[data-theme="dark"] img[src$="/x.svg"],
-:root[data-theme="dark"] img[src$="/trash-dark.svg"] {
-    filter: brightness(0) invert(0.88);
+/* Um toast sem texto (nenhuma mensagem de fato) não deve aparecer como pílula
+   vazia no topo da tela. Origem do elemento vazio observado no mobile ainda não
+   confirmada; esta regra só impede que ele seja desenhado sem conteúdo. */
+.mensagem-flutuante:not(:has(span)) {
+    display: none;
+}
+
+.mensagem-flutuante i {
+    flex-shrink: 0;
+    font-size: var(--fs-16);
+}
+
+.mensagem-flutuante--sucesso {
+    background: var(--green-700);
+}
+
+.mensagem-flutuante--erro {
+    background: var(--red-700);
+}
+
+.mensagem-flutuante__desfazer {
+    flex-shrink: 0;
+    margin-left: var(--space-2);
+    padding: 2px var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, .5);
+    color: var(--white);
+    font-size: var(--fs-12);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.mensagem-flutuante__desfazer:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+.botao {
+    font: inherit;
+    font-size: var(--fs-14);
+    /* 600 (e não 700) para não pesar mais que os chips e abas do resto do app */
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--radius-control);
+    padding: var(--space-3) var(--space-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background-color .12s ease;
+}
+
+.botao--full {
+    width: 100%;
+}
+
+/* Estado desabilitado — antes controlado só via JS (element.style.opacity),
+   misturando apresentação com lógica. Agora qualquer <button disabled> fica
+   assim automaticamente, sem o JS precisar saber de estilo. */
+.botao:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+/* Ação principal na cor da página (azul, como o card Clientes da home).
+   --blue-glow com texto branco dá 7,7:1 e o hover (--blue-900) 9,6:1, nos
+   dois temas. */
+.botao--principal {
+    background: var(--acento);
+    color: var(--white);
+}
+
+.botao--principal:hover {
+    background: var(--acento-forte);
+}
+
+/* Ação destrutiva */
+.botao--perigo {
+    background: var(--perigo-acao);
+    color: var(--white);
+}
+
+.botao--perigo:hover {
+    background: var(--perigo-acao-hover);
+}
+
+/* Ação neutra — nem "principal" (azul) nem destrutiva (vermelho): usada em
+   "Exportar", "Definir como novo saldo" e "Cancelar" do modal de
+   confirmação, onde a cor forte dos outros dois botões sugeriria uma ênfase
+   que essas ações não têm. */
+.botao--neutro {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--surface-border);
+}
+
+.botao--neutro:hover {
+    background: var(--surface-border);
+}
+
+/* Ação "fantasma" (sem preenchimento) — usada em "Selecionar" na toolbar de
+   Clientes: precisa ficar claramente abaixo de "Adicionar cliente" na
+   hierarquia visual, então não compete com contorno nem cor de fundo até
+   que o modo de seleção esteja ativo (ver .acao-rapida--ativa abaixo). */
+.botao--fantasma {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-border);
+}
+
+.botao--fantasma:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.botao--fantasma.acao-rapida--ativa {
+    background: var(--blue-200);
+    border-color: var(--blue-300);
+    color: var(--navy-900);
+}
+
+.botao-texto {
+    color: var(--text-soft);
+    font-weight: 700;
+    font-size: var(--fs-14);
+}
+
+/* --- Título da página -----------------------------------------------------
+   Toda página tem um <h1 class="page-topbar__title">; o contador ao lado
+   (ex.: "7 vendas este mês") usa .page-topbar__contador. */
+
+.page-topbar__contador {
+    font-size: var(--fs-13);
+    color: var(--text-muted);
+}
+
+/* --- Trilha de volta (páginas de detalhes) --------------------------------
+   "← Produtos › Nome do produto": o primeiro link volta para a lista. */
+
+.trilha {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-2) 0 var(--space-5);
+    font-size: var(--fs-14);
+    color: var(--text-muted);
+}
+
+.trilha a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.trilha a:hover {
+    text-decoration: underline;
+}
+
+.trilha [aria-current] {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* número pequeno dentro de um chip de filtro (ex.: "Arquivados 3") */
+.chip__contador {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 4px;
+    padding: 0 5px;
+    border-radius: var(--radius-full);
+    background: var(--surface-border);
+    color: var(--text);
+    font-size: var(--fs-12);
+    font-weight: 700;
+    text-align: center;
+}
+
+.chip.is-active .chip__contador {
+    background: rgba(255, 255, 255, .25);
+    color: inherit;
+}
+
+/* botão neutro com texto vermelho: ação destrutiva secundária (ex.:
+   "Excluir definitivamente" ao lado de "Restaurar") */
+.botao--texto-perigo {
+    color: var(--perigo);
+}
+
+/* foco visível em todo o sistema (antes só Clientes tinha) */
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+    outline: 2px solid var(--purple-500);
+    outline-offset: 2px;
+}
+
+/* --- Busca geral (Ctrl+K) — partials/busca-geral -------------------------- */
+
+.busca-geral {
+    width: 600px;
+    max-width: calc(100% - 24px);
+    margin: 12vh auto auto;
+    padding: 0;
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-modal);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-modal);
+    overflow: hidden;
+}
+
+.busca-geral::backdrop {
+    background: var(--backdrop);
+}
+
+.busca-geral__campo {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.busca-geral__campo > i {
+    color: var(--text-muted);
+    font-size: var(--fs-18);
+}
+
+.busca-geral__campo input {
+    flex: 1;
+    min-width: 0;
+    height: 56px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-16);
+}
+
+.busca-geral__campo input:focus-visible {
+    outline: none;
+}
+
+.busca-geral kbd {
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: var(--field);
+    color: var(--text-soft);
+    font: inherit;
+    font-size: var(--fs-12);
+    text-align: center;
+}
+
+.busca-geral__resultados {
+    max-height: min(60vh, 440px);
+    overflow-y: auto;
+    padding: var(--space-2);
+    transition: opacity .15s ease;
+}
+
+.busca-geral__resultados.esta-carregando {
+    opacity: .5;
+}
+
+.busca-geral__dica {
+    margin: 0;
+    padding: var(--space-5) var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-14);
+    text-align: center;
+}
+
+.busca-geral__grupo {
+    margin: var(--space-2) var(--space-3) var(--space-1);
+    color: var(--text-muted);
+    font-size: var(--fs-12);
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.busca-geral__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+}
+
+.busca-geral__item > i {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-control);
+    background: var(--field);
+    color: var(--text-soft);
+}
+
+.busca-geral__item span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.busca-geral__item strong,
+.busca-geral__item small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.busca-geral__item strong {
+    font-size: var(--fs-14);
+    font-weight: 600;
+}
+
+.busca-geral__item small {
+    color: var(--text-muted);
+    font-size: var(--fs-12);
+}
+
+.busca-geral__item:hover,
+.busca-geral__item[aria-selected="true"] {
+    background: var(--field);
+}
+
+.busca-geral__item[aria-selected="true"] > i {
+    background: var(--purple-500);
+    color: var(--white);
+}
+
+.busca-geral__rodape {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--surface-border);
+    color: var(--text-muted);
+    font-size: var(--fs-12);
+}
+
+.busca-geral__rodape span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* no celular não há teclado físico: o rodapé de atalhos não ajuda */
+@media (max-width: 767.98px) {
+    .busca-geral {
+        margin-top: var(--space-4);
+    }
+
+    .busca-geral__rodape,
+    .busca-geral__campo kbd {
+        display: none;
+    }
+}
+
+/* letra do atalho de teclado dentro de um botão (ex.: "Nova venda  N");
+   some no celular, que não tem teclado físico */
+.botao__atalho {
+    display: inline-block;
+    min-width: 18px;
+    padding: 0 5px;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    font: inherit;
+    font-size: var(--fs-12);
+    line-height: 1.4;
+    opacity: .6;
+}
+
+@media (hover: none), (max-width: 767.98px) {
+    .botao__atalho {
+        display: none;
+    }
+}
+
+/* texto só para leitor de tela (esconde visualmente, mantém acessível) */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* --- Página inicial: busca, painéis do dia e atalhos ----------------------- */
+
+.home-busca {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    height: 52px;
+    margin-bottom: var(--space-6);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    background: var(--field);
+    color: var(--text-muted);
+    font-size: var(--fs-14);
+    text-align: left;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.home-busca:hover {
+    border-color: var(--purple-300);
+    box-shadow: var(--shadow-sm);
+}
+
+.home-busca > i {
+    color: var(--text-soft);
+    font-size: var(--fs-18);
+}
+
+.home-busca span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-busca kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    font: inherit;
+    font-size: var(--fs-12);
+}
+
+@media (hover: none), (max-width: 767.98px) {
+    .home-busca kbd {
+        display: none;
+    }
+}
+
+.home-paineis {
+    display: grid;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+@media (min-width: 992px) {
+    .home-paineis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+    }
+}
+
+.home-painel {
+    padding: var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-md);
+}
+
+.home-painel--alerta {
+    border-color: var(--aviso-borda);
+}
+
+.home-painel__topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.home-painel__topo h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: var(--fs-16);
+}
+
+.home-painel--alerta .home-painel__topo h2 i {
+    color: var(--yellow-700);
+}
+
+.home-painel__topo a {
+    flex-shrink: 0;
+    font-size: var(--fs-13);
+    font-weight: 600;
+    color: var(--text-accent);
+}
+
+.home-painel__linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin: 0 calc(-1 * var(--space-2));
+    padding: var(--space-2);
+    border-top: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    font-size: var(--fs-14);
+}
+
+.home-painel__topo + .home-painel__linha {
+    border-top: none;
+}
+
+.home-painel__linha:hover {
+    background: var(--field);
+}
+
+.home-painel__linha > span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.home-painel__linha small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-muted);
+    font-size: var(--fs-12);
+}
+
+.home-painel__linha > strong {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.home-painel__linha--cancelada > strong {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.home-painel__vazio,
+.home-painel__mais {
+    margin: var(--space-2) 0 0;
+    color: var(--text-muted);
+    font-size: var(--fs-13);
+}
+
+.home-painel__vazio i {
+    color: var(--sucesso);
+}
+
+.home-secao-titulo {
+    margin: 0 0 var(--space-3);
+    font-size: var(--fs-20);
+}
+
+.action-card__icon--clientes { background: var(--blue-300); }
+.action-card__icon--campeonatos { background: var(--pink-300); }
+.action-card__icon--estoque { background: var(--purple-300); }
+.action-card__icon--vendas { background: var(--yellow-400); }
+.action-card__icon--config { background: var(--purple-light-300); }
+
+.busca-geral__campo input::-webkit-search-cancel-button {
+    display: none;
 }

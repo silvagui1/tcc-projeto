@@ -1,19 +1,19 @@
-{{-- Pop-up "Deseja apagar?" do estoque (mesmo visual do de campeonatos).
-     Abre ao clicar em qualquer botão com data-delete-open="<url>" — o app.js
-     coloca essa url como action do form e troca o título pelo
-     data-delete-title do botão. --}}
-<dialog class="confirm-popup" data-delete-dialog>
+{{-- Pop-up de confirmação do estoque (arquivar / excluir de vez), no padrão
+     .dialogo-confirmar do sistema. Abre ao clicar em qualquer botão com
+     data-delete-open="<url>": o app.js coloca a url como action do form e
+     troca título, texto e rótulo do botão pelos data-delete-title,
+     data-delete-texto e data-delete-botao do botão clicado. --}}
+<dialog class="dialogo-confirmar" data-delete-dialog aria-labelledby="estoque-confirmar-titulo">
     <form method="POST" action="" data-delete-form>
         @csrf
         @method('DELETE')
 
-        <p class="confirm-popup__title" data-delete-title>Deseja apagar este item?</p>
+        <h2 class="dialogo-confirmar__titulo" id="estoque-confirmar-titulo" data-delete-title>Arquivar este item?</h2>
+        <p class="dialogo-confirmar__texto" data-delete-texto></p>
 
-        <div class="confirm-popup__actions">
-            <button type="submit" class="confirm-popup__yes">Sim, apagar.</button>
-            <button type="button" class="confirm-popup__no" data-delete-cancel>Não, manter.</button>
+        <div class="dialogo-confirmar__acoes">
+            <button type="button" class="botao botao--neutro" data-delete-cancel>Manter</button>
+            <button type="submit" class="botao botao--perigo" data-delete-botao>Arquivar</button>
         </div>
-
-        <p class="confirm-popup__hint">Caso o item seja apagado não terá como desfazer essa ação.</p>
     </form>
 </dialog>

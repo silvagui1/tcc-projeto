@@ -21,10 +21,19 @@ class CartaMovimentacao extends Model
         'quantidade_anterior',
         'quantidade_nova',
         'descricao',
+        'venda_id',
     ];
 
     public function carta()
     {
-        return $this->belongsTo(Carta::class);
+        return $this->belongsTo(Carta::class)->withTrashed();
+    }
+
+    /**
+     * Venda que causou a movimentação (venda ou cancelamento), se houver.
+     */
+    public function venda()
+    {
+        return $this->belongsTo(Venda::class);
     }
 }

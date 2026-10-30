@@ -3,7 +3,21 @@ import './vendas';
 import './configuracoes';
 import './campeonatos';
 import './bootstrap';
-import { iniciarCampoDeImagem } from './comum';
+import { avisarDoServidor, iniciarCampoDeImagem } from './comum';
+import './busca-geral';
+import './atalhos';
+
+// aviso deixado pelo servidor antes de um redirect (session('aviso'))
+document.addEventListener('DOMContentLoaded', avisarDoServidor);
+
+// <form data-enviar-ao-mudar>: envia sozinho ao trocar um <select> (ex.:
+// "Ordenar por" do estoque). Sem JS, o <noscript> mostra o botão.
+document.addEventListener('change', (evento) => {
+    const form = evento.target.closest('form[data-enviar-ao-mudar]');
+    if (form && evento.target.matches('select')) {
+        form.requestSubmit();
+    }
+});
 
 // Abre/fecha o menu em arco do botão flutuante inferior (mobile).
 document.addEventListener('DOMContentLoaded', () => {
@@ -55,13 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Estoque — pop-up "Deseja apagar...?". Qualquer botão com
-// data-delete-open="<url>" abre o <dialog> e usa a url como action do form.
+// Estoque — pop-up de confirmação (arquivar / excluir de vez). Qualquer
+// botão com data-delete-open="<url>" abre o <dialog> e usa a url como action
+// do form; data-delete-title/-texto/-botao trocam os textos.
 // (Campeonatos tem o próprio, em campeonatos.js.)
 document.addEventListener('DOMContentLoaded', () => {
     const dialog = document.querySelector('[data-delete-dialog]');
     const form = dialog?.querySelector('[data-delete-form]');
     const titulo = dialog?.querySelector('[data-delete-title]');
+    const texto = dialog?.querySelector('[data-delete-texto]');
+    const botaoOk = dialog?.querySelector('[data-delete-botao]');
 
     if (!dialog || !form) {
         return;
@@ -75,6 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
             form.action = botao.dataset.deleteOpen;
             if (titulo && botao.dataset.deleteTitle) {
                 titulo.textContent = botao.dataset.deleteTitle;
+            }
+            if (texto) {
+                texto.textContent = botao.dataset.deleteTexto || '';
+                texto.hidden = !botao.dataset.deleteTexto;
+            }
+            if (botaoOk) {
+                botaoOk.textContent = botao.dataset.deleteBotao || 'Confirmar';
             }
             dialog.showModal();
         });

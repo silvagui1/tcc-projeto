@@ -33,8 +33,8 @@
     ], JSON_HEX_TAG) !!}</script>
 
     <div class="page-topbar">
-        <p class="page-topbar__title">Vendas</p>
-        <span class="vendas-contador">
+        <h1 class="page-topbar__title">Vendas</h1>
+        <span class="page-topbar__contador">
             {{ $resumo['mesQuantidade'] }} {{ $resumo['mesQuantidade'] === 1 ? 'venda' : 'vendas' }} este mês
         </span>
     </div>
@@ -80,9 +80,10 @@
 
         <div class="clientes-acoes vendas-acoes">
             @if ($aba === 'vendas')
-                <button type="button" class="botao botao--principal" data-abrir-nova-venda>
+                <button type="button" class="botao botao--principal" data-abrir-nova-venda data-atalho="n" title="Atalho: N">
                     <i class="bi bi-plus-lg" aria-hidden="true"></i>
                     Nova venda
+                    <kbd class="botao__atalho" aria-hidden="true">N</kbd>
                 </button>
             @else
                 <button type="button" class="botao botao--principal" data-abrir-novo-aluguel>
@@ -103,7 +104,6 @@
         @include('vendas.partials._aba_alugueis')
     @endif
 
-    <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
 
     @include('vendas.partials._modal_venda')
     @include('vendas.partials._modal_detalhes_venda')

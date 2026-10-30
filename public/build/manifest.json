@@ -280,42 +280,42 @@
     "src": "node_modules/@fontsource/inter/files/inter-vietnamese-800-normal.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-fea9a6ff.css",
+    "file": "assets/app-ccfee56d.css",
     "isEntry": true,
     "src": "resources/css/app.css"
   },
   "resources/css/campeonatos.css": {
-    "file": "assets/campeonatos-07878f47.css",
+    "file": "assets/campeonatos-a620d0f7.css",
     "isEntry": true,
     "src": "resources/css/campeonatos.css"
   },
   "resources/css/clientes.css": {
-    "file": "assets/clientes-48ce4c75.css",
+    "file": "assets/clientes-e5fdc68b.css",
     "isEntry": true,
     "src": "resources/css/clientes.css"
   },
   "resources/css/configuracoes.css": {
-    "file": "assets/configuracoes-71c675f2.css",
+    "file": "assets/configuracoes-bada4172.css",
     "isEntry": true,
     "src": "resources/css/configuracoes.css"
   },
   "resources/css/estoque.css": {
-    "file": "assets/estoque-ef18649e.css",
+    "file": "assets/estoque-d4e0bf73.css",
     "isEntry": true,
     "src": "resources/css/estoque.css"
   },
   "resources/css/login.css": {
-    "file": "assets/login-99ab07f9.css",
+    "file": "assets/login-b9bfe09e.css",
     "isEntry": true,
     "src": "resources/css/login.css"
   },
   "resources/css/vendas.css": {
-    "file": "assets/vendas-6dc23906.css",
+    "file": "assets/vendas-ed4459ce.css",
     "isEntry": true,
     "src": "resources/css/vendas.css"
   },
   "resources/js/app.js": {
-    "file": "assets/app-52f2b6f6.js",
+    "file": "assets/app-28fa856b.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },

@@ -10,8 +10,8 @@
 <div class="clientes-page" data-clientes-page>
 
     <div class="page-topbar">
-        <p class="page-topbar__title">Clientes</p>
-        <span class="clientes-contador" data-contador data-total="{{ $clientes->total() }}">{{ $clientes->total() }} cadastrados</span>
+        <h1 class="page-topbar__title">Clientes</h1>
+        <span class="page-topbar__contador" data-contador data-total="{{ $clientes->total() }}">{{ $clientes->total() }} cadastrados</span>
     </div>
 
     {{-- Panorama geral do cadastro — calculado sobre a base inteira (ver
@@ -137,7 +137,6 @@
         <button type="button" class="botao-texto" data-limpar-filtros hidden>Limpar filtros</button>
     </div>
 
-    <div class="mensagem-flutuante" data-mensagem hidden role="status"></div>
 
     <div class="clientes-lista-wrapper" data-lista-wrapper>
         @include('clientes.partials._lista', ['clientes' => $clientes, 'termo' => $termo, 'filtros' => $filtros])

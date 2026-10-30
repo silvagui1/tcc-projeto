@@ -2,13 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\AcoesDoEstoque;
+use App\Http\Requests\AjustarEstoqueRequest;
 use App\Http\Requests\SalvarProdutoRequest;
 use App\Models\Atividade;
+use App\Models\Carta;
+use App\Models\Categoria;
 use App\Models\Produto;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ProdutoController extends Controller
 {
+    use AcoesDoEstoque;
+
+    /**
+     * Quantos lançamentos do histórico aparecem na página de detalhes.
+     */
+    private const MOVIMENTACOES_NOS_DETALHES = 15;
+
+    /**
+     * Página de detalhes de um produto (aberta ao clicar no card do
+     * estoque), com o ajuste rápido de quantidade e as últimas
+     * movimentações. Abre também para produtos arquivados.
+     */
+    public function show(Produto $produto): View
+    {
+        $produto->load('categoria');
+
+        return view('pages.estoque.produto', [
+            'produto' => $produto,
+            'movimentacoes' => $produto->movimentacoes()->with('venda')->take(self::MOVIMENTACOES_NOS_DETALHES)->get(),
+            'totalMovimentacoes' => $produto->movimentacoes()->count(),
+            // o pop-up de edição (partials/produto-form) lista as categorias
+            'categorias' => Categoria::orderBy('nome')->get(),
+        ]);
+    }
+
     /**
      * Cadastra um novo produto (pop-up "Adicionar produto").
      */
@@ -18,13 +48,11 @@ class ProdutoController extends Controller
 
         // Quantidade inicial entra como uma "entrada" a partir de zero, para o
         // histórico já nascer explicando de onde veio o estoque.
-        if ($produto->quantidade > 0) {
-            $this->registrarMovimentacao($produto, 0, $produto->quantidade, 'Cadastro do produto');
-        }
+        $produto->registrarMovimentacao(0, $produto->quantidade, 'Cadastro do produto');
 
         Atividade::registrar('estoque', "Produto cadastrado: {$produto->nome} (qtd {$produto->quantidade})");
 
-        return back()->with('estoqueMensagem', "\"{$produto->nome}\" foi adicionado ao estoque.");
+        return back()->with('aviso', ['texto' => "\"{$produto->nome}\" foi adicionado ao estoque.", 'tipo' => 'sucesso']);
     }
 
     /**
@@ -35,44 +63,44 @@ class ProdutoController extends Controller
         $quantidadeAnterior = $produto->quantidade;
 
         $produto->update($request->dadosComImagem('produtos', $produto));
-
-        if ($produto->quantidade !== $quantidadeAnterior) {
-            $this->registrarMovimentacao($produto, $quantidadeAnterior, $produto->quantidade, 'Edição do produto');
-        }
+        $produto->registrarMovimentacao($quantidadeAnterior, $produto->quantidade, 'Edição do produto');
 
         Atividade::registrar('estoque', "Produto editado: {$produto->nome}"
             .($produto->quantidade !== $quantidadeAnterior ? " (qtd {$quantidadeAnterior} → {$produto->quantidade})" : ''));
 
-        return back()->with('estoqueMensagem', "\"{$produto->nome}\" foi atualizado.");
+        return back()->with('aviso', ['texto' => "\"{$produto->nome}\" foi atualizado.", 'tipo' => 'sucesso']);
     }
 
     /**
-     * Remove definitivamente um produto e o arquivo da imagem, se houver (o
-     * histórico de movimentações vai junto, por causa do cascadeOnDelete).
+     * "Apagar" um produto arquiva (ver AcoesDoEstoque).
      */
     public function destroy(Produto $produto): RedirectResponse
     {
-        $nome = $produto->nome;
-
-        $produto->apagarArquivoDeImagem();
-        $produto->delete();
-
-        Atividade::registrar('estoque', "Produto excluído: {$nome}");
-
-        return back()->with('estoqueMensagem', "\"{$nome}\" foi removido do estoque.");
+        return $this->arquivarItem($produto);
     }
 
-    /**
-     * Registra no histórico uma mudança de quantidade do produto.
-     */
-    private function registrarMovimentacao(Produto $produto, int $anterior, int $nova, string $descricao): void
+    public function restaurar(Produto $produto): RedirectResponse
     {
-        $produto->movimentacoes()->create([
-            'tipo' => $nova > $anterior ? 'entrada' : 'saida',
-            'quantidade' => abs($nova - $anterior),
-            'quantidade_anterior' => $anterior,
-            'quantidade_nova' => $nova,
-            'descricao' => $descricao,
-        ]);
+        return $this->restaurarItem($produto);
+    }
+
+    public function excluir(Produto $produto): RedirectResponse
+    {
+        return $this->excluirItem($produto);
+    }
+
+    public function ajustar(AjustarEstoqueRequest $request, Produto $produto): RedirectResponse
+    {
+        return $this->ajustarItem($request, $produto);
+    }
+
+    protected function rotulo(): array
+    {
+        return ['nome' => 'produto', 'o' => 'o', 'rota' => 'estoque.produtos'];
+    }
+
+    protected function urlDaLista(Produto|Carta $item): string
+    {
+        return route('estoque.index', ['situacao' => 'arquivados']);
     }
 }

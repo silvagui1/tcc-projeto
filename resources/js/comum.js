@@ -3,6 +3,76 @@
  * campeonatos.js e app.js).
  */
 
+const ICONES_AVISO = {
+    sucesso: 'bi-check-circle-fill',
+    erro: 'bi-exclamation-circle-fill',
+    info: 'bi-info-circle-fill',
+};
+
+/**
+ * Aviso flutuante do sistema (o único elemento [data-mensagem] fica no
+ * layout). Ícone + texto, e opcionalmente o botão "Desfazer":
+ *   avisar('Produto arquivado.', 'sucesso', { desfazer: () => ... })
+ * Com "Desfazer" o aviso fica mais tempo na tela (ou o tempo de `duracao`, em ms,
+ * quando a ação só é confirmada depois de uma janela — ver clientes.js).
+ */
+export function avisar(texto, tipo = 'sucesso', { desfazer = null, duracao = null } = {}) {
+    const el = document.querySelector('[data-mensagem]');
+    if (!el || !texto) return;
+
+    el.innerHTML = `<i class="bi ${ICONES_AVISO[tipo] || ICONES_AVISO.sucesso}" aria-hidden="true"></i><span></span>`;
+    el.querySelector('span').textContent = texto;
+    el.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
+
+    if (desfazer) {
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.className = 'mensagem-flutuante__desfazer';
+        botao.textContent = 'Desfazer';
+        botao.addEventListener('click', () => {
+            el.hidden = true;
+            window.clearTimeout(el._timeout);
+            desfazer();
+        });
+        el.append(botao);
+    }
+
+    el.className = `mensagem-flutuante mensagem-flutuante--${tipo}`;
+    el.hidden = false;
+    window.clearTimeout(el._timeout);
+    el._timeout = window.setTimeout(() => { el.hidden = true; }, duracao ?? (desfazer ? 8000 : (tipo === 'erro' ? 6000 : 4000)));
+}
+
+/**
+ * Aviso vindo do servidor depois de um redirect (session('aviso'), lido no
+ * layout). O "Desfazer" de um aviso do servidor é um formulário: envia
+ * {url, metodo} com o token CSRF.
+ */
+export function avisarDoServidor() {
+    const dados = document.querySelector('[data-aviso-inicial]');
+    if (!dados) return;
+
+    let aviso;
+    try {
+        aviso = JSON.parse(dados.textContent);
+    } catch (erro) {
+        return;
+    }
+
+    const desfazer = aviso.desfazer ? () => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = aviso.desfazer.url;
+        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        form.innerHTML = `<input type="hidden" name="_token" value="${token}">`
+            + `<input type="hidden" name="_method" value="${aviso.desfazer.metodo || 'POST'}">`;
+        document.body.append(form);
+        form.submit();
+    } : null;
+
+    avisar(aviso.texto, aviso.tipo || 'sucesso', { desfazer });
+}
+
 export function formatarMoeda(valor) {
     return 'R$ ' + Number(valor || 0).toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
